@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dcp8t54gln1p3"]
 
 [ext_resource type="Script" uid="uid://gklmsncvgb3d" path="res://ana_menu.gd" id="1_1v26u"]
-[ext_resource type="Texture2D" uid="uid://b6e6j5dpjwhuv" path="res://a018a0bc-95a4-4921-a90c-b6d261d28b8d.png" id="1_g6py4"]
+[ext_resource type="Texture2D" uid="uid://b6e6j5dpjwhuv" path="res://harita.png" id="1_g6py4"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g6py4"]
 bg_color = Color(0.6056738, 1.6605109e-06, 3.85046e-07, 1)

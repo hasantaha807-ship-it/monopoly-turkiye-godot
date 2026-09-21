@@ -71,8 +71,8 @@ extends Node2D
 var toplam_kare_sayisi = 23
 var hareket_ediyor = false 
 var tur_maasi = 200
-var ev_ikonu = preload("res://Arabalar/ev.png")       # Kendi ev.png dosyanın adını ve yolunu yaz
-var plaza_ikonu = preload("res://Arabalar/plaza.png") # Kendi plaza.png dosyanın adını ve yolunu yaz
+var ev_ikonu = preload("res://Mulkler/ev.png")       # Kendi ev.png dosyanın adını ve yolunu yaz
+var plaza_ikonu = preload("res://Mulkler/plaza.png") # Kendi plaza.png dosyanın adını ve yolunu yaz
 
 # YENİ: Haritada arabaları yüklemek için kaplama listemiz
 var araba_kaplamalari = [
