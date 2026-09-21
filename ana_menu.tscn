@@ -1,0 +1,209 @@
+[gd_scene format=3 uid="uid://dcp8t54gln1p3"]
+
+[ext_resource type="Script" uid="uid://gklmsncvgb3d" path="res://ana_menu.gd" id="1_1v26u"]
+[ext_resource type="Texture2D" uid="uid://b6e6j5dpjwhuv" path="res://a018a0bc-95a4-4921-a90c-b6d261d28b8d.png" id="1_g6py4"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g6py4"]
+bg_color = Color(0.6056738, 1.6605109e-06, 3.85046e-07, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7h0q2"]
+bg_color = Color(0.1776737, 0.4753527, 5.7756904e-07, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_12cob"]
+bg_color = Color(0, 1, 0.2784093, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n0vap"]
+bg_color = Color(0.1764706, 0.4745098, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xstlw"]
+bg_color = Color(0, 1, 0.3765157, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yfvuj"]
+bg_color = Color(0.1764706, 0.4745098, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dmqsj"]
+bg_color = Color(0.17558163, 1, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lbrtg"]
+bg_color = Color(0.1764706, 0.4745098, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1v26u"]
+bg_color = Color(0.17558163, 1, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8sb0c"]
+bg_color = Color(0.1764706, 0.4745098, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jhobn"]
+bg_color = Color(0.17558163, 1, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="AnaMenu" type="Control" unique_id=837099589]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_1v26u")
+
+[node name="ArkaPlan" type="Sprite2D" parent="." unique_id=1561749421]
+position = Vector2(965.50006, 565.5)
+scale = Vector2(1.2032472, 1.2116402)
+texture = ExtResource("1_g6py4")
+
+[node name="ColorRect" type="ColorRect" parent="ArkaPlan" unique_id=625752041]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -831.5
+offset_top = -472.5
+offset_right = -831.5
+offset_bottom = -472.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.31500003)
+
+[node name="OyunIsmi" type="Label" parent="ArkaPlan" unique_id=1243173819]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1201.7482
+offset_top = -612.393
+offset_right = -453.7722
+offset_bottom = -516.393
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 70
+theme_override_styles/normal = SubResource("StyleBoxFlat_g6py4")
+text = "TÜRKİYE MONOPOLY"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1486196257]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -194.0
+offset_top = -6.0
+offset_right = 202.42725
+offset_bottom = 119.04144
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme_override_constants/separation = 15
+
+[node name="basla_butonu" type="Button" parent="VBoxContainer" unique_id=1645963584]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_7h0q2")
+theme_override_styles/hover = SubResource("StyleBoxFlat_12cob")
+text = "OYUNA BAŞLA"
+
+[node name="cikis_butonu" type="Button" parent="VBoxContainer" unique_id=1211630686]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_n0vap")
+theme_override_styles/hover = SubResource("StyleBoxFlat_xstlw")
+text = "ÇIKIŞ YAP"
+
+[node name="SecimKutusu" type="VBoxContainer" parent="." unique_id=289877906]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -196.0
+offset_top = -7.0
+offset_right = 201.0
+offset_bottom = 153.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 15
+
+[node name="IkiKisiButonu" type="Button" parent="SecimKutusu" unique_id=454791309]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_yfvuj")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dmqsj")
+text = "2 Oyuncu"
+
+[node name="UcKisiButonu" type="Button" parent="SecimKutusu" unique_id=1011730188]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_lbrtg")
+theme_override_styles/hover = SubResource("StyleBoxFlat_1v26u")
+text = "3 Oyuncu"
+
+[node name="DortKisiButonu" type="Button" parent="SecimKutusu" unique_id=1246388298]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_8sb0c")
+theme_override_styles/hover = SubResource("StyleBoxFlat_jhobn")
+text = "4 Oyuncu"

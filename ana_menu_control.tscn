@@ -1,0 +1,254 @@
+[gd_scene format=3 uid="uid://bvrio2pro8rtn"]
+
+[ext_resource type="Script" uid="uid://4vcak5wd80v" path="res://ana_menu_control.gd" id="1_532yn"]
+[ext_resource type="Texture2D" uid="uid://2d2eem4igg7c" path="res://Arabalar/porsche.png" id="1_mle8n"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mle8n"]
+bg_color = Color(0.0744457, 0.07444573, 0.07444567, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_532yn"]
+bg_color = Color(0.60038817, 0.60038817, 0.60038817, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iiwsp"]
+bg_color = Color(0.8440192, 3.85046e-06, 4.813075e-07, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kh4es"]
+bg_color = Color(1, 0, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vkilc"]
+bg_color = Color(2.695322e-06, 0.38818312, 0.91388094, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7dc1f"]
+bg_color = Color(0.05490196, 0.44313726, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b5x3g"]
+bg_color = Color(0.8275378, 0.80224365, 0.023878628, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sikoi"]
+bg_color = Color(0.9254902, 0.8980392, 0.08627451, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u2lhi"]
+bg_color = Color(0, 0.9218227, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_58dt1"]
+bg_color = Color(0, 0.99215686, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_25grp"]
+bg_color = Color(0.07450981, 0.07450981, 0.07450981, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="AnaMenuControl" type="Control" unique_id=1903668230]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_532yn")
+
+[node name="ArkaPlan" type="ColorRect" parent="." unique_id=766490390]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.14333999, 0.14334002, 0.14333996, 1)
+
+[node name="BaslikEtiketi" type="Label" parent="." unique_id=1775146522]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 39.0
+offset_bottom = 135.0
+grow_horizontal = 2
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 70
+text = "1. OYUNCU SEÇİMİ"
+horizontal_alignment = 1
+
+[node name="IsimKutusu" type="LineEdit" parent="." unique_id=282995072]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 639.0
+offset_top = -371.0
+offset_right = -639.0
+offset_bottom = -294.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 50
+theme_override_styles/normal = SubResource("StyleBoxFlat_mle8n")
+text = "İsmini Gir..."
+alignment = 1
+
+[node name="Galeri" type="Control" parent="." unique_id=1425728612]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -797.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="ArabaGorseli" type="TextureRect" parent="Galeri" unique_id=285109186]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -169.25
+offset_top = -424.0
+offset_right = 169.25
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_mle8n")
+
+[node name="SolOkButonu" type="Button" parent="Galeri" unique_id=1802955059]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 459.0
+offset_top = -289.0
+offset_right = 640.0
+offset_bottom = 15.0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 60
+theme_override_styles/normal = SubResource("StyleBoxFlat_532yn")
+text = "<"
+
+[node name="SagOkButonu" type="Button" parent="Galeri" unique_id=1962846615]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -661.0
+offset_top = -288.0
+offset_right = -484.0
+offset_bottom = 15.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 60
+theme_override_styles/normal = SubResource("StyleBoxFlat_532yn")
+text = ">"
+
+[node name="ArabaIsmi" type="Label" parent="Galeri" unique_id=650093095]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -280.0
+offset_right = -10.0
+offset_bottom = -217.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 45
+text = "Porsche"
+horizontal_alignment = 1
+
+[node name="RenkPaleti" type="HBoxContainer" parent="." unique_id=147806390]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -206.0
+offset_bottom = -137.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="KirmiziButon" type="Button" parent="RenkPaleti" unique_id=1006707408]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_iiwsp")
+theme_override_styles/hover = SubResource("StyleBoxFlat_kh4es")
+
+[node name="MaviButon" type="Button" parent="RenkPaleti" unique_id=400241000]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_vkilc")
+theme_override_styles/hover = SubResource("StyleBoxFlat_7dc1f")
+
+[node name="SariButon" type="Button" parent="RenkPaleti" unique_id=1083841057]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_b5x3g")
+theme_override_styles/hover = SubResource("StyleBoxFlat_sikoi")
+
+[node name="YesilButon" type="Button" parent="RenkPaleti" unique_id=1952797488]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/normal = SubResource("StyleBoxFlat_u2lhi")
+theme_override_styles/hover = SubResource("StyleBoxFlat_58dt1")
+
+[node name="OnaylaButonu" type="Button" parent="." unique_id=1322240109]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -116.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 50
+theme_override_styles/normal = SubResource("StyleBoxFlat_25grp")
+text = "ONAYLA VE SIRADAKİNE GEÇ"
