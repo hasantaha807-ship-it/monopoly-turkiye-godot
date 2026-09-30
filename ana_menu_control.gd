@@ -17,13 +17,15 @@ extends Control
 var su_anki_oyuncu_indeksi = 0
 var secili_araba_indeksi = 0
 
-# YENİ: Göz yormayan pastel (soft) renk paleti
+# YENİ: Seçilen renkleri tutacağımız hafıza listesi
+var secilen_renkler = [] 
+
 var renk_kirmizi = Color("ff5943")
-var renk_mavi = Color("599eff") # İstediğin o tatlı, yumuşak mavi
+var renk_mavi = Color("599eff") 
 var renk_sari = Color("ffcc00")
 var renk_yesil = Color("3de865")
 
-var secili_renk = renk_kirmizi # Varsayılan
+var secili_renk = renk_kirmizi 
 
 var arabalar = [
 	{"isim": "Porsche 911", "gorsel": preload("res://Arabalar/porsche.png")},
@@ -38,7 +40,6 @@ func _ready():
 	sag_ok.pressed.connect(_on_sag_ok_basildi)
 	onayla_butonu.pressed.connect(_on_onayla_basildi)
 	
-	# Butonlara yeni yumuşak renkleri gönderiyoruz
 	kirmizi_buton.pressed.connect(func(): _renk_degistir(renk_kirmizi))
 	mavi_buton.pressed.connect(func(): _renk_degistir(renk_mavi))
 	sari_buton.pressed.connect(func(): _renk_degistir(renk_sari))
@@ -50,8 +51,23 @@ func ekrani_hazirla():
 	baslik_etiketi.text = str(su_anki_oyuncu_indeksi + 1) + ". OYUNCU SEÇİMİ"
 	isim_kutusu.text = "" 
 	
-	var varsayilan_renkler = [renk_kirmizi, renk_mavi, renk_sari, renk_yesil]
-	secili_renk = varsayilan_renkler[su_anki_oyuncu_indeksi]
+	var tum_renkler = [renk_kirmizi, renk_mavi, renk_sari, renk_yesil]
+	var tum_butonlar = [kirmizi_buton, mavi_buton, sari_buton, yesil_buton]
+	
+	# 1. Adım: Tüm butonları aktif hale getir
+	for btn in tum_butonlar:
+		btn.disabled = false
+		
+	# 2. Adım: Daha önce seçilmiş renklerin butonlarını kilitle (disabled yap)
+	for i in range(tum_renkler.size()):
+		if secilen_renkler.has(tum_renkler[i]):
+			tum_butonlar[i].disabled = true
+			
+	# 3. Adım: Yeni oyuncu için boşta olan ilk rengi varsayılan olarak belirle
+	for renk in tum_renkler:
+		if not secilen_renkler.has(renk):
+			secili_renk = renk
+			break
 	
 	arabayi_guncelle()
 
@@ -86,6 +102,9 @@ func _on_onayla_basildi():
 	Global.oyuncu_ayarlari[su_anki_oyuncu_indeksi]["isim"] = girilen_isim
 	Global.oyuncu_ayarlari[su_anki_oyuncu_indeksi]["araba_indeksi"] = secili_araba_indeksi
 	Global.oyuncu_ayarlari[su_anki_oyuncu_indeksi]["renk"] = secili_renk
+	
+	# YENİ: Onaylanan rengi hafıza listesine ekle ki bir sonraki oyuncu alamasın
+	secilen_renkler.append(secili_renk)
 	
 	su_anki_oyuncu_indeksi += 1
 	

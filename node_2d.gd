@@ -12,6 +12,16 @@ extends Node2D
 @onready var pas_gec_butonu = $Arayuz/TapuKarti/PasGecButonu
 @onready var path_2d = $Path2D
 
+# --- YENİ: DURAKLATMA MENÜSÜ BAĞLANTILARI ---
+@onready var duraklatma_ekrani = $Arayuz/DuraklatmaEkrani
+@onready var tam_ekran_butonu = $Arayuz/DuraklatmaEkrani/Panel/VBoxContainer/TamEkranButonu
+@onready var hiz_slider = $Arayuz/DuraklatmaEkrani/Panel/VBoxContainer/HizSlider
+@onready var muzik_slider = $Arayuz/DuraklatmaEkrani/Panel/VBoxContainer/MuzikSlider
+@onready var efekt_slider = $Arayuz/DuraklatmaEkrani/Panel/VBoxContainer/EfektSlider
+@onready var devam_butonu = $Arayuz/DuraklatmaEkrani/Panel/VBoxContainer/DevamButonu
+@onready var yeniden_baslat_butonu_menu = $Arayuz/DuraklatmaEkrani/Panel/VBoxContainer/YenidenBaslatButonu
+@onready var ana_menu_butonu = $Arayuz/DuraklatmaEkrani/Panel/VBoxContainer/AnaMenuButonu
+
 @onready var bildirim_paneli = $Arayuz/BildirimPaneli
 @onready var bildirim_yazisi = $Arayuz/BildirimPaneli/BildirimYazisi
 @onready var tamam_butonu = $Arayuz/BildirimPaneli/TamamButonu
@@ -69,12 +79,12 @@ extends Node2D
 @onready var sans_karti_sesi_player = $SansKartiSesi
 
 var toplam_kare_sayisi = 23
+var eski_bakiyeler = [0, 0, 0, 0]
 var hareket_ediyor = false 
 var tur_maasi = 200
-var ev_ikonu = preload("res://Mulkler/ev.png")       # Kendi ev.png dosyanın adını ve yolunu yaz
-var plaza_ikonu = preload("res://Mulkler/plaza.png") # Kendi plaza.png dosyanın adını ve yolunu yaz
+var ev_ikonu = preload("res://Mulkler/ev.png")       
+var plaza_ikonu = preload("res://Mulkler/plaza.png") 
 
-# YENİ: Haritada arabaları yüklemek için kaplama listemiz
 var araba_kaplamalari = [
 	preload("res://Arabalar/porsche.png"),
 	preload("res://Arabalar/vosvos.png"),
@@ -139,6 +149,26 @@ func _ready():
 	satis_paneli.hide()
 	ihale_paneli.hide()
 	zar_secim_paneli.hide()
+	duraklatma_ekrani.hide()
+	
+	# --- YENİ: DURAKLATMA MENÜSÜ SİNYAL BAĞLANTILARI ---
+	tam_ekran_butonu.toggled.connect(_on_tam_ekran_degisti)
+	hiz_slider.value_changed.connect(_on_hiz_degisti)
+	muzik_slider.value_changed.connect(_on_muzik_degisti)
+	efekt_slider.value_changed.connect(_on_efekt_degisti)
+	devam_butonu.pressed.connect(_on_devam_basildi)
+	yeniden_baslat_butonu_menu.pressed.connect(_on_yeniden_baslat_basildi)
+	ana_menu_butonu.pressed.connect(_on_ana_menu_basildi)
+	
+	# Başlangıç değerlerini senkronize et
+	var muzik_bus = AudioServer.get_bus_index("Muzik")
+	var efekt_bus = AudioServer.get_bus_index("Efekt")
+	muzik_slider.value = AudioServer.get_bus_volume_db(muzik_bus)
+	efekt_slider.value = AudioServer.get_bus_volume_db(efekt_bus)
+	var mevcut_mod = DisplayServer.window_get_mode()
+	tam_ekran_butonu.button_pressed = (mevcut_mod == DisplayServer.WINDOW_MODE_FULLSCREEN or mevcut_mod == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+	
+	# ----------------------------------------------------
 	
 	oyuncular = [
 		{"isim": "Oyuncu 1", "para": 1500, "konum": 0, "renk": Color.RED, "piyon": piyon_kirmizi, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": false, "aktif_mi": true},
@@ -155,8 +185,6 @@ func _ready():
 		oyuncular[3]["aktif_mi"] = false
 		oyuncular[3]["piyon"].hide()
 		
-	# DİKKAT: For döngüsünü bir sekme (Tab) sola, if ve elif ile aynı hizaya çektik!
-	# --- YENİ: BÜTÜN PİYONLARI (GİZLİ OLSALAR BİLE) ZORLA ARABAYA ÇEVİR ---
 	for i in range(4):
 		var ayarlar = Global.oyuncu_ayarlari[i]
 		oyuncular[i]["isim"] = ayarlar["isim"]
@@ -165,19 +193,19 @@ func _ready():
 		var p = oyuncular[i]["piyon"]
 		var araba_sprite = null
 		
-		# Piyonun içindeki Sprite2D'yi bul
 		for alt_dugum in p.get_children():
 			if alt_dugum is Sprite2D:
 				araba_sprite = alt_dugum
 				break
 		
-		# Bulduğu an acımadan arabaya çevir ve sağa döndür
 		if araba_sprite != null:
 			araba_sprite.texture = araba_kaplamalari[ayarlar["araba_indeksi"]]
 			araba_sprite.modulate = ayarlar["renk"]
 			araba_sprite.scale = Vector2(0.18, 0.18)
 			araba_sprite.rotation_degrees = 90
-	
+			
+	for i in range(4):
+		eski_bakiyeler[i] = oyuncular[i]["para"]
 	arayuzu_guncelle()
 	
 	var buton_baglantilari = [
@@ -214,36 +242,32 @@ func _ready():
 			ihale_timer.timeout.disconnect(c.callable)
 		ihale_timer.timeout.connect(_on_ihale_timer_timeout)
 	
-	# ... (diğer timer ve buton bağlantıları)
-	if ihale_timer:
-		for c in ihale_timer.timeout.get_connections():
-			ihale_timer.timeout.disconnect(c.callable)
-		ihale_timer.timeout.connect(_on_ihale_timer_timeout)
-	
-	# YENİ EKLENEN SATIR: Oyun başlar başlamaz başlangıç karesindeki arabaları yan yana diz
 	piyonlarin_konumlarini_duzenle()
-	
 	siradaki_turu_baslat()
-	# TEST KODU: Oyun başlar başlamaz 10. kareye (Konya) Kırmızı bir Gökdelen (Seviye 4) diker
-	
-func _process(_delta):
-	if !karar_timer.is_stopped():
-		sayac_etiketi.text = str(int(karar_timer.time_left))
 
+	
 func arayuzu_guncelle():
-	var bakiye_metni = ""
+	var bakiye_metni = "" 
 	
 	for i in range(Global.oyuncu_sayisi):
 		var o = oyuncular[i]
+		
 		if o["aktif_mi"]:
-			# Oyuncunun rengini metin rengi (Hex) koduna çeviriyoruz (Örn: #ff5959)
+			if eski_bakiyeler.size() > 0:
+				var fark = o["para"] - eski_bakiyeler[i]
+				if fark != 0:
+					bakiye_degisim_animasyonu_oynat(i, fark)
+					eski_bakiyeler[i] = o["para"]
+			
 			var hex_renk = o["renk"].to_html(false) 
 			
 			if i == aktif_oyuncu_indeksi:
 				bakiye_metni += "[b][color=#" + hex_renk + "]▶ " + o["isim"] + " : " + str(o["para"]) + " ₺[/color][/b]\n\n"
 			else:
 				bakiye_metni += "[color=#" + hex_renk + "]   " + o["isim"] + " : " + str(o["para"]) + " ₺[/color]\n\n"
-				
+		else:
+			bakiye_metni += "[color=gray]   " + o["isim"] + " : (İFLAS)[/color]\n\n"
+			
 	if bakiye_etiketi:
 		bakiye_etiketi.text = bakiye_metni
 
@@ -288,6 +312,7 @@ func _on_taktiksel_zar_basildi():
 	var o_oyuncu = oyuncular[aktif_oyuncu_indeksi]
 	if o_oyuncu["para"] >= 100:
 		o_oyuncu["para"] -= 100
+		eski_bakiyeler[aktif_oyuncu_indeksi] = o_oyuncu["para"]
 		arayuzu_guncelle()
 		zar_secim_paneli.hide()
 		zar_at_ve_ilerle(true)
@@ -301,6 +326,7 @@ func ai_hamle_yap():
 		if randi() % 100 < 30:
 			o_oyuncu["para"] -= 100
 			ekstra_zar_kullan = true
+			eski_bakiyeler[aktif_oyuncu_indeksi] = o_oyuncu["para"]
 			arayuzu_guncelle()
 			
 	zar_at_ve_ilerle(ekstra_zar_kullan)
@@ -315,7 +341,6 @@ func zar_at_ve_ilerle(ekstra_zar: bool):
 		if o_oyuncu["hapis_turu"] == 1:
 			hapis_yazisi.text = o_oyuncu["isim"] + " OYUNCUSU HAPİSTESİN!\n\n300 TL kefalet ödeyip hemen zarı atabilir veya 1 tur içeride yatabilirsin."
 			kefalet_butonu.text = "300 TL\nKefalet Öde"
-			# YENİ: Bot hapisteyken butonlar kitlenir
 			kefalet_butonu.disabled = o_oyuncu["yapay_zeka"]
 			yat_butonu.disabled = o_oyuncu["yapay_zeka"]
 			kefalet_butonu.show()
@@ -332,8 +357,6 @@ func zar_at_ve_ilerle(ekstra_zar: bool):
 
 func zari_at_ve_hareketi_baslat(o_oyuncu, ekstra_zar: bool):
 	hareket_ediyor = true
-	
-	# 1. Zarların kaç geleceğini hesapla
 	var zar1 = randi_range(1, 6)
 	var zar2 = 0
 	if ekstra_zar:
@@ -341,7 +364,6 @@ func zari_at_ve_hareketi_baslat(o_oyuncu, ekstra_zar: bool):
 		
 	var toplam_zar = zar1 + zar2
 	
-	# 2. Zar panellerini görünür yap
 	zar_paneli.show()
 	zar_gorseli.show()
 	if ekstra_zar:
@@ -349,22 +371,18 @@ func zari_at_ve_hareketi_baslat(o_oyuncu, ekstra_zar: bool):
 	else:
 		ekstra_zar_gorseli.hide()
 		
-	# 3. Zarların final resimlerini (sayılarını) ekrana bas
 	var zar_kareleri = {6: 0, 5: 1, 4: 2, 3: 3, 2: 4, 1: 5} 
 	zar_gorseli.frame = zar_kareleri[zar1]
 	if ekstra_zar:
 		ekstra_zar_gorseli.frame = zar_kareleri[zar2]
 		
-	# 4. İŞTE SİHİR BURADA: Eski takılan animasyon yerine bizim havalı animasyonu beklet!
 	await zar_animasyonu_oynat()
 	
-	# 5. Animasyon bittikten sonra araba harekete başlasın
 	var curve = path_2d.curve
 	for i in range(toplam_zar):
 		o_oyuncu["konum"] += 1
 		var basa_sardi = false
 	
-		
 		if o_oyuncu["konum"] >= toplam_kare_sayisi:
 			o_oyuncu["konum"] = 0
 			basa_sardi = true
@@ -396,8 +414,7 @@ func zari_at_ve_hareketi_baslat(o_oyuncu, ekstra_zar: bool):
 	elif durulan_yer == "Hapishane":
 		o_oyuncu["hapiste_mi"] = true
 		o_oyuncu["hapis_turu"] = 1
-# ESKİ: bildirim_yazisi.text = "\n\nKODES BOYLADI!\n\nPolis çevirmesine takıldın. Doğruca hapishaneye gidiyorsun!"
-		bildirim_yazisi.text = "[center]\n\n\n[font_size=20][b][color=#ff3333]KADER MAHKÛMU![/color][/b][/font_size]\n\nPolis çevirmesine takıldın. Doğruca hapishaneye gidiyorsun![/center]"		# YENİ: Bot hapise girdiğinde buton kilitlenir
+		bildirim_yazisi.text = "[center]\n\n\n[font_size=20][b][color=#ff3333]KADER MAHKÛMU![/color][/b][/font_size]\n\nPolis çevirmesine takıldın. Doğruca hapishaneye gidiyorsun![/center]"		
 		tamam_butonu.disabled = o_oyuncu["yapay_zeka"]
 		bildirim_paneli.show()
 		if o_oyuncu["yapay_zeka"]:
@@ -415,11 +432,9 @@ func zari_at_ve_hareketi_baslat(o_oyuncu, ekstra_zar: bool):
 					var yukseltme_bedeli = int(fiyat * [0.5, 0.75, 1.0, 1.5][mevcut_seviye])
 					var sonraki_kira = int(fiyat * [0.5, 1.0, 1.5, 2.0][mevcut_seviye])
 					
-					soru_yazisi.text = "\n"+durulan_yer.to_upper() + " (Seviye " + str(mevcut_seviye) + ")\n\nYükseltmek ister misin?\nBedel: " + str(yukseltme_bedeli) + " TL\nYeni Kira: " + str(sonraki_kira) + " TL"
-					# YENİ: Bot yükseltme düşünürken butonlar kilitlenir
 					evet_butonu.disabled = o_oyuncu["yapay_zeka"]
 					hayir_butonu.disabled = o_oyuncu["yapay_zeka"]
-					yukseltme_paneli.show()
+					yukseltme_panelini_goster(durulan_yer.to_upper(), mevcut_seviye, yukseltme_bedeli, sonraki_kira)
 					
 					if o_oyuncu["yapay_zeka"]:
 						await get_tree().create_timer(1.5).timeout
@@ -437,8 +452,7 @@ func zari_at_ve_hareketi_baslat(o_oyuncu, ekstra_zar: bool):
 					kira_bedeli = int(fiyat * [0.5, 1.0, 1.5, 2.0][mevcut_seviye-1])
 					
 				bekleyen_kira = {"aktif": true, "odeyen": aktif_oyuncu_indeksi, "alan": sahip_indeksi, "miktar": kira_bedeli}
-# ESKİ: bildirim_yazisi.text = "\nKİRA ÖDEMESİ!\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n\nÖdemen Gereken: " + str(kira_bedeli) + " TL\n\n(Tamam'a bastığında bakiyenden düşülecektir)"
-				bildirim_yazisi.text = "[center]\n[b][color=#ffaa00]KİRA ÖDEMESİ![/color][/b]\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n\n[b]Ödemen Gereken: " + str(kira_bedeli) + " TL[/b]\n\n(Tamam'a bastığında bakiyenden düşülecektir)[/center]"				# YENİ: Bot kira öderken buton kilitlenir
+				bildirim_yazisi.text = "[center]\n[font_size=20][b][color=#ffaa00]KİRA ÖDEMESİ![/color][/b][/font_size]\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n\n[b]Ödemen Gereken: " + str(kira_bedeli) + " TL[/b]\n\n(Tamam'a bastığında bakiyenden düşülecektir)[/center]"				
 				tamam_butonu.disabled = o_oyuncu["yapay_zeka"]
 				bildirim_paneli.show()
 				
@@ -452,26 +466,36 @@ func zari_at_ve_hareketi_baslat(o_oyuncu, ekstra_zar: bool):
 
 func sans_kartini_cek(oyuncu):
 	var kartlar = [
-		{"metin": "Burs yattı! 200 TL çektin.", "deger": 200},
-		{"metin": "Radar cezası yedin! Polise 100 TL öde.", "deger": -100},
-		{"metin": "Vergi İadesi! 150 TL kazandın.", "deger": 150},
-		{"metin": "Telefon ekranı kırıldı. 150 TL öde.", "deger": -150}
+		{"metin": "Burs yattı!\n200 TL çektin.", "deger": 200},
+		{"metin": "Radar cezası yedin!\n100 TL öde.", "deger": -100},
+		{"metin": "Vergi İadesi!\n150 TL kazandın.", "deger": 150},
+		{"metin": "Telefon ekranı kırıldı.\n150 TL öde.", "deger": -150}
 	]
 	var secilen = kartlar[randi() % kartlar.size()]
 	
 	bekleyen_sans_karti_degeri = secilen["deger"]
 	
-	olay_yazisi.text = "\nSÜRPRİZ!\n\n" + secilen["metin"]
+	var renk_kodu = "green" if secilen["deger"] > 0 else "red"
+	var yazi_icerigi = "[center][b][font_size=25][color=gold]\nŞANS KARTI[/color][/font_size][/b]\n\n\n\n"
+	yazi_icerigi += "[font_size=23][color=" + renk_kodu + "]" + secilen["metin"] + "[/color][/font_size]"
+	
 	if (oyuncu["para"] + bekleyen_sans_karti_degeri) < 0:
-		olay_yazisi.text += "\n\nDİKKAT: BAKİYEN EKSİYE DÜŞECEK!"
+		yazi_icerigi += "\n\n[b][color=red]DİKKAT: BAKİYEN EKSİYE DÜŞECEK![/color][/b]"
+		
+	yazi_icerigi += "[/center]"
+	olay_yazisi.text = yazi_icerigi
 		
 	if sans_karti_sesi_player:
 		sans_karti_sesi_player.stop()
 		sans_karti_sesi_player.play(0)
 		
-	# YENİ: Temiz kilit kontrolü
 	karti_kapat_butonu.disabled = oyuncu["yapay_zeka"]
-	sans_karti_paneli.show()
+	sans_karti_paneli.visible = true
+	sans_karti_paneli.scale = Vector2(0, 0)
+	var tween = create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(sans_karti_paneli, "scale", Vector2(1, 1), 0.5)
 	
 	if oyuncu["yapay_zeka"]:
 		await get_tree().create_timer(2.5).timeout
@@ -537,10 +561,9 @@ func borc_kontrolu():
 				kalan.append(p)
 				
 		if kalan.size() == 1:
-			kazanan_yazisi.text = "\nOYUN BİTTİ!\n\nŞAMPİYON: " + kalan[0]["isim"]
-			oyun_bitti_paneli.show()
+			var kazanan_renk_hex = kalan[0]["renk"].to_html(false)
+			oyun_bitti_animasyonunu_baslat(kalan[0]["isim"], kazanan_renk_hex)
 		else:
-# ESKİ: bildirim_yazisi.text = o_oyuncu["isim"] + " İFLAS ETTİ!\n\n(Oyun 5 saniye içinde devam edecek...)"
 			bildirim_yazisi.text = "[center]\n\n\n[font_size=20][b][color=#aa0000]" + o_oyuncu["isim"] + " İFLAS ETTİ![/color][/b][/font_size]\n\n(Oyun 5 saniye içinde devam edecek...)[/center]"
 			tamam_butonu.hide()
 			bildirim_paneli.show()
@@ -635,27 +658,31 @@ func _ihale_kurulumu_yap(sehir_adi, baslangic_fiyati):
 	ihale_verileri["satici"] = aktif_oyuncu_indeksi
 	ihale_verileri["cekilenler"].clear()
 	
-	ihale_mulk_bilgisi.text = "Satılan Mülk:\n" + sehir_adi.to_upper() + " (Başlangıç: " + str(baslangic_fiyati) + " TL)"
-	ihale_durum_yazisi.text = "AÇIK ARTIRMA BAŞLADI!\nTeklifler bekleniyor..."
+	ihale_mulk_bilgisi.text = "[center]Satılan Mülk:\n[font_size=28][b][color=gold]" + sehir_adi.to_upper() + "[/color][/b][/font_size] (Başlangıç: [color=green]" + str(baslangic_fiyati) + " TL[/color])[/center]"
+	ihale_durum_yazisi.text = "[center][font_size=23][b][color=cyan]AÇIK ARTIRMA BAŞLADI![/color][/b][/font_size]\nTeklifler bekleniyor...[/center]"
+	
 	ihale_suresi = 8
 	sure_yazisi.text = "Kalan Süre: 8"
 	
 	teklif_butonu.show()
 	pas_butonu.show()
 	
-
-	# YENİ VE DÜZELTİLMİŞ İHALE KİLİT SİSTEMİ
-	# 1. Eğer insan oyuncu (0. indeks) ihaleyi YAPAN (satan) kişiyse VEYA iflas etmişse butonlar kitlenir.
-	# 2. Eğer insan oyuncu hayattaysa ve ihaleye dışarıdan katılıyorsa butonlar açık kalır.
 	if aktif_oyuncu_indeksi == 0 or oyuncular[0]["aktif_mi"] == false:
 		teklif_butonu.disabled = true
 		pas_butonu.disabled = true
 	else:
 		teklif_butonu.disabled = false
 		pas_butonu.disabled = false
-	ihale_paneli.show()
+		
+	ihale_paneli.visible = true
+	ihale_paneli.scale = Vector2(0, 0)
+	var tween = create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(ihale_paneli, "scale", Vector2(1, 1), 0.5)
+	
 	ihale_aktif = true
-	ihale_timer.start(1.0) 
+	ihale_timer.start(1.0)
 
 func _on_ihale_timer_timeout():
 	if not ihale_aktif: return
@@ -700,7 +727,7 @@ func _on_ihale_timer_timeout():
 
 func _on_teklif_butonu_basildi():
 	if not ihale_paneli.visible: return
-	if not oyuncular[0]["aktif_mi"]: return # İFLAS ETTİYSEN MÜDAHALE EDEMEZSİN!
+	if not oyuncular[0]["aktif_mi"]: return 
 	
 	if oyuncular[0]["para"] >= ihale_verileri["guncel_teklif"] + 50:
 		_teklifi_artir(0)
@@ -709,7 +736,7 @@ func _on_teklif_butonu_basildi():
 
 func _on_pas_butonu_basildi():
 	if not ihale_paneli.visible: return
-	if not oyuncular[0]["aktif_mi"]: return # İFLAS ETTİYSEN MÜDAHALE EDEMEZSİN!
+	if not oyuncular[0]["aktif_mi"]: return 
 	
 	ihale_verileri["cekilenler"].append(0)
 	teklif_butonu.disabled = true
@@ -721,7 +748,9 @@ func _teklifi_artir(veren_indeks):
 	ihale_verileri["kazanan_indeks"] = veren_indeks
 	ihale_suresi = 8
 	sure_yazisi.text = "Kalan Süre: 8"
-	ihale_durum_yazisi.text = oyuncular[veren_indeks]["isim"] + " teklifi " + str(ihale_verileri["guncel_teklif"]) + " TL'ye yükseltti!\nBaşka artıran var mı?"
+	
+	var hex_renk = oyuncular[veren_indeks]["renk"].to_html(false)
+	ihale_durum_yazisi.text = "[center][color=#" + hex_renk + "][font_size=23][b]" + oyuncular[veren_indeks]["isim"] + "[/b][/font_size][/color] teklifi [color=green][font_size=23][b]" + str(ihale_verileri["guncel_teklif"]) + " TL[/b][/font_size][/color]'ye yükseltti!\nBaşka artıran var mı?[/center]"
 
 func _ihale_sonuclandir():
 	ihale_aktif = false
@@ -746,7 +775,8 @@ func _ihale_sonuclandir():
 			var ev_node = path_2d.get_node_or_null("Ev_" + str(konum) + "_" + str(i))
 			if ev_node: ev_node.modulate = alici["renk"]
 			
-		ihale_durum_yazisi.text = "İHALE BİTTİ!\n\nSATILAN KİŞİ: " + alici["isim"] + "\nÖDENEN TUTAR: " + str(bedel) + " TL"
+		var hex_renk = alici["renk"].to_html(false)
+		ihale_durum_yazisi.text = "[center][font_size=21][b][color=gold]İHALE BİTTİ![/color][/b][/font_size]\n\nSATILAN KİŞİ: [color=#" + hex_renk + "]" + alici["isim"] + "[/color]\nÖDENEN TUTAR: [color=green]" + str(bedel) + " TL[/color][/center]"
 	else:
 		satici["para"] += bedel
 		var konum = harita_sirasi.find(s)
@@ -756,7 +786,7 @@ func _ihale_sonuclandir():
 			
 		mülkiyet_durumu.erase(s)
 		haritadaki_kirayi_guncelle(s, 0)
-		ihale_durum_yazisi.text = "İHALE BİTTİ!\n\nKimse teklif vermedi.\nMülk bankaya iade edildi."
+		ihale_durum_yazisi.text = "[center][b][color=red]İHALE BİTTİ![/color][/b]\n\nKimse teklif vermedi.\nMülk bankaya iade edildi.[/center]"
 		
 	arayuzu_guncelle()
 	await get_tree().create_timer(3.0).timeout
@@ -810,8 +840,7 @@ func _on_yat_basildi():
 	if not hapishane_paneli.visible: return
 	oyuncular[aktif_oyuncu_indeksi]["hapis_turu"] = 2
 	hapishane_paneli.hide()
-# ESKİ: bildirim_yazisi.text = "\nCEZANI ÇEKİYORSUN!\n\n\nBu turu hapiste yatarak geçiriyorsun."
-	bildirim_yazisi.text = "[center]\n\n\n[font_size=20][b][color=#ff3333]CEZANI ÇEKİYORSUN![/color][/b][/font_size]\n\nBu turu hapiste yatarak geçiriyorsun.[/center]"	# YENİ: Bot hapiste yatmayı seçtiğinde de buton kilitlenir
+	bildirim_yazisi.text = "[center]\n\n\n[font_size=20][b][color=#ff3333]CEZANI ÇEKİYORSUN![/color][/b][/font_size]\n\nBu turu hapiste yatarak geçiriyorsun.[/center]"	
 	tamam_butonu.disabled = oyuncular[aktif_oyuncu_indeksi]["yapay_zeka"]
 	bildirim_paneli.show()
 	
@@ -828,7 +857,6 @@ func tapu_kartini_goster(sehir_anahtari: String):
 	
 	karar_timer.start(15)
 	
-	# YENİ: Bot satınalma kararı verirken butonlar kilitlenir
 	satin_al_butonu.disabled = oyuncular[aktif_oyuncu_indeksi]["yapay_zeka"]
 	pas_gec_butonu.disabled = oyuncular[aktif_oyuncu_indeksi]["yapay_zeka"]
 	tapu_karti.show()
@@ -892,11 +920,7 @@ func _on_sure_bitti():
 	tapu_karti.hide()
 	sirayi_sonraki_oyuncuya_gecir()
 
-func _on_yeniden_baslat_basildi():
-	get_tree().reload_current_scene()
-
 func insaa_et_gorsel_ev(indeks: int, renk: Color, ev_sirasi: int):
-	# Eğer oyuncu 4. seviyeye (Plaza/Otel) ulaştıysa, önce arsadaki eski 4 küçük evi yık!
 	if ev_sirasi == 4:
 		for i in range(4):
 			var eski_ev = path_2d.get_node_or_null("Ev_" + str(indeks) + "_" + str(i))
@@ -905,45 +929,35 @@ func insaa_et_gorsel_ev(indeks: int, renk: Color, ev_sirasi: int):
 				
 	var ev = Sprite2D.new()
 	
-	# Eğer 4. seviye ise Plaza ikonunu kullan, değilse Ev ikonunu kullan
 	if ev_sirasi == 4:
 		ev.texture = plaza_ikonu
-		ev.scale = Vector2(0.06, 0.06) # Plazanın boyutu (resminin büyüklüğüne göre ayarlarsın)
+		ev.scale = Vector2(0.06, 0.06) 
 	else:
 		ev.texture = ev_ikonu
-		ev.scale = Vector2(0.04, 0.04) # Evin boyutu (resminin büyüklüğüne göre ayarlarsın)
+		ev.scale = Vector2(0.04, 0.04) 
 		
 	ev.modulate = renk
-	# Plaza da olsa adı "Ev_indeks_4" olacak ki, arsa satıldığında kolayca silinebilsin
 	ev.name = "Ev_" + str(indeks) + "_" + str(ev_sirasi)
 	
-	# Şehrin konumunu al
 	var kordinat = path_2d.curve.get_point_position(clampi(indeks, 0, path_2d.curve.get_point_count() - 1))
 	
-	# Plaza yapılıyorsa karenin tam ortasına koy, Ev yapılıyorsa yan yana diz
 	if ev_sirasi == 4:
 		ev.position = kordinat + Vector2(0, -7) 
 	else:
-		# Evleri yan yana dizmek için matematik (-30'dan başla, her evde 20 piksel sağa kay)
 		ev.position = kordinat + Vector2(-30 + (ev_sirasi * 20), -20)
 		
 	path_2d.add_child(ev)
 	
-	
-	# --- OTOPARK (VALE) SİSTEMİ ---
 func piyonlarin_konumlarini_duzenle():
-	# Haritadaki tüm kareleri (0'dan 22'ye) tek tek kontrol et
 	for kare in range(toplam_kare_sayisi):
 		var bu_karedeki_oyuncular = []
 		
-		# Bu karede duran "aktif" oyuncuları listeye al
 		for i in range(Global.oyuncu_sayisi):
 			if oyuncular[i]["aktif_mi"] and oyuncular[i]["konum"] == kare:
 				bu_karedeki_oyuncular.append(i)
 		
 		var kisi_sayisi = bu_karedeki_oyuncular.size()
 		
-		# Eğer karede birden fazla araba varsa onlara park yeri ayarla
 		for i in range(kisi_sayisi):
 			var o_indeks = bu_karedeki_oyuncular[i]
 			var p = oyuncular[o_indeks]["piyon"]
@@ -957,7 +971,6 @@ func piyonlarin_konumlarini_duzenle():
 			if araba_sprite != null:
 				var ofset = Vector2.ZERO
 				
-				# Arabaları kare içindeki sayısına göre yan yana/alt alta kaydır (20 piksellik boşluklar)
 				if kisi_sayisi == 2:
 					ofset = [Vector2(-20, 0), Vector2(20, 0)][i]
 				elif kisi_sayisi == 3:
@@ -965,39 +978,141 @@ func piyonlarin_konumlarini_duzenle():
 				elif kisi_sayisi == 4:
 					ofset = [Vector2(-20, -20), Vector2(20, -20), Vector2(-20, 20), Vector2(20, 20)][i]
 					
-				# Arabayı anında ışınlamak yerine yumuşakça (0.3 saniyede) park yerine kaydır
 				var tween = create_tween()
 				tween.tween_property(araba_sprite, "position", ofset, 0.3).set_trans(Tween.TRANS_SINE)
 
-# --- ZAR ANİMASYONU ---
 func zar_animasyonu_oynat():
-	# Zar sesini başlat
 	if zar_sesi_player:
 		zar_sesi_player.play()
 		
-	# Açıları başlangıçta sıfırla
 	zar_gorseli.rotation_degrees = 0
 	if ekstra_zar_gorseli: ekstra_zar_gorseli.rotation_degrees = 0
 		
-	# 1. Aşama: Zarları havaya fırlat (Büyüt ve Döndür)
 	var yukari_tween = create_tween().set_parallel(true)
 	yukari_tween.tween_property(zar_gorseli, "scale", Vector2(0.28, 0.28), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	yukari_tween.tween_property(zar_gorseli, "rotation_degrees", 360.0, 0.4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	
 	if ekstra_zar_gorseli and ekstra_zar_gorseli.visible:
 		yukari_tween.tween_property(ekstra_zar_gorseli, "scale", Vector2(0.28, 0.28), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		# Ekstra zarı ters yöne döndürelim, daha havalı dursun
 		yukari_tween.tween_property(ekstra_zar_gorseli, "rotation_degrees", -360.0, 0.4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	
-	# Havadayken 0.3 saniye bekle
 	await get_tree().create_timer(0.3).timeout
 	
-	# 2. Aşama: Zarları yere vur (Küçült ve Sektir)
 	var asagi_tween = create_tween().set_parallel(true)
 	asagi_tween.tween_property(zar_gorseli, "scale", Vector2(0.25, 0.25), 0.2).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 	
 	if ekstra_zar_gorseli and ekstra_zar_gorseli.visible:
 		asagi_tween.tween_property(ekstra_zar_gorseli, "scale", Vector2(0.25, 0.25), 0.2).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 		
-	# Animasyonun tamamen bitmesi ve arabanın hareketine geçmesi için biraz daha bekle
 	await get_tree().create_timer(0.3).timeout
+	
+func oyun_bitti_animasyonunu_baslat(kazanan_isim: String, renk_hex: String):
+	var panel = $Arayuz/OyunBittiPaneli
+	var yazi = $Arayuz/OyunBittiPaneli/KazananYazisi
+	
+	panel.visible = true
+	panel.scale = Vector2(0, 0)
+	
+	yazi.text = "\n[center][font_size=20][b][color=gold]🏆 OYUN BİTTİ 🏆[/color][/b][/font_size]\n\n[font_size=25]Kazanan: [color=#" + renk_hex + "]" + kazanan_isim + "[/color][/font_size][/center]"
+	
+	var tween = create_tween()
+	tween.set_trans(Tween.TRANS_BACK) 
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(panel, "scale", Vector2(1, 1), 0.7) 
+	
+func yukseltme_panelini_goster(sehir_adi: String, seviye: int, bedel: int, yeni_kira: int):
+	var panel = $Arayuz/YukseltmePaneli
+	var yazi = $Arayuz/YukseltmePaneli/SoruYazisi 
+	
+	panel.visible = true
+	panel.scale = Vector2(0, 0) 
+	
+	yazi.text = "\n[center][font_size=23][b][color=cyan]MÜLK YÜKSELTME[/color][/b][/font_size]\n\n[color=gold]" + sehir_adi + " (Seviye " + str(seviye) + ")[/color]\nBu mülkü yükseltmek ister misin?\n\nİnşaat Bedeli: [color=red]" + str(bedel) + " TL[/color]\nYeni Kira Getirisi: [color=green]" + str(yeni_kira) + " TL[/color][/center]"
+	
+	var tween = create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(panel, "scale", Vector2(1, 1), 0.5)
+	
+func bakiye_degisim_animasyonu_oynat(oyuncu_indeksi: int, miktar: int):
+	var ucan_yazi = Label.new()
+	
+	ucan_yazi.add_theme_font_size_override("font_size", 23)
+	ucan_yazi.add_theme_constant_override("outline_size", 5)
+	ucan_yazi.add_theme_color_override("font_outline_color", Color.BLACK)
+	
+	var oyuncu_rengi = oyuncular[oyuncu_indeksi]["renk"]
+	ucan_yazi.add_theme_color_override("font_color", oyuncu_rengi)
+	
+	if miktar > 0:
+		ucan_yazi.text = "+" + str(miktar) + " TL"
+	else:
+		ucan_yazi.text = str(miktar) + " TL" 
+		
+	$Arayuz.add_child(ucan_yazi)
+	
+	var baslangic_y = (oyuncu_indeksi * 55) -1
+	ucan_yazi.global_position = bakiye_etiketi.global_position + Vector2(305, baslangic_y)
+	
+	ucan_yazi.modulate.a = 1.0
+	
+	var tween = create_tween()
+	tween.tween_property(ucan_yazi, "modulate:a", 0.0, 1.0).set_ease(Tween.EASE_OUT)
+	tween.tween_callback(ucan_yazi.queue_free)
+	
+
+# ==========================================
+# YENİ EKLENEN DURAKLATMA (PAUSE) MENÜSÜ SİSTEMİ
+# ==========================================
+func _input(event):
+	if event.is_action_pressed("ui_cancel"): 
+		oyunu_duraklat_veya_devam_et()
+
+func oyunu_duraklat_veya_devam_et():
+	var yeni_durum = not get_tree().paused
+	get_tree().paused = yeni_durum
+	duraklatma_ekrani.visible = yeni_durum
+
+func _on_devam_basildi():
+	oyunu_duraklat_veya_devam_et()
+
+# Not: Eski OyunBitti fonksiyonunu burayla birleştirdik. 
+# Artık oyunu yeniden başlattığında zaman/hız sıfırlanıp öyle başlayacak.
+func _on_yeniden_baslat_basildi():
+	get_tree().paused = false
+	Engine.time_scale = 1.0 
+	get_tree().reload_current_scene() 
+
+func _on_ana_menu_basildi():
+	get_tree().paused = false 
+	Engine.time_scale = 1.0 
+	get_tree().change_scene_to_file("res://ana_menu.tscn")
+
+func _on_tam_ekran_degisti(aktif_mi: bool):
+	if aktif_mi:
+		# Tam ekrana geç
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+	else:
+		# Pencereli moda geç
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		
+		# Windows'un kafası karışmasın diye pencere boyutunu manuel veriyoruz (Standart 1152x648)
+		DisplayServer.window_set_size(Vector2(1920, 1080))
+		
+		# Pencereyi ekranın tam ortasına yerleştir
+		var ekran_boyutu = DisplayServer.screen_get_size()
+		var pencere_boyutu = DisplayServer.window_get_size()
+		DisplayServer.window_set_position((ekran_boyutu / 2) - (pencere_boyutu / 2))
+
+func _on_hiz_degisti(deger: float):
+	Engine.time_scale = deger 
+
+func _on_muzik_degisti(deger: float):
+	var muzik_bus = AudioServer.get_bus_index("Muzik")
+	AudioServer.set_bus_mute(muzik_bus, deger <= -30)
+	AudioServer.set_bus_volume_db(muzik_bus, deger)
+
+func _on_efekt_degisti(deger: float):
+	var efekt_bus = AudioServer.get_bus_index("Efekt")
+	AudioServer.set_bus_mute(efekt_bus, deger <= -30)
+	AudioServer.set_bus_volume_db(efekt_bus, deger)

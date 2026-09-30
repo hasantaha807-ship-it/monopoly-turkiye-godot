@@ -75,7 +75,7 @@ corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ta5nu"]
-bg_color = Color(0, 0, 0, 0.69500005)
+bg_color = Color(0, 0, 0, 0.795)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -96,14 +96,14 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k73cj"]
-bg_color = Color(0.79135346, 0.7578697, 0.70102113, 1)
+bg_color = Color(0, 0, 0, 0.83400005)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_flf07"]
-bg_color = Color(0.5829006, 0.10610395, 0.07484985, 1)
+bg_color = Color(0.507555, 0.08635964, 0.058785178, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -117,22 +117,46 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_554du"]
-bg_color = Color(0.6752246, 0.6273736, 0.5745176, 1)
+bg_color = Color(0, 0, 0, 0.89000005)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oesjf"]
 bg_color = Color(1.3356283e-06, 0.43820944, 0.19766092, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ei405"]
 bg_color = Color(0, 1, 0.19641912, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_273db"]
 bg_color = Color(0.59316206, 0.00830738, 0.015279058, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e8dv2"]
 bg_color = Color(0.99823964, 0.012920001, 0.012920001, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xstlw"]
-bg_color = Color(0.82606, 0.82606006, 0.82606, 1)
+bg_color = Color(0, 0, 0, 0.89000005)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ykaop"]
 bg_color = Color(2.7434528e-06, 0.36812338, 0.056963846, 1)
@@ -143,9 +167,17 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2nhjh"]
 bg_color = Color(0, 1, 0.050708726, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_epypp"]
 bg_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jwyb2"]
 bg_color = Color(0.073625185, 0.45869154, 0.016177515, 1)
@@ -178,23 +210,124 @@ corner_radius_bottom_left = 8
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_te0f0"]
 bg_color = Color(0.0041724406, 0.0034297649, 0.002368804, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yoh3i"]
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qlvxw"]
+bg_color = Color(0, 0, 0, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_12cob"]
-bg_color = Color(0.7921569, 0.75686276, 0.69803923, 1)
+bg_color = Color(0, 0, 0, 0.89000005)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dmqsj"]
+bg_color = Color(1.1551381e-06, 0.4749788, 0.1968522, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_drddx"]
+bg_color = Color(0.21508199, 1, 0.25766784, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8sb0c"]
+bg_color = Color(0.44390714, 0.13152748, 0.0552909, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cs8s0"]
+bg_color = Color(1, 0, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5k0el"]
-bg_color = Color(0.78431374, 0.7490196, 0.6901961, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d21ai"]
 bg_color = Color(0.13457868, 0.40260032, 0, 1)
+corner_radius_top_left = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2hxjc"]
 bg_color = Color(0.13335153, 1, 0, 1)
+corner_radius_top_left = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lbrtg"]
 bg_color = Color(0.42816737, 0.0005935123, 2.4065375e-07, 1)
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ebxd8"]
 bg_color = Color(1, 0, 0, 1)
+corner_radius_top_right = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6k4uy"]
+bg_color = Color(0, 0, 0, 0.734)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2xasi"]
+bg_color = Color(3.8263947e-06, 0.54988873, 3.85046e-07, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xfxja"]
+bg_color = Color(0, 1, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_joo1f"]
+bg_color = Color(0.7029258, 0.34911558, 4.813075e-07, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tskgn"]
+bg_color = Color(1, 0.3491902, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8qddu"]
+bg_color = Color(0.60039026, 0, 0.0051901797, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5haew"]
+bg_color = Color(1, 0, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="Node2D" type="Node2D" unique_id=1687317604]
 script = ExtResource("1_epypp")
@@ -585,7 +718,7 @@ one_shot = true
 [node name="OyuncuPaneli" type="Panel" parent="Arayuz" unique_id=616732877]
 offset_left = 257.0
 offset_top = 244.0
-offset_right = 522.0
+offset_right = 555.0
 offset_bottom = 464.0
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Arayuz/OyuncuPaneli" unique_id=1672824991]
@@ -663,6 +796,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_fs4d3")
 text = "Tamam"
 
 [node name="OyunBittiPaneli" type="Panel" parent="Arayuz" unique_id=224949387]
+visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -674,9 +808,10 @@ offset_right = 165.0
 offset_bottom = 103.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(189.5, 108)
 theme_override_styles/panel = SubResource("StyleBoxFlat_k73cj")
 
-[node name="KazananYazisi" type="Label" parent="Arayuz/OyunBittiPaneli" unique_id=1250722227]
+[node name="KazananYazisi" type="RichTextLabel" parent="Arayuz/OyunBittiPaneli" unique_id=253186531]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -687,14 +822,15 @@ offset_right = -11.0
 offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/normal_font_size = 20
+bbcode_enabled = true
 text = "o<nsdboı<nbınoı<fb
 akmhkpın<on
 IHBıqnbıhnenb
 obgu<nbOInİn"
-horizontal_alignment = 1
+fit_content = true
 autowrap_mode = 2
+horizontal_alignment = 1
 
 [node name="YenidenBaslatButonu" type="Button" parent="Arayuz/OyunBittiPaneli" unique_id=1551935995]
 layout_mode = 1
@@ -703,9 +839,9 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -62.5
-offset_right = 62.5
-offset_bottom = 56.0
+offset_left = -56.5
+offset_right = 56.5
+offset_bottom = 60.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 20
@@ -717,12 +853,13 @@ autowrap_mode = 2
 [node name="YukseltmePaneli" type="Panel" parent="Arayuz" unique_id=701153022]
 visible = false
 offset_left = 792.0
-offset_top = 368.0
+offset_top = 349.0
 offset_right = 1108.0
 offset_bottom = 670.0
+pivot_offset = Vector2(158, 151)
 theme_override_styles/panel = SubResource("StyleBoxFlat_554du")
 
-[node name="SoruYazisi" type="Label" parent="Arayuz/YukseltmePaneli" unique_id=862829021]
+[node name="SoruYazisi" type="RichTextLabel" parent="Arayuz/YukseltmePaneli" unique_id=1184932094]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -733,10 +870,12 @@ offset_right = -11.0
 offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 24
-horizontal_alignment = 1
+theme_override_font_sizes/normal_font_size = 20
+bbcode_enabled = true
+text = "[center][b][color=cyan]MÜLK YÜKSELTME[/color][/b]\\n\\n[color=gold]SAMSUN[/color] şehrine bir ev dikmek istiyor musun?\\n\\nİnşaat Bedeli: [color=green]150 TL[/color][/center]"
+fit_content = true
 autowrap_mode = 2
+horizontal_alignment = 1
 
 [node name="EvetButonu" type="Button" parent="Arayuz/YukseltmePaneli" unique_id=864559640]
 layout_mode = 1
@@ -775,49 +914,29 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -166.0
-offset_top = -242.0
+offset_top = -183.0
 offset_right = 166.0
-offset_bottom = 164.0
+offset_bottom = 122.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(166, 203)
 theme_override_styles/panel = SubResource("StyleBoxFlat_xstlw")
 
-[node name="ColorRect" type="ColorRect" parent="Arayuz/SansKartiPaneli" unique_id=330708906]
+[node name="OlayYazisi" type="RichTextLabel" parent="Arayuz/SansKartiPaneli" unique_id=582642788]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 107.0
-grow_horizontal = 2
-color = Color(0.9529412, 0.93333334, 0.08235294, 1)
-
-[node name="SansKartı" type="Label" parent="Arayuz/SansKartiPaneli/ColorRect" unique_id=1677550130]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 104.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(0.003921569, 0.003921569, 0.003921569, 1)
-theme_override_font_sizes/font_size = 40
-text = "Şans Kartı"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="OlayYazisi" type="Label" parent="Arayuz/SansKartiPaneli" unique_id=569776891]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 9.0
-offset_top = -295.0
-offset_right = -9.0
-offset_bottom = -14.0
+offset_left = 12.0
+offset_top = 1.0
+offset_right = -12.0
+offset_bottom = -11.0
 grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 26
-horizontal_alignment = 1
+grow_vertical = 2
+bbcode_enabled = true
+fit_content = true
 autowrap_mode = 2
+horizontal_alignment = 1
 
 [node name="KartiKapatButonu" type="Button" parent="Arayuz/SansKartiPaneli" unique_id=1932622992]
 layout_mode = 1
@@ -921,13 +1040,13 @@ text = "Bir Tur
 Bekle"
 
 [node name="ZarPaneli" type="Panel" parent="Arayuz" unique_id=1094462396]
-offset_left = 577.0
+offset_left = 597.0
 offset_top = 249.0
-offset_right = 635.0
+offset_right = 650.0
 offset_bottom = 301.0
 
 [node name="ZarGorseli" type="Sprite2D" parent="Arayuz/ZarPaneli" unique_id=624647483]
-position = Vector2(29.000008, 29.999975)
+position = Vector2(30.000008, 30.000006)
 scale = Vector2(0.26433155, 0.25624996)
 texture = ExtResource("5_q6r6c")
 hframes = 3
@@ -935,7 +1054,7 @@ vframes = 2
 
 [node name="EkstraZarGorseli" type="Sprite2D" parent="Arayuz/ZarPaneli" unique_id=1529862374]
 modulate = Color(1, 0.23908132, 0.1824697, 1)
-position = Vector2(121.999985, 30.999989)
+position = Vector2(119.999985, 29.999989)
 scale = Vector2(0.26188242, 0.25937498)
 texture = ExtResource("5_q6r6c")
 hframes = 3
@@ -985,9 +1104,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -152.5
-offset_top = 50.0
+offset_top = 56.0
 offset_right = 152.5
-offset_bottom = 123.0
+offset_bottom = 118.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -1005,6 +1124,7 @@ grow_vertical = 0
 offset_transform_enabled = true
 theme_override_colors/font_color = Color(1, 0, 0, 1)
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_yoh3i")
 text = "Satışı Onayla"
 
 [node name="IhaleyeCikarButonu" type="Button" parent="Arayuz/SatisPaneli" unique_id=2125573219]
@@ -1017,6 +1137,7 @@ offset_right = 151.0
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.19607843, 0.9843137, 0.050980393, 1)
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_qlvxw")
 text = "Açık Artırmaya
  Çıkar"
 
@@ -1033,6 +1154,7 @@ offset_right = 247.0
 offset_bottom = 216.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(258.5, 223)
 theme_override_styles/panel = SubResource("StyleBoxFlat_12cob")
 
 [node name="BaslikYazisi" type="Label" parent="Arayuz/IhalePaneli" unique_id=1117870382]
@@ -1050,39 +1172,41 @@ text = "AÇIK ARTIRMA BAŞLADI!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="MulkBilgisi" type="Label" parent="Arayuz/IhalePaneli" unique_id=153197909]
+[node name="MulkBilgisi" type="RichTextLabel" parent="Arayuz/IhalePaneli" unique_id=1412764298]
 layout_mode = 1
 anchors_preset = 14
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_top = -149.0
-offset_bottom = -33.0
+offset_top = -137.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/normal_font_size = 28
+bbcode_enabled = true
 text = "Satılan Mülk: 
 ADANA (Başlangıç: 140 TL)"
+fit_content = true
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DurumYazisi" type="Label" parent="Arayuz/IhalePaneli" unique_id=2091337157]
+[node name="DurumYazisi" type="RichTextLabel" parent="Arayuz/IhalePaneli" unique_id=769127106]
 layout_mode = 1
 anchors_preset = 14
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
 offset_left = 15.0
-offset_top = -14.0
+offset_top = -4.0
 offset_right = -16.0
-offset_bottom = 95.0
+offset_bottom = 111.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/normal_font_size = 23
+bbcode_enabled = true
 text = "Mavi düşünüyor...\\nSarı 200 TL teklif etti!"
+fit_content = true
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -1118,8 +1242,12 @@ offset_left = -157.0
 offset_top = -62.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.20285092, 1, 0.06100855, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 23
+theme_override_styles/normal = SubResource("StyleBoxFlat_dmqsj")
+theme_override_styles/hover = SubResource("StyleBoxFlat_drddx")
 text = "Teklif Ver 
 +50 TL"
 
@@ -1131,8 +1259,12 @@ anchor_bottom = 1.0
 offset_top = -71.0
 offset_right = 157.0
 grow_vertical = 0
-theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 23
+theme_override_styles/normal = SubResource("StyleBoxFlat_8sb0c")
+theme_override_styles/hover = SubResource("StyleBoxFlat_cs8s0")
 text = "İhaleden 
 Çekil"
 
@@ -1158,6 +1290,8 @@ anchor_bottom = 1.0
 offset_right = 175.0
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = SubResource("StyleBoxFlat_d21ai")
 theme_override_styles/hover = SubResource("StyleBoxFlat_2hxjc")
@@ -1174,6 +1308,8 @@ offset_left = -185.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = SubResource("StyleBoxFlat_lbrtg")
 theme_override_styles/hover = SubResource("StyleBoxFlat_ebxd8")
@@ -1192,17 +1328,138 @@ grow_horizontal = 0
 grow_vertical = 2
 color = Color(0.0010853444, 0.0010853446, 0.0010853445, 1)
 
+[node name="DuraklatmaEkrani" type="ColorRect" parent="Arayuz" unique_id=1007123676]
+process_mode = 3
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.54300004)
+
+[node name="Panel" type="Panel" parent="Arayuz/DuraklatmaEkrani" unique_id=741911015]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -216.0
+offset_top = -284.0
+offset_right = 319.0
+offset_bottom = 244.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6k4uy")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Arayuz/DuraklatmaEkrani/Panel" unique_id=1544769912]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 23.0
+offset_right = -23.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="RichTextLabel" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=1891683018]
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 22
+bbcode_enabled = true
+text = "[center][b][font_size=23][color=gold] AYARLAR [/color][/font_size][/b][/center]"
+fit_content = true
+
+[node name="TamEkranButonu" type="CheckButton" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=1615440580]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Tam Ekran Yap"
+
+[node name="Label2" type="Label" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=214657858]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Oyun Hızı"
+
+[node name="HizSlider" type="HSlider" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=481641667]
+layout_mode = 2
+min_value = 1.0
+max_value = 3.0
+step = 0.5
+value = 1.0
+
+[node name="Label3" type="Label" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=606255180]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Müzik Sesi"
+
+[node name="MuzikSlider" type="HSlider" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=1983694797]
+layout_mode = 2
+min_value = -30.0
+max_value = 0.0
+value = -10.0
+
+[node name="Label4" type="Label" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=560964792]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Efekt Sesi"
+
+[node name="EfektSlider" type="HSlider" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=1698220338]
+layout_mode = 2
+min_value = -30.0
+max_value = 0.0
+
+[node name="Label5" type="RichTextLabel" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=1143191951]
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 22
+bbcode_enabled = true
+text = "[center][b][font_size=23][color=gold]OYUN[/color][/font_size][/b][/center]"
+fit_content = true
+
+[node name="DevamButonu" type="Button" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=405330181]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_2xasi")
+theme_override_styles/hover = SubResource("StyleBoxFlat_xfxja")
+text = "Oyuna Devam Et"
+
+[node name="YenidenBaslatButonu" type="Button" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=564923258]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_joo1f")
+theme_override_styles/hover = SubResource("StyleBoxFlat_tskgn")
+text = "Oyunu Yeniden Başlat"
+
+[node name="AnaMenuButonu" type="Button" parent="Arayuz/DuraklatmaEkrani/Panel/VBoxContainer" unique_id=1664204731]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_8qddu")
+theme_override_styles/hover = SubResource("StyleBoxFlat_5haew")
+text = "Ana Menüye Dön"
+
 [node name="MuzikCalar" type="AudioStreamPlayer" parent="." unique_id=999606910]
 stream = ExtResource("7_ir8iy")
-volume_db = -13.333
+volume_db = -11.093
 autoplay = true
+bus = &"Muzik"
 
 [node name="ZarSesi" type="AudioStreamPlayer" parent="." unique_id=1202602633]
 stream = ExtResource("8_4d7sh")
+bus = &"Efekt"
 
 [node name="ParaSesi" type="AudioStreamPlayer" parent="." unique_id=364165868]
 stream = ExtResource("9_4d7sh")
+bus = &"Efekt"
 
 [node name="SansKartiSesi" type="AudioStreamPlayer" parent="." unique_id=2099770102]
 stream = ExtResource("10_ir8iy")
 volume_db = -3.111
+bus = &"Efekt"

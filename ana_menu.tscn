@@ -81,6 +81,20 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5k0el"]
+bg_color = Color(0.1764706, 0.4745098, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_te0f0"]
+bg_color = Color(0.17558163, 1, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [node name="AnaMenu" type="Control" unique_id=837099589]
 layout_mode = 3
 anchors_preset = 15
@@ -115,9 +129,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -1201.7482
-offset_top = -612.393
-offset_right = -453.7722
-offset_bottom = -516.393
+offset_top = -635.5022
+offset_right = -453.77222
+offset_bottom = -539.5022
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -137,9 +151,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -194.0
-offset_top = -6.0
+offset_top = -39.0
 offset_right = 202.42725
-offset_bottom = 119.04144
+offset_bottom = 60.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
@@ -166,6 +180,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_xstlw")
 text = "ÇIKIŞ YAP"
 
 [node name="SecimKutusu" type="VBoxContainer" parent="." unique_id=289877906]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -173,9 +188,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -196.0
-offset_top = -7.0
+offset_top = -39.0
 offset_right = 201.0
-offset_bottom = 153.0
+offset_bottom = 174.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -207,3 +222,10 @@ theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_8sb0c")
 theme_override_styles/hover = SubResource("StyleBoxFlat_jhobn")
 text = "4 Oyuncu"
+
+[node name="GeriButonu" type="Button" parent="SecimKutusu" unique_id=931113985]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_5k0el")
+theme_override_styles/hover = SubResource("StyleBoxFlat_te0f0")
+text = "Geri dön"
