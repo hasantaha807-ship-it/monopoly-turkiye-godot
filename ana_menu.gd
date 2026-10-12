@@ -9,6 +9,7 @@ extends Control
 @onready var iki_kisi_butonu = $SecimKutusu/IkiKisiButonu
 @onready var uc_kisi_butonu = $SecimKutusu/UcKisiButonu
 @onready var dort_kisi_butonu = $SecimKutusu/DortKisiButonu
+@onready var geri_butonu = $SecimKutusu/GeriButonu
 
 func _ready():
 	# Başlangıçta 2-3-4 kişi butonlarını gizle
@@ -21,6 +22,7 @@ func _ready():
 	iki_kisi_butonu.pressed.connect(_on_iki_kisi_basildi)
 	uc_kisi_butonu.pressed.connect(_on_uc_kisi_basildi)
 	dort_kisi_butonu.pressed.connect(_on_dort_kisi_basildi)
+	geri_butonu.pressed.connect(_on_geri_basildi)
 
 func _on_basla_basildi():
 	# BAŞLA'ya basılınca ana butonları gizle ve SecimKutusu'nu göster
@@ -43,3 +45,8 @@ func _on_uc_kisi_basildi():
 func _on_dort_kisi_basildi():
 	Global.oyuncu_sayisi = 4
 	get_tree().change_scene_to_file("res://ana_menu_control.tscn")
+
+func _on_geri_basildi():
+	# Seçim kutusunu gizle, ana menü butonlarını geri getir
+	$SecimKutusu.hide()
+	$VBoxContainer.show()
