@@ -11,6 +11,7 @@ extends Node2D
 @onready var satin_al_butonu = $Arayuz/TapuKarti/SatinAlButonu
 @onready var pas_gec_butonu = $Arayuz/TapuKarti/PasGecButonu
 @onready var path_2d = $Path2D
+@onready var ayarlar_butonu = $Arayuz/AyarlarButonu
 
 # --- YENİ: DURAKLATMA MENÜSÜ BAĞLANTILARI ---
 @onready var duraklatma_ekrani = $Arayuz/DuraklatmaEkrani
@@ -159,7 +160,7 @@ func _ready():
 	devam_butonu.pressed.connect(_on_devam_basildi)
 	yeniden_baslat_butonu_menu.pressed.connect(_on_yeniden_baslat_basildi)
 	ana_menu_butonu.pressed.connect(_on_ana_menu_basildi)
-	
+	ayarlar_butonu.pressed.connect(oyunu_duraklat_veya_devam_et)
 	# Başlangıç değerlerini senkronize et
 	var muzik_bus = AudioServer.get_bus_index("Muzik")
 	var efekt_bus = AudioServer.get_bus_index("Efekt")
@@ -244,6 +245,7 @@ func _ready():
 	
 	piyonlarin_konumlarini_duzenle()
 	siradaki_turu_baslat()
+	
 
 	
 func arayuzu_guncelle():
@@ -682,6 +684,7 @@ func _ihale_kurulumu_yap(sehir_adi, baslangic_fiyati):
 	tween.tween_property(ihale_paneli, "scale", Vector2(1, 1), 0.5)
 	
 	ihale_aktif = true
+	ihale_timer.one_shot = false
 	ihale_timer.start(1.0)
 
 func _on_ihale_timer_timeout():
@@ -1116,3 +1119,17 @@ func _on_efekt_degisti(deger: float):
 	var efekt_bus = AudioServer.get_bus_index("Efekt")
 	AudioServer.set_bus_mute(efekt_bus, deger <= -30)
 	AudioServer.set_bus_volume_db(efekt_bus, deger)
+
+func _process(delta):
+	# 1. ŞEHİR ALMA (TAPU) KARTI SÜRESİ (15 Saniye)
+	# Eğer tapu kartı ekrandaysa ve timer çalışıyorsa, kalan süreyi sayaca yaz:
+	if tapu_karti.visible and not karar_timer.is_stopped():
+		sayac_etiketi.text = str(int(ceil(karar_timer.time_left)))
+
+	# 2. İHALE (AÇIK ARTIRMA) SÜRESİ GÜVENCESİ
+	# İhale paneli açıksa ve saniye göstergede güncellenmiyorsa,
+	# timer'ın aralıksız (one_shot = false) çalıştığından emin olmak için kodu _ready içine eklemene gerek kalmadan
+	# doğrudan Timer'ın ayarını kod üzerinden garantiye alabiliriz:
+	if ihale_paneli.visible and ihale_timer.is_stopped() and ihale_suresi > 0 and ihale_aktif:
+		ihale_timer.one_shot = false
+		ihale_timer.start(1.0)
