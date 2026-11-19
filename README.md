@@ -22,3 +22,17 @@ Godot 4 oyun motoru kullanılarak baştan sona geliştirilmiş, Türkiye şehirl
 1. Sağ üstteki yeşil **Code** butonundan projeyi `.zip` olarak indirin.
 2. Godot 4 motorunu açıp, inen klasördeki `project.godot` dosyasını içeri aktarın.
 3. F5 tuşuna basarak oyunu hemen deneyimlemeye başlayın!
+
+## 📡 Çevrimiçi Oyun (Aynı Wi-Fi / Hotspot)
+Ana menüdeki **ÇEVRİMİÇİ OYNA (AYNI Wİ-Fİ)** butonuyla 2-4 kişi kendi telefonundan (veya bilgisayarından) aynı oyunu oynayabilir. İnternet sunucusu gerekmez.
+
+1. Herkes aynı Wi-Fi ağına bağlanır (ya da biri telefonundan hotspot açar, diğerleri ona bağlanır).
+2. Bir kişi ismini, arabasını ve rengini seçip **ODA KUR**'a basar.
+3. Diğerleri "Bulunan Odalar" listesinde odaya dokunur. Oda listede çıkmazsa, oda sahibinin ekranında yazan IP adresini kutuya yazıp **BAĞLAN**'a basar.
+4. Oda sahibi isterse boş yerlere **BOT EKLE** ile bot koyar ve **OYUNU BAŞLAT**'a basar.
+
+**Teknik özet:** Odayı kuran cihaz sunucudur; zarlar, şans kartları, botlar ve süreler sadece onda üretilir. Her hamle bir komut olarak tüm cihazlara gönderilir ve her cihaz komutları aynı sırayla işler (`node_2d.gd` içindeki `_komut` / `_komutu_isle`). Her tur başında sunucu tam oyun durumunu da gönderir, böylece küçük kaymalar kendiliğinden düzelir. Ağ ve lobi kodu `ag.gd` (autoload: `Ag`) ve `lobi.gd` dosyalarındadır.
+
+- Bağlantısı kopan oyuncunun yerine bot oynar; aynı isimle odaya tekrar katılırsa sıradaki turdan itibaren kontrolü geri alır.
+- Oda sahibi oyundan çıkarsa oyun herkes için biter.
+- Kullanılan portlar: 7777 (oyun, ENet/UDP) ve 7778 (oda bulma yayını, UDP). Bilgisayarda oda kurarken Windows Güvenlik Duvarı izin isterse "Özel ağlar" için izin verin.

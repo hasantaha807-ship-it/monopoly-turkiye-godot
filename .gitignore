@@ -1,3 +1,11 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Godot motorunun kendisi (GitHub 100 MB üstü dosyaları kabul etmez)
+Godot_v*.exe
+*.exe
+# Dışa aktarılan telefon paketleri
+*.apk
+*.aab
+*.idsig

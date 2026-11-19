@@ -24,10 +24,39 @@ func _ready():
 	dort_kisi_butonu.pressed.connect(_on_dort_kisi_basildi)
 	geri_butonu.pressed.connect(_on_geri_basildi)
 
+	# --- ÇEVRİMİÇİ (AYNI Wİ-Fİ) BUTONU ---
+	var online_butonu = Button.new()
+	online_butonu.name = "online_butonu"
+	online_butonu.text = "ÇEVRİMİÇİ OYNA"
+	online_butonu.custom_minimum_size = basla_butonu.custom_minimum_size
+	online_butonu.size_flags_horizontal = basla_butonu.size_flags_horizontal
+	online_butonu.theme = basla_butonu.theme
+	for ozellik in ["font_size"]:
+		if basla_butonu.has_theme_font_size_override(ozellik):
+			online_butonu.add_theme_font_size_override(ozellik, basla_butonu.get_theme_font_size(ozellik))
+	for stil in ["normal", "hover", "pressed", "focus"]:
+		if basla_butonu.has_theme_stylebox_override(stil):
+			online_butonu.add_theme_stylebox_override(stil, basla_butonu.get_theme_stylebox(stil))
+	if basla_butonu.has_theme_color_override("font_color"):
+		online_butonu.add_theme_color_override("font_color", basla_butonu.get_theme_color("font_color"))
+	v_box_container.add_child(online_butonu)
+	v_box_container.move_child(online_butonu, basla_butonu.get_index() + 1)
+	online_butonu.pressed.connect(func(): get_tree().change_scene_to_file("res://lobi.tscn"))
+
+	# Çevrimiçi oyundan bir hata ile dönüldüyse mesajı göster
+	if Ag.son_mesaj != "":
+		var mesaj = Label.new()
+		mesaj.text = Ag.son_mesaj
+		mesaj.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		mesaj.add_theme_font_size_override("font_size", 30)
+		mesaj.add_theme_color_override("font_color", Color(1, 0.8, 0.4))
+		v_box_container.add_child(mesaj)
+		Ag.son_mesaj = ""
+
 func _on_basla_basildi():
-	# BAŞLA'ya basılınca ana butonları gizle ve SecimKutusu'nu göster
-	v_box_container.hide()
-	secim_kutusu.show()
+	# Tek cihazda botlara karşı oyun: çevrimiçi oyundaki oda ekranının aynısı açılır
+	Ag.acilis_modu = "cevrimdisi"
+	get_tree().change_scene_to_file("res://lobi.tscn")
 
 func _on_cikis_basildi():
 	get_tree().quit()

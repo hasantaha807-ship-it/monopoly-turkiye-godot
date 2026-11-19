@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cllj3ur57v41w"
-path="res://.godot/imported/harita.jpeg-7a37c28d37beaf0e232cfa041794e9a6.ctex"
+uid="uid://cwa4uad0fcqyd"
+path="res://.godot/imported/simge_512.png-d1009739e321519e324b9a9d9dc0ca34.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://harita.jpeg"
-dest_files=["res://.godot/imported/harita.jpeg-7a37c28d37beaf0e232cfa041794e9a6.ctex"]
+source_file="res://Gorseller/simge_512.png"
+dest_files=["res://.godot/imported/simge_512.png-d1009739e321519e324b9a9d9dc0ca34.ctex"]
 
 [params]
 

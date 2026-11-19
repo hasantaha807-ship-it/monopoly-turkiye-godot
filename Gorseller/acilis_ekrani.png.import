@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dsxp2rrg8455i"
-path="res://.godot/imported/pngtree-dice-faces-two-png-image_11198500 (2) (2).png-59211ee7aef68a01ee049f9688b07abb.ctex"
+uid="uid://cqli54ltryo58"
+path="res://.godot/imported/acilis_ekrani.png-0a92297156e4bf80e6acb79584b10ad0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://pngtree-dice-faces-two-png-image_11198500 (2) (2).png"
-dest_files=["res://.godot/imported/pngtree-dice-faces-two-png-image_11198500 (2) (2).png-59211ee7aef68a01ee049f9688b07abb.ctex"]
+source_file="res://Gorseller/acilis_ekrani.png"
+dest_files=["res://.godot/imported/acilis_ekrani.png-0a92297156e4bf80e6acb79584b10ad0.ctex"]
 
 [params]
 

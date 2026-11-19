@@ -13,11 +13,14 @@ config_version=5
 config/name="monopoly fantazisel"
 run/main_scene="uid://dcp8t54gln1p3"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0.08, 0.04, 0.12, 1)
+boot_splash/image="res://Gorseller/acilis_ekrani.png"
+config/icon="res://Gorseller/simge_512.png"
 
 [autoload]
 
 Global="*uid://df3kc7bfymvbs"
+Ag="*res://ag.gd"
 
 [display]
 

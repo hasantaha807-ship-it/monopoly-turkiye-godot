@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bkp6ie5ujg4tb"
-path="res://.godot/imported/istockphoto-1297394069-612x612_2.jpg-3a3e6b7f806ed7ce4368c4730ad3da68.ctex"
+uid="uid://dc0o6n0s0qbpq"
+path="res://.godot/imported/simge_192.png-a6ae6083e626e67f9a2f5f244b43182c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://istockphoto-1297394069-612x612_2.jpg"
-dest_files=["res://.godot/imported/istockphoto-1297394069-612x612_2.jpg-3a3e6b7f806ed7ce4368c4730ad3da68.ctex"]
+source_file="res://Gorseller/simge_192.png"
+dest_files=["res://.godot/imported/simge_192.png-a6ae6083e626e67f9a2f5f244b43182c.ctex"]
 
 [params]
 
