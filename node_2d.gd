@@ -546,6 +546,11 @@ func _bilgi_goster(metin: String, sure := 4.0, renk := Color(1, 0.82, 0.3), once
 		return
 	_bilgi_oncelikli = oncelikli
 	_bilgi_etiketi.text = metin
+	# Kısa yazı tek satırda kalır; uzunsa en fazla BILGI_YAZI_MAKS genişliğinde alt satıra geçer
+	var yazi_tipi = _bilgi_etiketi.get_theme_font("font")
+	var yazi_boyu = _bilgi_etiketi.get_theme_font_size("font_size")
+	var genislik = yazi_tipi.get_string_size(metin, HORIZONTAL_ALIGNMENT_LEFT, -1, yazi_boyu).x + 4
+	_bilgi_etiketi.custom_minimum_size.x = minf(genislik, BILGI_YAZI_MAKS)
 	_bilgi_stili.border_color = renk
 	_bilgi_kutusu.visible = true
 	_bilgi_sayaci = sure
@@ -554,18 +559,25 @@ func _bilgi_goster(metin: String, sure := 4.0, renk := Color(1, 0.82, 0.3), once
 	var tween = create_tween()
 	tween.tween_property(_bilgi_kutusu, "modulate:a", 1.0, 0.25)
 
+# Bilgi şeridi ekranın tam ortasında, üstteki şehir kartlarının hemen altındaki bantta durur.
+# Bakiye paneli ve tur göstergesi bu bandın altına indirildi (SOL_PANEL_KAYMA), ikisi çakışmaz.
+const BILGI_YAZI_MAKS := 1160.0   # şerit en fazla x=340..1580 arası; uzun yazı 2 satıra iner
+const SOL_PANEL_KAYMA := 100.0    # bakiye paneli 244 → 344, gösterge 472 → 572
+
 func _bilgi_kutusunu_kur():
-	# Üst ortada, şehir kartlarının hemen altında yuvarlak köşeli bilgi şeridi
-	var merkez = CenterContainer.new()
+	# Şehir kartlarının hemen altında yuvarlak köşeli bilgi şeridi; uzun yazılar aşağı doğru iki satıra iner
+	var merkez = HBoxContainer.new()
+	merkez.alignment = BoxContainer.ALIGNMENT_CENTER
 	merkez.anchor_left = 0.0
 	merkez.anchor_right = 1.0
 	merkez.offset_top = 212
-	merkez.offset_bottom = 290
+	merkez.offset_bottom = 420
 	merkez.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	$Arayuz.add_child(merkez)
 	
 	var kutu = PanelContainer.new()
 	kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	kutu.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	_bilgi_stili = StyleBoxFlat.new()
 	_bilgi_stili.bg_color = Color(0.05, 0.07, 0.1, 0.88)
 	_bilgi_stili.set_corner_radius_all(36)
@@ -582,6 +594,7 @@ func _bilgi_kutusunu_kur():
 	
 	_bilgi_etiketi = Label.new()
 	_bilgi_etiketi.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_bilgi_etiketi.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_bilgi_etiketi.add_theme_font_size_override("font_size", 32)
 	_bilgi_etiketi.add_theme_color_override("font_color", Color.WHITE)
 	_bilgi_etiketi.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -589,6 +602,9 @@ func _bilgi_kutusunu_kur():
 	
 	_bilgi_kutusu = merkez
 	_bilgi_kutusu.hide()
+
+	# Bakiye panelini bilgi şeridinin altına indir (sahne dosyasına dokunmadan, kodla)
+	$Arayuz/OyuncuPaneli.position.y += SOL_PANEL_KAYMA
 
 # ==========================================
 # OYUN
@@ -858,10 +874,10 @@ func _on_taktiksel_zar_basildi():
 		_ekstra_zar_bekliyor = true
 		if _ekstra_buton_metni == "":
 			_ekstra_buton_metni = taktiksel_zar_butonu.text
-		taktiksel_zar_butonu.text = "TELEFONU SALLA!\n(100 TL)"
+		taktiksel_zar_butonu.text = "SALLA!\n(-100 TL)"   # orijinal yazıdan geniş olmamalı, yoksa buton taşar
 		taktiksel_zar_butonu.modulate = Color(1.25, 1.15, 0.6)
 		_titret(40)
-		_bilgi_goster("Ekstra zar seçildi — telefonu salla! (Bedava zar için Zar At butonuna bas)", 2.5)
+		_bilgi_goster("Ekstra zar seçildi — telefonu salla!", 2.5)
 		return
 	_ekstra_zar_at()
 
@@ -1774,7 +1790,7 @@ func _tur_tamamlandi():
 
 func _gostergeyi_kur():
 	var kutu = PanelContainer.new()
-	kutu.position = Vector2(257, 472)
+	kutu.position = Vector2(257, 472 + SOL_PANEL_KAYMA)
 	kutu.custom_minimum_size = Vector2(298, 0)
 	kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	kutu.add_theme_stylebox_override("panel", _stil_kutusu(Color(0.05, 0.07, 0.1, 0.82), 10))
