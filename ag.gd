@@ -6,7 +6,7 @@ extends Node
 # Oyun mantığının ağ kısmı node_2d.gd içindedir.
 # ==========================================================
 
-const SURUM := 2                 # Farklı sürümler birbirine bağlanmasın diye (2: ihale, tekel, enflasyon)
+const SURUM := 3                 # Farklı sürümler birbirine bağlanmasın diye (2: ihale, tekel, enflasyon; 3: şans destesi)
 const OYUN_PORTU := 7777         # ENet (oyun trafiği)
 const KESIF_PORTU := 7778        # UDP yayını (oda bulma)
 const MAKS_OYUNCU := 4

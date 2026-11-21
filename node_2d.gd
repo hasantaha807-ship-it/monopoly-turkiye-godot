@@ -106,7 +106,6 @@ var oyuncular = []
 var aktif_oyuncu_indeksi = 0 
 var mülkiyet_durumu = {} 
 var bekleyen_kira = {"aktif": false, "odeyen": -1, "alan": -1, "miktar": 0}
-var bekleyen_sans_karti_degeri = 0 
 
 var ihale_suresi = 8
 var ihale_aktif = false
@@ -157,12 +156,64 @@ var sehirler = {
 }
 
 
-var sans_kartlari = [
-	{"metin": "Burs yattı!\n200 TL çektin.", "deger": 200},
-	{"metin": "Radar cezası yedin!\n100 TL öde.", "deger": -100},
-	{"metin": "Vergi İadesi!\n150 TL kazandın.", "deger": 150},
-	{"metin": "Telefon ekranı kırıldı.\n150 TL öde.", "deger": -150}
-]
+# ==========================================
+# ŞANS DESTESİ (24 kart)
+# ------------------------------------------
+# tur: "oyuncu" (oyuncu seçtirir), "sehir" (şehir seçtirir), "herkes" (herkesi etkiler),
+#      "el" (elde saklanır), "para", "hareket"
+# ==========================================
+const KART_BILGILERI := {
+	"dogum_gunu": {"baslik": "DOĞUM GÜNÜ HEDİYESİ", "tur": "oyuncu", "metin": "Bugün senin doğum günün! İstediğin bir oyuncu sana [b]100 TL[/b] hediye eder."},
+	"borc_senedi": {"baslik": "BORÇ SENEDİ", "tur": "oyuncu", "metin": "İstediğin bir oyuncudan [b]150 TL[/b] borç al. Karşılığında o oyuncu, senin bir sonraki turuna kadar şehirlerinde kira ödemez."},
+	"hayirsever": {"baslik": "HAYIRSEVER", "tur": "oyuncu", "metin": "İstediğin bir oyuncuya [b]100 TL[/b] bağışla. İyilik karşılıksız kalmaz: eline bir [b]Kira Kalkanı[/b] kartı geçer."},
+	"yer_degistirme": {"baslik": "YER DEĞİŞTİRME", "tur": "oyuncu", "metin": "İstediğin bir oyuncuyla arabanın yerini değiştir. Kimse kira ödemez, sadece arabalar yer değiştirir."},
+	"komsu_pazarligi": {"baslik": "KOMŞU PAZARLIĞI", "tur": "sehir", "metin": "Başka bir oyuncunun katsız bir şehrini liste fiyatından satın alabilirsin; satmayı reddedemez. Tekel grubundaki şehirler alınamaz."},
+	"hapse_yolla": {"baslik": "HAPSE YOLLA", "tur": "oyuncu", "metin": "İstediğin bir oyuncuyu doğruca [b]hapse[/b] gönder!"},
+	"dugun": {"baslik": "DÜĞÜN DAVETİYESİ", "tur": "herkes", "metin": "Düğünün var! Her oyuncu sana [b]50 TL[/b] takı takar."},
+	"cay_ocagi": {"baslik": "ÇAY OCAĞI", "tur": "herkes", "metin": "En zengin oyuncu herkese [b]30 TL[/b] çay parası öder."},
+	"bayram_harcligi": {"baslik": "BAYRAM HARÇLIĞI", "tur": "herkes", "metin": "En fakir oyuncu bankadan [b]100 TL[/b] harçlık alır."},
+	"yazi_tura": {"baslik": "YAZI TURA", "tur": "herkes", "metin": "Senden sonra oynayacak oyuncuyla [b]100 TL[/b]'sine yazı tura atıyorsun! Tura gelirse sen kazanırsın."},
+	"dedikodu": {"baslik": "DEDİKODU", "tur": "herkes", "metin": "Mahallede dedikodu yayıldı: herkesin toplam serveti (para + mülk) ortaya döküldü!"},
+	"torpil": {"baslik": "TORPİL", "tur": "el", "metin": "Elinde saklanır. Hapse girmen gerektiğinde otomatik kullanılır ve [b]hapse girmezsin[/b]."},
+	"kira_kalkani": {"baslik": "KİRA KALKANI", "tur": "el", "metin": "Elinde saklanır. Bir sonraki kira ödemende otomatik kullanılır, [b]o kirayı ödemezsin[/b]."},
+	"cift_zar": {"baslik": "ÇİFT ZAR", "tur": "el", "metin": "Elinde saklanır. İstediğin bir turda Ekstra Zar'ı [b]bedava[/b] atarsın."},
+	"ihale_karti": {"baslik": "İHALE KARTI", "tur": "el", "metin": "Elinde saklanır. Kazandığın bir sonraki banka ihalesinde [b]%20 indirim[/b] alırsın."},
+	"vergi_affi": {"baslik": "VERGİ AFFI", "tur": "para", "metin": "Devlet vergi affı çıkardı! Bankadan [b]150 TL[/b] al."},
+	"trafik_cezasi": {"baslik": "TRAFİK CEZASI", "tur": "para", "metin": "Radara yakalandın! Bankaya [b]100 TL[/b] öde."},
+	"emlak_vergisi": {"baslik": "EMLAK VERGİSİ", "tur": "para", "metin": "Sahip olduğun her kat için [b]25 TL[/b] emlak vergisi öde. (Plaza 4 kat sayılır.)"},
+	"bayram_trafigi": {"baslik": "BAYRAM TRAFİĞİ", "tur": "hareket", "metin": "Yollar kilit! [b]3 kare geri[/b] git."},
+	"otoyol": {"baslik": "OTOYOL AÇILDI", "tur": "hareket", "metin": "Yeni otoyol açıldı! Doğruca [b]Başlangıç[/b]'a git ve maaşını al."},
+	"ucak_bileti": {"baslik": "UÇAK BİLETİ", "tur": "sehir", "metin": "İstediğin [b]boş şehre[/b] uç! Almak isteyip istemediğine orada karar verirsin."},
+	"yanlis_adres": {"baslik": "YANLIŞ ADRES", "tur": "hareket", "metin": "Polis seni başkasıyla karıştırdı! Doğruca [b]hapse[/b] git."},
+	"kentsel_donusum": {"baslik": "KENTSEL DÖNÜŞÜM", "tur": "para", "metin": "Tekelindeki en ucuz şehre [b]bedava bir kat[/b] çıkılır. Kat çıkabileceğin şehir yoksa devlet [b]100 TL[/b] destek verir."},
+	"piyango": {"baslik": "PİYANGO", "tur": "para", "metin": "Bilet aldın, zar atılıyor! [b]6[/b] gelirse [b]300 TL[/b] kazanırsın; gelmezse 30 TL bilet parası ödersin."}
+}
+const ELDE_KART_ADLARI := {"torpil": "Torpil", "kira_kalkani": "Kira Kalkanı", "cift_zar": "Çift Zar", "ihale_karti": "İhale Kartı"}
+const EL_SINIRI := 2                          # Bir oyuncu elinde en fazla kaç kart tutabilir
+# Deneme için: doluysa oyunun başında kartlar önce bu sırayla çekilir (ör. ["piyango", "torpil"])
+const TEST_DESTESI: Array = []
+const DESTE_KONUMU := Vector2(1461, 640)      # Tahtada zarların üstü: en üstteki kartın sol üst köşesi
+const DESTE_KART_BOYU := Vector2(112, 146)
+
+var _deste: Array = []              # Sunucu: çekilecek kartlar (sondan çekilir)
+var _deste_kalan := 24              # Herkes: destede kalan kart sayısı (sağ üstteki rozet)
+var _test_destesi_kullanildi := false
+var _bekleyen_kart := ""            # Ekranda açık olan şans kartı
+var _bekleyen_ek := 0               # Kartla birlikte sunucunun attığı zar (piyango, yazı tura)
+var _bekleyen_secimli := false      # Kart bir oyuncu/şehir seçimi bekliyor mu?
+var _muafiyetler: Array = []        # Borç senedi: {"odeyen": i, "alan": j} — j'nin sıradaki turuna kadar geçerli
+var _deste_kartlari: Array = []     # Tahtadaki deste katmanları (0 = en üstteki)
+var _deste_bos: Control = null
+var _deste_sayac: Label = null
+var _kart_kutu: PanelContainer = null
+var _kart_baslik: Label = null
+var _kart_etiket: Label = null
+var _kart_etiket_stili: StyleBoxFlat = null
+var _kart_metin: RichTextLabel = null
+var _kart_ek_bilgi: RichTextLabel = null
+var _kart_secenek_izgara: GridContainer = null
+var _kart_durum: Label = null
+var _serif: Font = null
 
 # ==========================================
 # ÇEVRİMİÇİ (AYNI Wİ-Fİ) ALTYAPISI
@@ -257,8 +308,9 @@ func _komutu_isle(ad: String, a: Array):
 		"durum": _durumu_uygula(a[0])
 		"zar": _zar_komutu(bool(a[0]))
 		"hareket": await _hareketi_oynat(int(a[0]), int(a[1]), bool(a[2]))
-		"sans_karti": sans_kartini_goster(int(a[0]))
-		"karti_kapat": _karti_kapat()
+		"sans_karti": sans_kartini_goster(str(a[0]), int(a[1]), int(a[2]), bool(a[3]))
+		"karti_kapat": await _karti_kapat()
+		"kart_secim": await _kart_secimi(str(a[0]), str(a[1]))
 		"tamam": _tamam()
 		"satin_al": _satin_al(str(a[0]))
 		"pas_gec": _pas_gec()
@@ -295,7 +347,9 @@ func _komut_gecerli(ad: String, a: Array, g: int) -> bool:
 		"zar":
 			return a.size() == 1 and _tur_basi and not hareket_ediyor and not o["hapiste_mi"] and not _panel_acik_mi()
 		"karti_kapat":
-			return sans_karti_paneli.visible
+			return sans_karti_paneli.visible and not _bekleyen_secimli
+		"kart_secim":
+			return a.size() == 2 and sans_karti_paneli.visible and _bekleyen_secimli and str(a[0]) == _bekleyen_kart and _kart_secimi_gecerli(_bekleyen_kart, str(a[1]))
 		"tamam":
 			return bildirim_paneli.visible and tamam_butonu.visible
 		"satin_al":
@@ -338,8 +392,8 @@ func _gecikmeli(sure: float, ad: String, args: Array = []):
 func _durum_al() -> Dictionary:
 	var liste = []
 	for o in oyuncular:
-		liste.append({"para": o["para"], "konum": o["konum"], "hapiste_mi": o["hapiste_mi"], "hapis_turu": o["hapis_turu"], "aktif_mi": o["aktif_mi"], "yapay_zeka": o["yapay_zeka"]})
-	return {"aktif": aktif_oyuncu_indeksi, "oyuncular": liste, "mulk": mülkiyet_durumu.duplicate(true), "tur_basi": _tur_basi, "tur": tur_sayaci, "enf": enf_kademe}
+		liste.append({"para": o["para"], "konum": o["konum"], "hapiste_mi": o["hapiste_mi"], "hapis_turu": o["hapis_turu"], "aktif_mi": o["aktif_mi"], "yapay_zeka": o["yapay_zeka"], "kartlar": o["kartlar"].duplicate()})
+	return {"aktif": aktif_oyuncu_indeksi, "oyuncular": liste, "mulk": mülkiyet_durumu.duplicate(true), "tur_basi": _tur_basi, "tur": tur_sayaci, "enf": enf_kademe, "deste": _deste_kalan, "muaf": _muafiyetler.duplicate(true)}
 
 func _durum_yayinla():
 	if online and multiplayer.is_server():
@@ -361,6 +415,7 @@ func _durumu_uygula(d: Dictionary):
 		o["hapis_turu"] = int(s["hapis_turu"])
 		o["aktif_mi"] = bool(s["aktif_mi"])
 		o["yapay_zeka"] = bool(s["yapay_zeka"])
+		o["kartlar"] = s.get("kartlar", []).duplicate()
 		if konum_degisti and not hareket_ediyor:
 			_piyonu_yerlestir(i)
 		if i < Global.oyuncu_sayisi:
@@ -373,6 +428,9 @@ func _durumu_uygula(d: Dictionary):
 	_tur_basi = bool(d["tur_basi"])
 	tur_sayaci = int(d.get("tur", tur_sayaci))
 	enf_kademe = int(d.get("enf", enf_kademe))
+	_deste_kalan = int(d.get("deste", _deste_kalan))
+	_muafiyetler = d.get("muaf", []).duplicate(true)
+	_desteyi_ciz()
 	_tum_kiralari_guncelle()
 	_gostergeyi_guncelle()
 	piyonlarin_konumlarini_duzenle()
@@ -433,6 +491,7 @@ func _butonlari_yenile():
 	sat_butonu.disabled = kontrol
 	ihaleye_cikar_butonu.disabled = kontrol
 	_insa_arayuzunu_yenile()
+	_kart_butonlarini_yenile()
 
 # --- BAĞLANTI OLAYLARI (sunucu) ---
 func _cevrimici_hazirla():
@@ -500,7 +559,10 @@ func _bot_devral(i: int):
 		var dy = harita_sirasi[o["konum"]]
 		_bot_yukseltme_karari(int(sehirler[dy]["fiyat"] * [0.5, 0.75, 1.0, 1.5][mülkiyet_durumu[dy]["seviye"]]))
 	elif sans_karti_paneli.visible:
-		_gecikmeli(1.0, "karti_kapat")
+		if _bekleyen_secimli:
+			_bot_kart_secimi()
+		else:
+			_gecikmeli(1.0, "karti_kapat")
 	elif hapishane_paneli.visible:
 		_bot_hapis_karari()
 	elif bildirim_paneli.visible and tamam_butonu.visible:
@@ -675,14 +737,17 @@ func _ready():
 	_grup_seritlerini_ciz()
 	_gostergeyi_kur()
 	_insa_arayuzunu_kur()
+	_desteyi_kur()
+	_kart_arayuzunu_kur()
+	_ekstra_buton_metni = taktiksel_zar_butonu.text
 
 	# ----------------------------------------------------
 
 	oyuncular = [
-		{"isim": "Oyuncu 1", "para": 1500, "konum": 0, "renk": Color.RED, "piyon": piyon_kirmizi, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": false, "aktif_mi": true},
-		{"isim": "Bot 1", "para": 1500, "konum": 0, "renk": Color.BLUE, "piyon": piyon_mavi, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": true, "aktif_mi": true},
-		{"isim": "Bot 2", "para": 1500, "konum": 0, "renk": Color.YELLOW, "piyon": piyon_sari, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": true, "aktif_mi": true},
-		{"isim": "Bot 3", "para": 1500, "konum": 0, "renk": Color.GREEN, "piyon": piyon_yesil, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": true, "aktif_mi": true}
+		{"isim": "Oyuncu 1", "para": 1500, "konum": 0, "renk": Color.RED, "piyon": piyon_kirmizi, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": false, "aktif_mi": true, "kartlar": []},
+		{"isim": "Bot 1", "para": 1500, "konum": 0, "renk": Color.BLUE, "piyon": piyon_mavi, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": true, "aktif_mi": true, "kartlar": []},
+		{"isim": "Bot 2", "para": 1500, "konum": 0, "renk": Color.YELLOW, "piyon": piyon_sari, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": true, "aktif_mi": true, "kartlar": []},
+		{"isim": "Bot 3", "para": 1500, "konum": 0, "renk": Color.GREEN, "piyon": piyon_yesil, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": true, "aktif_mi": true, "kartlar": []}
 	]
 	if online:
 		for i in range(4):
@@ -755,6 +820,9 @@ func _ready():
 			ihale_timer.timeout.disconnect(c.callable)
 		ihale_timer.timeout.connect(_on_ihale_timer_timeout)
 
+	if _yetkili():
+		_desteyi_karistir()
+	_desteyi_ciz()
 	piyonlarin_konumlarini_duzenle()
 	_tum_kiralari_guncelle()
 	_gostergeyi_guncelle()
@@ -786,9 +854,9 @@ func arayuzu_guncelle():
 				ek = " (bağlantı yok)"
 
 			if i == aktif_oyuncu_indeksi:
-				bakiye_metni += "[b][color=#" + hex_renk + "]▶ " + o["isim"] + ek + " : " + str(o["para"]) + " ₺[/color][/b]\n\n"
+				bakiye_metni += "[b][color=#" + hex_renk + "]▶ " + o["isim"] + ek + " : " + str(o["para"]) + " ₺[/color][/b]\n" + _el_satiri(o) + "\n"
 			else:
-				bakiye_metni += "[color=#" + hex_renk + "]   " + o["isim"] + ek + " : " + str(o["para"]) + " ₺[/color]\n\n"
+				bakiye_metni += "[color=#" + hex_renk + "]   " + o["isim"] + ek + " : " + str(o["para"]) + " ₺[/color]\n" + _el_satiri(o) + "\n"
 		else:
 			bakiye_metni += "[color=gray]   " + o["isim"] + " : (İFLAS)[/color]\n\n"
 
@@ -819,6 +887,13 @@ func siradaki_turu_baslat():
 				oyuncular[i]["yapay_zeka"] = false
 		_devir_bekleyen.clear()
 
+	# Borç senedi muafiyeti, senedi veren oyuncunun sırası gelince biter
+	var gecerli_muaf = []
+	for m in _muafiyetler:
+		if int(m["alan"]) != aktif_oyuncu_indeksi and oyuncular[int(m["odeyen"])]["aktif_mi"] and oyuncular[int(m["alan"])]["aktif_mi"]:
+			gecerli_muaf.append(m)
+	_muafiyetler = gecerli_muaf
+
 	_tur_basi = true
 	var o_oyuncu = oyuncular[aktif_oyuncu_indeksi]
 
@@ -848,10 +923,7 @@ func o_oyuncu_rengi() -> Color:
 
 func _zar_panelini_goster():
 	var o_oyuncu = oyuncular[aktif_oyuncu_indeksi]
-	if o_oyuncu["para"] < 100:
-		taktiksel_zar_butonu.disabled = true
-	else:
-		taktiksel_zar_butonu.disabled = false
+	taktiksel_zar_butonu.disabled = o_oyuncu["para"] < 100 and not _cift_zar_kartli()
 	_ekstra_zar_secimini_sifirla()
 	zar_secim_paneli.show()
 	_insa_arayuzunu_yenile()
@@ -869,12 +941,12 @@ func _on_normal_zar_basildi():
 # Seçiliyken butona tekrar basılırsa sallamadan atılır.
 func _on_taktiksel_zar_basildi():
 	if not zar_secim_paneli.visible or not _kontrol_bende(): return
-	if oyuncular[aktif_oyuncu_indeksi]["para"] < 100: return
+	if oyuncular[aktif_oyuncu_indeksi]["para"] < 100 and not _cift_zar_kartli(): return
 	if OS.has_feature("mobile") and not _ekstra_zar_bekliyor:
 		_ekstra_zar_bekliyor = true
 		if _ekstra_buton_metni == "":
 			_ekstra_buton_metni = taktiksel_zar_butonu.text
-		taktiksel_zar_butonu.text = "SALLA!\n(-100 TL)"   # orijinal yazıdan geniş olmamalı, yoksa buton taşar
+		taktiksel_zar_butonu.text = "SALLA!\n(KART)" if _cift_zar_kartli() else "SALLA!\n(-100 TL)"   # orijinal yazıdan geniş olmamalı, yoksa buton taşar
 		taktiksel_zar_butonu.modulate = Color(1.25, 1.15, 0.6)
 		_titret(40)
 		_bilgi_goster("Ekstra zar seçildi — telefonu salla!", 2.5)
@@ -883,13 +955,13 @@ func _on_taktiksel_zar_basildi():
 
 func _ekstra_zar_at():
 	_ekstra_zar_secimini_sifirla()
-	if oyuncular[aktif_oyuncu_indeksi]["para"] >= 100:
+	if oyuncular[aktif_oyuncu_indeksi]["para"] >= 100 or _cift_zar_kartli():
 		_oyuncu_komutu("zar", [true])
 
 func _ekstra_zar_secimini_sifirla():
 	_ekstra_zar_bekliyor = false
 	if _ekstra_buton_metni != "":
-		taktiksel_zar_butonu.text = _ekstra_buton_metni
+		taktiksel_zar_butonu.text = _ekstra_buton_yazisi()
 	taktiksel_zar_butonu.modulate = Color.WHITE
 
 func _zar_komutu(ekstra_zar: bool):
@@ -898,7 +970,11 @@ func _zar_komutu(ekstra_zar: bool):
 	_insa_arayuzunu_yenile()
 	var o_oyuncu = oyuncular[aktif_oyuncu_indeksi]
 	if ekstra_zar:
-		if o_oyuncu["para"] >= 100:
+		if o_oyuncu["kartlar"].has("cift_zar"):
+			o_oyuncu["kartlar"].erase("cift_zar")
+			arayuzu_guncelle()
+			_bilgi_goster(o_oyuncu["isim"] + " Çift Zar kartını kullandı: ekstra zar bedava!", 2.5, o_oyuncu["renk"])
+		elif o_oyuncu["para"] >= 100:
 			o_oyuncu["para"] -= 100
 			eski_bakiyeler[aktif_oyuncu_indeksi] = o_oyuncu["para"]
 			arayuzu_guncelle()
@@ -926,6 +1002,8 @@ func ai_hamle_yap():
 	if not o_oyuncu["hapiste_mi"] and o_oyuncu["para"] > 800:
 		if randi() % 100 < 30:
 			ekstra_zar_kullan = true
+	if not o_oyuncu["hapiste_mi"] and o_oyuncu["kartlar"].has("cift_zar"):
+		ekstra_zar_kullan = true
 
 	_komut("zar", [ekstra_zar_kullan])
 
@@ -1003,6 +1081,12 @@ func _hareketi_oynat(zar1: int, zar2: int, ekstra_zar: bool):
 
 		await get_tree().create_timer(0.05).timeout
 
+	_kareye_vardi()
+
+# Araba bir kareye vardığında o karenin olayı: şans kartı, hapis, kira, tapu.
+# Zar hareketinden sonra ve kartla gidilen karelerde (Bayram trafiği, Uçak bileti) kullanılır.
+func _kareye_vardi():
+	var o_oyuncu = oyuncular[aktif_oyuncu_indeksi]
 	hareket_ediyor = false
 	piyonlarin_konumlarini_duzenle()
 	var durulan_yer = harita_sirasi[o_oyuncu["konum"]]
@@ -1010,11 +1094,16 @@ func _hareketi_oynat(zar1: int, zar2: int, ekstra_zar: bool):
 	if durulan_yer == "Sans_Karti":
 		sans_kartini_cek(o_oyuncu)
 	elif durulan_yer == "Hapishane":
-		o_oyuncu["hapiste_mi"] = true
-		o_oyuncu["hapis_turu"] = 1
-		if _kontrol_bende():
-			_titret(300)
-		bildirim_yazisi.text = "[center]\n\n\n[font_size=20][b][color=#ff3333]KADER MAHKÛMU![/color][/b][/font_size]\n\nPolis çevirmesine takıldın. Doğruca hapishaneye gidiyorsun![/center]"
+		if o_oyuncu["kartlar"].has("torpil"):
+			o_oyuncu["kartlar"].erase("torpil")
+			arayuzu_guncelle()
+			bildirim_yazisi.text = "[center]\n\n\n[font_size=20][b][color=#55dd77]TORPİL![/color][/b][/font_size]\n\nPolis çevirmesinde tanıdık çıktı. Torpil kartın kullanıldı, hapse girmiyorsun![/center]"
+		else:
+			o_oyuncu["hapiste_mi"] = true
+			o_oyuncu["hapis_turu"] = 1
+			if _kontrol_bende():
+				_titret(300)
+			bildirim_yazisi.text = "[center]\n\n\n[font_size=20][b][color=#ff3333]KADER MAHKÛMU![/color][/b][/font_size]\n\nPolis çevirmesine takıldın. Doğruca hapishaneye gidiyorsun![/center]"
 		tamam_butonu.disabled = not _kontrol_bende()
 		bildirim_paneli.show()
 		if o_oyuncu["yapay_zeka"] and _yetkili():
@@ -1041,20 +1130,29 @@ func _hareketi_oynat(zar1: int, zar2: int, ekstra_zar: bool):
 					sirayi_sonraki_oyuncuya_gecir()
 			else:
 				var kira_bedeli = _kira_hesapla(durulan_yer)
-				# Kiranın neden yüksek olduğunu söyle: tekel ve/veya enflasyon
-				var aciklama = "(Tamam'a bastığında bakiyenden düşülecektir)"
-				var notlar = []
-				if _tekel_mi(sahip_indeksi, durulan_yer):
-					notlar.append("[color=gold]TEKEL: grubun tamamı onun[/color]")
-				if enf_kademe > 0:
-					notlar.append("[color=#ff7766]enflasyon ×" + _carpan_yazisi() + "[/color]")
-				if not notlar.is_empty():
-					aciklama = " · ".join(PackedStringArray(notlar))
+				bekleyen_kira["aktif"] = false
+				if _kira_muaf_mi(aktif_oyuncu_indeksi, sahip_indeksi):
+					# Borç senedi: senedi veren oyuncunun şehirlerinde bu tur kira yok
+					bildirim_yazisi.text = "[center]\n[font_size=20][b][color=#7fd4ff]BORÇ SENEDİ![/color][/b][/font_size]\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n\nBorç senedi sayesinde bu turluk kira ödemiyorsun.\n\n[s]" + str(kira_bedeli) + " TL[/s][/center]"
+				elif o_oyuncu["kartlar"].has("kira_kalkani"):
+					o_oyuncu["kartlar"].erase("kira_kalkani")
+					arayuzu_guncelle()
+					bildirim_yazisi.text = "[center]\n[font_size=20][b][color=#55dd77]KİRA KALKANI![/color][/b][/font_size]\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n\nKira Kalkanı kartın kullanıldı, bu kirayı ödemiyorsun.\n\n[s]" + str(kira_bedeli) + " TL[/s][/center]"
+				else:
+					# Kiranın neden yüksek olduğunu söyle: tekel ve/veya enflasyon
+					var aciklama = "(Tamam'a bastığında bakiyenden düşülecektir)"
+					var notlar = []
+					if _tekel_mi(sahip_indeksi, durulan_yer):
+						notlar.append("[color=gold]TEKEL: grubun tamamı onun[/color]")
+					if enf_kademe > 0:
+						notlar.append("[color=#ff7766]enflasyon ×" + _carpan_yazisi() + "[/color]")
+					if not notlar.is_empty():
+						aciklama = " · ".join(PackedStringArray(notlar))
 
-				bekleyen_kira = {"aktif": true, "odeyen": aktif_oyuncu_indeksi, "alan": sahip_indeksi, "miktar": kira_bedeli}
-				bildirim_yazisi.text = "[center]\n[font_size=20][b][color=#ffaa00]KİRA ÖDEMESİ![/color][/b][/font_size]\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n\n[b]Ödemen Gereken: " + str(kira_bedeli) + " TL[/b]\n\n" + aciklama + "[/center]"
-				if _kontrol_bende():
-					_titret(220)
+					bekleyen_kira = {"aktif": true, "odeyen": aktif_oyuncu_indeksi, "alan": sahip_indeksi, "miktar": kira_bedeli}
+					bildirim_yazisi.text = "[center]\n[font_size=20][b][color=#ffaa00]KİRA ÖDEMESİ![/color][/b][/font_size]\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n\n[b]Ödemen Gereken: " + str(kira_bedeli) + " TL[/b]\n\n" + aciklama + "[/center]"
+					if _kontrol_bende():
+						_titret(220)
 				tamam_butonu.disabled = not _kontrol_bende()
 				bildirim_paneli.show()
 
@@ -1065,62 +1163,960 @@ func _hareketi_oynat(zar1: int, zar2: int, ekstra_zar: bool):
 	else:
 		sirayi_sonraki_oyuncuya_gecir()
 
+# ==========================================
+# ŞANS DESTESİ: ÇEKME, GÖSTERME, SEÇİM VE ETKİLER
+# ------------------------------------------
+# Desteyi sadece sunucu tutar ve karıştırır. Çekilen kart, destede kalan sayı ve
+# kartın zarı (piyango, yazı tura) herkese "sans_karti" komutuyla gider. Seçim
+# isteyen kartlarda kartı çeken oyuncu "kart_secim" gönderir, etki her cihazda
+# aynı sırayla uygulanır.
+# ==========================================
+# Sunucu: desteyi elde tutulan kartlar hariç yeniden karıştırır
+func _desteyi_karistir():
+	var liste: Array = KART_BILGILERI.keys().duplicate()
+	for o in oyuncular:
+		for kart in o.get("kartlar", []):
+			liste.erase(kart)
+	liste.shuffle()
+	if not _test_destesi_kullanildi:
+		_test_destesi_kullanildi = true
+		for i in range(TEST_DESTESI.size() - 1, -1, -1):
+			var t = str(TEST_DESTESI[i])
+			if liste.has(t):
+				liste.erase(t)
+				liste.append(t)
+	_deste = liste
+	_deste_kalan = _deste.size()
+
 func sans_kartini_cek(_oyuncu):
-	# Kartı sadece sunucu seçer
-	if _yetkili():
-		_komut("sans_karti", [randi() % sans_kartlari.size()])
+	# Kartı sadece sunucu çeker
+	if not _yetkili():
+		return
+	var karisti = false
+	if _deste.is_empty():
+		_desteyi_karistir()
+		karisti = true
+	var kart = str(_deste.pop_back())
+	_komut("sans_karti", [kart, _deste.size(), randi_range(1, 6), karisti])
 
-func sans_kartini_goster(kart_no: int):
-	var oyuncu = oyuncular[aktif_oyuncu_indeksi]
-	var secilen = sans_kartlari[clampi(kart_no, 0, sans_kartlari.size() - 1)]
+func sans_kartini_goster(kart: String, kalan: int, ek: int, karisti: bool):
+	if not KART_BILGILERI.has(kart):
+		kart = "vergi_affi"
+	_deste_kalan = kalan
+	_desteyi_ciz()
+	if karisti:
+		_bilgi_goster("Şans destesi karıştırıldı!", 2.0)
 
-	bekleyen_sans_karti_degeri = secilen["deger"]
-
-	var renk_kodu = "green" if secilen["deger"] > 0 else "red"
-	var yazi_icerigi = "[center][b][font_size=25][color=gold]\nŞANS KARTI[/color][/font_size][/b]\n\n\n\n"
-	yazi_icerigi += "[font_size=23][color=" + renk_kodu + "]" + secilen["metin"] + "[/color][/font_size]"
-
-	if (oyuncu["para"] + bekleyen_sans_karti_degeri) < 0:
-		yazi_icerigi += "\n\n[b][color=red]DİKKAT: BAKİYEN EKSİYE DÜŞECEK![/color][/b]"
-
-	yazi_icerigi += "[/center]"
-	olay_yazisi.text = yazi_icerigi
+	_bekleyen_kart = kart
+	_bekleyen_ek = ek
+	var secenekler = _kart_secenekleri(kart)
+	_bekleyen_secimli = not secenekler.is_empty()
+	_kart_panelini_doldur(kart, secenekler)
 
 	if sans_karti_sesi_player:
 		sans_karti_sesi_player.stop()
 		sans_karti_sesi_player.play(0)
+	if _kontrol_bende():
+		_titret(60)
 
-	karti_kapat_butonu.disabled = not _kontrol_bende()
 	sans_karti_paneli.visible = true
-	sans_karti_paneli.scale = Vector2(0, 0)
-	var tween = create_tween()
-	tween.set_trans(Tween.TRANS_BACK)
-	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(sans_karti_paneli, "scale", Vector2(1, 1), 0.5)
+	_kart_animasyonu()
 
-	if oyuncu["yapay_zeka"] and _yetkili():
-		_gecikmeli(2.5, "karti_kapat")
+	if oyuncular[aktif_oyuncu_indeksi]["yapay_zeka"] and _yetkili():
+		if _bekleyen_secimli:
+			_bot_kart_secimi()
+		else:
+			_gecikmeli(3.0, "karti_kapat")
 
 func _on_karti_kapat_basildi():
-	if not sans_karti_paneli.visible or not _kontrol_bende(): return
+	if not sans_karti_paneli.visible or _bekleyen_secimli or not _kontrol_bende(): return
 	_oyuncu_komutu("karti_kapat")
 
 func _karti_kapat():
+	if not sans_karti_paneli.visible:
+		return
 	sans_karti_paneli.hide()
+	await _kart_etkisini_uygula(_bekleyen_kart, "")
 
-	var o_oyuncu = oyuncular[aktif_oyuncu_indeksi]
+func _on_kart_secenek_basildi(deger: String):
+	if not sans_karti_paneli.visible or not _bekleyen_secimli or not _kontrol_bende():
+		return
+	for b in _kart_secenek_izgara.get_children():
+		if b is Button:
+			b.disabled = true
+	_oyuncu_komutu("kart_secim", [_bekleyen_kart, deger])
+	# İstek bir sebeple kabul edilmezse butonlar tekrar açılsın
+	get_tree().create_timer(2.0).timeout.connect(_kart_butonlarini_yenile)
 
-	if bekleyen_sans_karti_degeri != 0:
-		o_oyuncu["para"] += bekleyen_sans_karti_degeri
-		_para_sesini_tek_cal()
+func _kart_secimi(kart: String, deger: String):
+	if not sans_karti_paneli.visible or kart != _bekleyen_kart:
+		return
+	sans_karti_paneli.hide()
+	await _kart_etkisini_uygula(kart, deger)
 
-	bekleyen_sans_karti_degeri = 0
+# Kartın seçenekleri (oyuncular ya da şehirler). Boş dizi: kart seçim beklemez.
+# Her cihaz aynı oyun durumundan aynı listeyi üretir.
+func _kart_secenekleri(kart: String) -> Array:
+	var liste = []
+	var ben = aktif_oyuncu_indeksi
+	if str(KART_BILGILERI[kart]["tur"]) == "oyuncu":
+		for i in range(4):
+			if i == ben or not oyuncular[i]["aktif_mi"]:
+				continue
+			if (kart == "yer_degistirme" or kart == "hapse_yolla") and oyuncular[i]["hapiste_mi"]:
+				continue
+			liste.append({"deger": str(i), "yazi": oyuncular[i]["isim"] + "\n" + str(oyuncular[i]["para"]) + " ₺", "renk": oyuncular[i]["renk"], "aktif": true})
+	elif kart == "ucak_bileti":
+		for s in harita_sirasi:
+			if sehirler.has(s) and not mülkiyet_durumu.has(s):
+				liste.append({"deger": s, "yazi": _gorunen_ad(s) + "\n" + str(sehirler[s]["fiyat"]) + " TL", "renk": sehirler[s]["renk"], "aktif": true})
+	elif kart == "komsu_pazarligi":
+		for s in harita_sirasi:
+			if not mülkiyet_durumu.has(s):
+				continue
+			var sahip = int(mülkiyet_durumu[s]["sahip"])
+			if sahip == ben or not oyuncular[sahip]["aktif_mi"] or int(mülkiyet_durumu[s]["seviye"]) > 0 or _tekel_mi(sahip, s):
+				continue
+			liste.append({"deger": s, "yazi": _gorunen_ad(s) + "\n" + oyuncular[sahip]["isim"] + " · " + str(sehirler[s]["fiyat"]) + " TL", "renk": oyuncular[sahip]["renk"], "aktif": oyuncular[ben]["para"] >= sehirler[s]["fiyat"]})
+		if not liste.is_empty():
+			liste.append({"deger": "-", "yazi": "Vazgeç", "renk": Color(0.45, 0.4, 0.35), "aktif": true})
+	return liste
+
+func _kart_secimi_gecerli(kart: String, deger: String) -> bool:
+	if not KART_BILGILERI.has(kart):
+		return false
+	for s in _kart_secenekleri(kart):
+		if str(s["deger"]) == deger and s["aktif"]:
+			return true
+	return false
+
+# Kartın etkisi (her cihazda aynı sırayla). Sonunda tur biter ya da gidilen karenin olayı başlar.
+func _kart_etkisini_uygula(kart: String, deger: String):
+	var ben = aktif_oyuncu_indeksi
+	var o = oyuncular[ben]
+	var ek = _bekleyen_ek
+	var t = int(deger) if deger.is_valid_int() else -1
+	if t >= 0 and (t == ben or t > 3 or not oyuncular[t]["aktif_mi"]):
+		t = -1
+	_bekleyen_kart = ""
+	_bekleyen_secimli = false
+
+	match kart:
+		"dogum_gunu":
+			if t >= 0:
+				var miktar = _para_aktar(t, ben, 100)
+				_hedefi_titret(t)
+				_kart_bilgisi("DOĞUM GÜNÜ: " + oyuncular[t]["isim"] + " → " + o["isim"] + "  " + str(miktar) + " TL hediye")
+		"borc_senedi":
+			if t >= 0:
+				var miktar = _para_aktar(t, ben, 150)
+				_muafiyetler.append({"odeyen": t, "alan": ben})
+				_hedefi_titret(t)
+				_kart_bilgisi("BORÇ SENEDİ: " + oyuncular[t]["isim"] + " → " + o["isim"] + "  " + str(miktar) + " TL  ·  " + oyuncular[t]["isim"] + " bir tur kira ödemez")
+		"hayirsever":
+			if t >= 0:
+				_para_aktar(ben, t, 100)
+				var mesaj = "HAYIRSEVER: " + o["isim"] + " → " + oyuncular[t]["isim"] + "  100 TL"
+				if _ele_kart_ekle(ben, "kira_kalkani"):
+					mesaj += "  ·  Kira Kalkanı kazandı"
+				_kart_bilgisi(mesaj)
+		"yer_degistirme":
+			if t >= 0:
+				await _yer_degistir(ben, t)
+				_kart_bilgisi("YER DEĞİŞTİRME: " + o["isim"] + " ve " + oyuncular[t]["isim"] + " yer değiştirdi")
+		"komsu_pazarligi":
+			if mülkiyet_durumu.has(deger):
+				var sahip = int(mülkiyet_durumu[deger]["sahip"])
+				var f = int(sehirler[deger]["fiyat"])
+				if sahip != ben and o["para"] >= f:
+					o["para"] -= f
+					oyuncular[sahip]["para"] += f
+					mülkiyet_durumu[deger]["sahip"] = ben
+					_evleri_boya(deger, o["renk"])
+					_tum_kiralari_guncelle()
+					_para_sesini_tek_cal()
+					_hedefi_titret(sahip)
+					_kart_bilgisi("KOMŞU PAZARLIĞI: " + _gorunen_ad(deger) + ", " + oyuncular[sahip]["isim"] + " → " + o["isim"] + "  (" + str(f) + " TL)")
+					_tekel_kontrol(ben, deger)
+		"hapse_yolla":
+			if t >= 0:
+				_hedefi_titret(t)
+				await _kartla_hapse(t)
+		"dugun":
+			var toplam = 0
+			for i in range(4):
+				if i != ben and oyuncular[i]["aktif_mi"]:
+					toplam += _para_aktar(i, ben, 50)
+			_kart_bilgisi("DÜĞÜN: " + o["isim"] + " toplam " + str(toplam) + " TL takı topladı")
+		"cay_ocagi":
+			var z = _en_zengin()
+			for i in range(4):
+				if i != z and oyuncular[i]["aktif_mi"]:
+					_para_aktar(z, i, 30)
+			_kart_bilgisi("ÇAY OCAĞI: " + oyuncular[z]["isim"] + " herkese 30 TL çay parası ödedi", oyuncular[z]["renk"])
+		"bayram_harcligi":
+			var f = _en_fakir()
+			_para_aktar(-1, f, 100)
+			_kart_bilgisi("BAYRAM HARÇLIĞI: " + oyuncular[f]["isim"] + " bankadan 100 TL aldı", oyuncular[f]["renk"])
+		"yazi_tura":
+			var r = _sonraki_aktif(ben)
+			if r != ben:
+				var tura = ek % 2 == 0
+				var kazanan = ben if tura else r
+				var kaybeden = r if tura else ben
+				var miktar = _para_aktar(kaybeden, kazanan, 100)
+				_kart_bilgisi(("TURA" if tura else "YAZI") + "!  " + oyuncular[kazanan]["isim"] + " kazandı  (+" + str(miktar) + " TL)", oyuncular[kazanan]["renk"])
+		"dedikodu":
+			pass
+		"torpil", "kira_kalkani", "cift_zar", "ihale_karti":
+			if _ele_kart_ekle(ben, kart):
+				_kart_bilgisi(o["isim"] + " elinde saklıyor: " + str(ELDE_KART_ADLARI[kart]))
+			else:
+				_kart_bilgisi("Elin dolu (en fazla " + str(EL_SINIRI) + " kart)! " + str(ELDE_KART_ADLARI[kart]) + " desteye döndü.")
+		"vergi_affi":
+			_para_aktar(-1, ben, 150)
+		"trafik_cezasi":
+			_para_aktar(ben, -1, 100)
+		"emlak_vergisi":
+			var kat = _toplam_kat(ben)
+			if kat > 0:
+				_para_aktar(ben, -1, kat * 25)
+				_kart_bilgisi("EMLAK VERGİSİ: " + str(kat) + " kat × 25 = " + str(kat * 25) + " TL")
+		"bayram_trafigi":
+			hareket_ediyor = true
+			await _geri_yuru(ben, 3)
+			_kareye_vardi()
+			return
+		"otoyol":
+			hareket_ediyor = true
+			await _baslangica_sur(ben)
+			o["para"] += tur_maasi
+			_para_sesini_tek_cal()
+		"ucak_bileti":
+			if sehirler.has(deger):
+				hareket_ediyor = true
+				await _isinla(ben, harita_sirasi.find(deger))
+				_kareye_vardi()
+				return
+			_para_aktar(-1, ben, 100)   # Boş şehir kalmadı: bilet iadesi
+		"yanlis_adres":
+			await _kartla_hapse(ben)
+		"kentsel_donusum":
+			var hedef = _kentsel_donusum_hedefi(ben)
+			if hedef != "":
+				mülkiyet_durumu[hedef]["seviye"] += 1
+				var yeni_kat = int(mülkiyet_durumu[hedef]["seviye"])
+				insaa_et_gorsel_ev(harita_sirasi.find(hedef), o["renk"], yeni_kat)
+				_tum_kiralari_guncelle()
+				_kart_bilgisi("KENTSEL DÖNÜŞÜM: " + _gorunen_ad(hedef) + " → " + ("plaza" if yeni_kat == 4 else str(yeni_kat) + ". kat") + " (bedava)")
+			else:
+				_para_aktar(-1, ben, 100)
+				_kart_bilgisi("KENTSEL DÖNÜŞÜM: devletten 100 TL destek")
+		"piyango":
+			if ek == 6:
+				_para_aktar(-1, ben, 300)
+				_kart_bilgisi("PİYANGO: zar 6 — KAZANDIN!  +300 TL")
+			else:
+				_para_aktar(ben, -1, 30)
+				_kart_bilgisi("PİYANGO: zar " + str(ek) + " — olmadı, 30 TL bilet parası")
+	_kart_turunu_bitir()
+
+func _kart_turunu_bitir():
+	hareket_ediyor = false
+	piyonlarin_konumlarini_duzenle()
 	arayuzu_guncelle()
-
-	if o_oyuncu["para"] < 0:
+	if oyuncular[aktif_oyuncu_indeksi]["para"] < 0:
 		borc_kontrolu()
 	else:
 		sirayi_sonraki_oyuncuya_gecir()
+
+# Para aktarımı (-1 = banka). Sırası gelmeyen oyuncu elindekinden fazlasını ödemez;
+# sırası gelen oyuncu eksiye düşebilir (tur sonunda borç kontrolü yapılır).
+func _para_aktar(odeyen: int, alan: int, miktar: int) -> int:
+	var tutar = miktar
+	if odeyen >= 0:
+		if odeyen != aktif_oyuncu_indeksi:
+			tutar = mini(tutar, maxi(int(oyuncular[odeyen]["para"]), 0))
+		oyuncular[odeyen]["para"] -= tutar
+	if alan >= 0:
+		oyuncular[alan]["para"] += tutar
+	if tutar > 0:
+		_para_sesini_tek_cal()
+	return tutar
+
+func _ele_kart_ekle(i: int, kart: String) -> bool:
+	if oyuncular[i]["kartlar"].size() >= EL_SINIRI:
+		return false
+	oyuncular[i]["kartlar"].append(kart)
+	arayuzu_guncelle()
+	return true
+
+func _kart_bilgisi(metin: String, renk := Color(0, 0, 0, 0)):
+	_bilgi_goster(metin, 3.5, o_oyuncu_rengi() if renk.a == 0.0 else renk)
+
+# Kartın hedefi bu telefondaki oyuncuysa telefon titrer
+func _hedefi_titret(i: int):
+	if i == _yerel() and not oyuncular[i]["yapay_zeka"]:
+		_titret(150)
+
+func _kira_muaf_mi(odeyen: int, alan: int) -> bool:
+	for m in _muafiyetler:
+		if int(m["odeyen"]) == odeyen and int(m["alan"]) == alan:
+			return true
+	return false
+
+func _en_zengin() -> int:
+	var z = -1
+	for i in range(4):
+		if oyuncular[i]["aktif_mi"] and (z == -1 or oyuncular[i]["para"] > oyuncular[z]["para"]):
+			z = i
+	return z
+
+func _en_fakir() -> int:
+	var f = -1
+	for i in range(4):
+		if oyuncular[i]["aktif_mi"] and (f == -1 or oyuncular[i]["para"] < oyuncular[f]["para"]):
+			f = i
+	return f
+
+func _sonraki_aktif(i: int) -> int:
+	for adim in range(1, 4):
+		var j = (i + adim) % 4
+		if oyuncular[j]["aktif_mi"]:
+			return j
+	return i
+
+func _toplam_kat(i: int) -> int:
+	var kat = 0
+	for s in mülkiyet_durumu.keys():
+		if int(mülkiyet_durumu[s]["sahip"]) == i:
+			kat += int(mülkiyet_durumu[s]["seviye"])
+	return kat
+
+# Toplam servet: para + şehirlerin alış fiyatı + dikilen katların maliyeti
+func _servet(i: int) -> int:
+	var toplam = int(oyuncular[i]["para"])
+	var maliyet = [0.5, 0.75, 1.0, 1.5]
+	for s in mülkiyet_durumu.keys():
+		if int(mülkiyet_durumu[s]["sahip"]) == i:
+			var f = sehirler[s]["fiyat"]
+			toplam += f
+			for x in range(int(mülkiyet_durumu[s]["seviye"])):
+				toplam += int(f * maliyet[x])
+	return toplam
+
+func _servet_siralamasi() -> String:
+	var liste = []
+	for i in range(4):
+		if oyuncular[i]["aktif_mi"]:
+			liste.append(i)
+	liste.sort_custom(func(a, b): return _servet(a) > _servet(b))
+	var satirlar = []
+	for n in range(liste.size()):
+		satirlar.append(str(n + 1) + ".  " + _renkli_isim(liste[n]) + "  —  " + str(_servet(liste[n])) + " TL")
+	return "\n".join(PackedStringArray(satirlar))
+
+# Krem kart zemininde okunsun diye oyuncu rengi biraz koyulaştırılır
+func _renkli_isim(i: int) -> String:
+	return "[color=#" + oyuncular[i]["renk"].darkened(0.35).to_html(false) + "][b]" + oyuncular[i]["isim"] + "[/b][/color]"
+
+func _kentsel_donusum_hedefi(i: int) -> String:
+	var hedef = ""
+	for s in _insa_secenekleri(i):
+		if hedef == "" or sehirler[s]["fiyat"] < sehirler[hedef]["fiyat"]:
+			hedef = s
+	return hedef
+
+func _evleri_boya(sehir: String, renk: Color):
+	var konum = harita_sirasi.find(sehir)
+	for i in range(5):
+		var ev_node = path_2d.get_node_or_null("Ev_" + str(konum) + "_" + str(i))
+		if ev_node:
+			ev_node.modulate = renk
+
+# Bakiye panelinde oyuncunun altındaki satır: elindeki kartlar
+func _el_satiri(o: Dictionary) -> String:
+	var kartlar: Array = o.get("kartlar", [])
+	if kartlar.is_empty():
+		return ""
+	var adlar = []
+	for k in kartlar:
+		adlar.append(str(ELDE_KART_ADLARI.get(k, k)))
+	# Sondaki normal boyutlu boşluk satır yüksekliğini korur (uçan para yazıları kaymasın)
+	return "    [font_size=15][color=#ffd34d]Kart: " + " · ".join(PackedStringArray(adlar)) + "[/color][/font_size] "
+
+func _cift_zar_kartli() -> bool:
+	return oyuncular[aktif_oyuncu_indeksi]["kartlar"].has("cift_zar")
+
+func _ekstra_buton_yazisi() -> String:
+	if _cift_zar_kartli():
+		return "Ekstra Zar\n(KART)"
+	return _ekstra_buton_metni
+
+# --- KARTLA HAREKET ---
+# Araba yol boyunca sürmeden kaybolup yeni yerinde belirir
+func _isinla(i: int, hedef: int):
+	var p = oyuncular[i]["piyon"]
+	var tw = create_tween()
+	tw.tween_property(p, "modulate:a", 0.0, 0.25)
+	await tw.finished
+	oyuncular[i]["konum"] = hedef
+	_piyonu_yerlestir(i)
+	piyonlarin_konumlarini_duzenle()
+	var tw2 = create_tween()
+	tw2.tween_property(p, "modulate:a", 1.0, 0.3)
+	await tw2.finished
+
+func _yer_degistir(a: int, b: int):
+	hareket_ediyor = true
+	var pa = oyuncular[a]["piyon"]
+	var pb = oyuncular[b]["piyon"]
+	var tw = create_tween().set_parallel(true)
+	tw.tween_property(pa, "modulate:a", 0.0, 0.25)
+	tw.tween_property(pb, "modulate:a", 0.0, 0.25)
+	await tw.finished
+	var k = oyuncular[a]["konum"]
+	oyuncular[a]["konum"] = oyuncular[b]["konum"]
+	oyuncular[b]["konum"] = k
+	_piyonu_yerlestir(a)
+	_piyonu_yerlestir(b)
+	piyonlarin_konumlarini_duzenle()
+	var tw2 = create_tween().set_parallel(true)
+	tw2.tween_property(pa, "modulate:a", 1.0, 0.3)
+	tw2.tween_property(pb, "modulate:a", 1.0, 0.3)
+	await tw2.finished
+
+# Kare kare geri gider (Başlangıç'tan geriye sarar, maaş verilmez)
+func _geri_yuru(i: int, adim: int):
+	var o = oyuncular[i]
+	var curve = path_2d.curve
+	for _a in range(adim):
+		if o["konum"] == 0:
+			o["piyon"].progress = curve.get_baked_length()
+			o["konum"] = toplam_kare_sayisi - 1
+		else:
+			o["konum"] -= 1
+		var hedef = curve.get_closest_offset(curve.get_point_position(clampi(o["konum"], 0, curve.get_point_count() - 1)))
+		if o["konum"] == 0:
+			hedef = 0.0
+		var tw = create_tween()
+		tw.tween_property(o["piyon"], "progress", hedef, 0.25).set_trans(Tween.TRANS_SINE)
+		await tw.finished
+		await get_tree().create_timer(0.05).timeout
+
+# Otoyol: yolun sonuna kadar hızla sürüp Başlangıç'a varır
+func _baslangica_sur(i: int):
+	var p = oyuncular[i]["piyon"]
+	var tw = create_tween()
+	tw.tween_property(p, "progress", path_2d.curve.get_baked_length(), 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	await tw.finished
+	p.progress = 0.0
+	oyuncular[i]["konum"] = 0
+	piyonlarin_konumlarini_duzenle()
+
+# Kartla hapis (Yanlış adres, Hapse yolla). Elinde Torpil varsa kart kullanılır, hapse girmez.
+func _kartla_hapse(i: int):
+	var o = oyuncular[i]
+	if o["kartlar"].has("torpil"):
+		o["kartlar"].erase("torpil")
+		arayuzu_guncelle()
+		_kart_bilgisi("TORPİL! " + o["isim"] + " son anda hapisten yırttı.", o["renk"])
+		return
+	hareket_ediyor = true
+	await _isinla(i, harita_sirasi.find("Hapishane"))
+	o["hapiste_mi"] = true
+	o["hapis_turu"] = 1
+	_kart_bilgisi(o["isim"] + " hapse girdi!", Color(1, 0.4, 0.35))
+
+# --- BOT KARARLARI (sunucuda) ---
+func _bot_kart_secimi():
+	var kart = _bekleyen_kart
+	await get_tree().create_timer(3.0).timeout
+	if not is_inside_tree() or not sans_karti_paneli.visible or not _bekleyen_secimli or _bekleyen_kart != kart:
+		return
+	_komut("kart_secim", [kart, _bot_kart_karari(kart)])
+
+func _bot_kart_karari(kart: String) -> String:
+	var ben = aktif_oyuncu_indeksi
+	var para = int(oyuncular[ben]["para"])
+	var gecerli = []
+	for s in _kart_secenekleri(kart):
+		if s["aktif"]:
+			gecerli.append(str(s["deger"]))
+	if gecerli.is_empty():
+		return "-"
+	match kart:
+		"ucak_bileti":
+			# Parasının yettiği en pahalı boş şehir (100 TL yedek), yoksa en ucuzu
+			var en_iyi = ""
+			for s in gecerli:
+				if para - sehirler[s]["fiyat"] >= 100 and (en_iyi == "" or sehirler[s]["fiyat"] > sehirler[en_iyi]["fiyat"]):
+					en_iyi = s
+			if en_iyi == "":
+				en_iyi = gecerli[0]
+				for s in gecerli:
+					if sehirler[s]["fiyat"] < sehirler[en_iyi]["fiyat"]:
+						en_iyi = s
+			return en_iyi
+		"komsu_pazarligi":
+			# Önce grubunu tamamlayan şehir, yoksa 200 TL yedek bırakarak en pahalısı
+			var en_iyi = "-"
+			for s in gecerli:
+				if s == "-":
+					continue
+				var tamamlar = true
+				for g in _grup_sehirleri(s):
+					if g != s and (not mülkiyet_durumu.has(g) or int(mülkiyet_durumu[g]["sahip"]) != ben):
+						tamamlar = false
+				if tamamlar:
+					return s
+				if para - sehirler[s]["fiyat"] >= 200 and (en_iyi == "-" or sehirler[s]["fiyat"] > sehirler[en_iyi]["fiyat"]):
+					en_iyi = s
+			return en_iyi
+		"hayirsever":
+			return _secenekteki_oyuncu(gecerli, false)     # en fakire bağışlar
+		"yer_degistirme":
+			return gecerli[randi() % gecerli.size()]
+	return _secenekteki_oyuncu(gecerli, true)              # diğer kartlarda en zengini hedef alır
+
+func _secenekteki_oyuncu(degerler: Array, en_zengin: bool) -> String:
+	var secilen = str(degerler[0])
+	for d in degerler:
+		var p = oyuncular[int(d)]["para"]
+		var q = oyuncular[int(secilen)]["para"]
+		if (en_zengin and p > q) or (not en_zengin and p < q):
+			secilen = str(d)
+	return secilen
+
+# --- KART EKRANI ---
+func _serif_yazi_tipi() -> Font:
+	if _serif == null:
+		var f = SystemFont.new()
+		f.font_names = PackedStringArray(["Georgia", "Cambria", "Times New Roman", "Noto Serif", "serif"])
+		f.font_weight = 700
+		_serif = f
+	return _serif
+
+func _kart_yazi_alani(boyut: int) -> RichTextLabel:
+	var r = RichTextLabel.new()
+	r.bbcode_enabled = true
+	r.fit_content = true
+	r.scroll_active = false
+	r.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	r.custom_minimum_size = Vector2(570, 0)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	r.add_theme_font_size_override("normal_font_size", boyut)
+	r.add_theme_font_size_override("bold_font_size", boyut)
+	r.add_theme_color_override("default_color", Color(0.15, 0.12, 0.1))
+	return r
+
+# Ekranın ortasında açılan büyük şans kartı (eski küçük panelin yerine)
+func _kart_arayuzunu_kur():
+	var kok = CenterContainer.new()
+	kok.set_anchors_preset(Control.PRESET_FULL_RECT)
+	kok.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	kok.hide()
+	$Arayuz.add_child(kok)
+
+	_kart_kutu = PanelContainer.new()
+	_kart_kutu.custom_minimum_size = Vector2(640, 0)
+	var stil = StyleBoxFlat.new()
+	stil.bg_color = Color(0.91, 0.89, 0.83)
+	stil.set_corner_radius_all(22)
+	stil.border_color = Color(0.29, 0.25, 0.21)
+	stil.set_border_width_all(5)
+	stil.shadow_color = Color(0, 0, 0, 0.55)
+	stil.shadow_size = 22
+	stil.content_margin_left = 34
+	stil.content_margin_right = 34
+	stil.content_margin_top = 18
+	stil.content_margin_bottom = 26
+	_kart_kutu.add_theme_stylebox_override("panel", stil)
+	kok.add_child(_kart_kutu)
+
+	var v = VBoxContainer.new()
+	v.add_theme_constant_override("separation", 12)
+	_kart_kutu.add_child(v)
+
+	var ust = Label.new()
+	ust.text = "Ş A N S   K A R T I"
+	ust.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ust.add_theme_font_override("font", _serif_yazi_tipi())
+	ust.add_theme_font_size_override("font_size", 17)
+	ust.add_theme_color_override("font_color", Color(0.45, 0.38, 0.3))
+	v.add_child(ust)
+
+	_kart_baslik = Label.new()
+	_kart_baslik.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_kart_baslik.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_kart_baslik.add_theme_font_override("font", _serif_yazi_tipi())
+	_kart_baslik.add_theme_font_size_override("font_size", 38)
+	v.add_child(_kart_baslik)
+
+	var etiket_ortala = CenterContainer.new()
+	v.add_child(etiket_ortala)
+	var etiket_kutu = PanelContainer.new()
+	_kart_etiket_stili = StyleBoxFlat.new()
+	_kart_etiket_stili.set_corner_radius_all(12)
+	_kart_etiket_stili.content_margin_left = 16
+	_kart_etiket_stili.content_margin_right = 16
+	_kart_etiket_stili.content_margin_top = 3
+	_kart_etiket_stili.content_margin_bottom = 4
+	etiket_kutu.add_theme_stylebox_override("panel", _kart_etiket_stili)
+	etiket_ortala.add_child(etiket_kutu)
+	_kart_etiket = Label.new()
+	_kart_etiket.add_theme_font_size_override("font_size", 15)
+	_kart_etiket.add_theme_color_override("font_color", Color.WHITE)
+	etiket_kutu.add_child(_kart_etiket)
+
+	var cizgi = ColorRect.new()
+	cizgi.custom_minimum_size = Vector2(0, 2)
+	cizgi.color = Color(0.45, 0.38, 0.3, 0.55)
+	v.add_child(cizgi)
+
+	_kart_metin = _kart_yazi_alani(25)
+	v.add_child(_kart_metin)
+	_kart_ek_bilgi = _kart_yazi_alani(21)
+	v.add_child(_kart_ek_bilgi)
+
+	var izgara_ortala = CenterContainer.new()
+	v.add_child(izgara_ortala)
+	_kart_secenek_izgara = GridContainer.new()
+	_kart_secenek_izgara.add_theme_constant_override("h_separation", 10)
+	_kart_secenek_izgara.add_theme_constant_override("v_separation", 10)
+	izgara_ortala.add_child(_kart_secenek_izgara)
+
+	_kart_durum = Label.new()
+	_kart_durum.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_kart_durum.add_theme_font_size_override("font_size", 19)
+	_kart_durum.add_theme_color_override("font_color", Color(0.4, 0.34, 0.28))
+	v.add_child(_kart_durum)
+
+	var buton_ortala = CenterContainer.new()
+	v.add_child(buton_ortala)
+	var devam = Button.new()
+	devam.text = "DEVAM ET"
+	devam.custom_minimum_size = Vector2(260, 62)
+	devam.add_theme_font_size_override("font_size", 26)
+	devam.add_theme_color_override("font_color", Color.WHITE)
+	devam.add_theme_color_override("font_disabled_color", Color(0.92, 0.92, 0.92))
+	devam.add_theme_stylebox_override("normal", _stil_kutusu(Color(0.12, 0.45, 0.16), 12))
+	devam.add_theme_stylebox_override("hover", _stil_kutusu(Color(0.16, 0.56, 0.2), 12))
+	devam.add_theme_stylebox_override("pressed", _stil_kutusu(Color(0.09, 0.36, 0.12), 12))
+	devam.add_theme_stylebox_override("disabled", _stil_kutusu(Color(0.55, 0.52, 0.48), 12))
+	buton_ortala.add_child(devam)
+
+	# Oyunun geri kalanı bu değişkenlerle çalışıyor (görünürlük kontrolleri, butonlar)
+	sans_karti_paneli = kok
+	karti_kapat_butonu = devam
+	olay_yazisi = _kart_metin
+
+func _kart_panelini_doldur(kart: String, secenekler: Array):
+	var bilgi = KART_BILGILERI[kart]
+	var tur = str(bilgi["tur"])
+	var etiketler = {
+		"oyuncu": ["OYUNCU SEÇ", Color(0.45, 0.24, 0.6)],
+		"sehir": ["ŞEHİR SEÇ", Color(0.45, 0.24, 0.6)],
+		"herkes": ["HERKESİ ETKİLER", Color(0.07, 0.47, 0.5)],
+		"el": ["ELDE SAKLANIR", Color(0.6, 0.44, 0.06)],
+		"para": ["PARA", Color(0.17, 0.48, 0.2)],
+		"hareket": ["HAREKET", Color(0.14, 0.33, 0.62)]
+	}
+	var e = etiketler.get(tur, etiketler["para"])
+	_kart_baslik.text = str(bilgi["baslik"])
+	_kart_baslik.add_theme_color_override("font_color", Color(e[1]).darkened(0.3))
+	_kart_etiket.text = str(e[0])
+	_kart_etiket_stili.bg_color = e[1]
+	_kart_metin.text = "[center]" + str(bilgi["metin"]) + "[/center]"
+	var ek_bilgi = _kart_ek_bilgisi(kart, secenekler)
+	_kart_ek_bilgi.text = "[center]" + ek_bilgi + "[/center]"
+	_kart_ek_bilgi.visible = ek_bilgi != ""
+
+	for c in _kart_secenek_izgara.get_children():
+		_kart_secenek_izgara.remove_child(c)
+		c.queue_free()
+	_kart_secenek_izgara.columns = clampi(secenekler.size(), 1, 3)
+	_kart_secenek_izgara.visible = not secenekler.is_empty()
+	for s in secenekler:
+		_kart_secenek_izgara.add_child(_kart_secenek_butonu(s))
+	karti_kapat_butonu.visible = secenekler.is_empty()
+	_kart_butonlarini_yenile()
+
+func _kart_secenek_butonu(s: Dictionary) -> Button:
+	var b = Button.new()
+	b.text = str(s["yazi"])
+	b.custom_minimum_size = Vector2(178, 64)
+	b.add_theme_font_size_override("font_size", 20)
+	b.add_theme_color_override("font_color", Color(0.13, 0.1, 0.08))
+	b.add_theme_color_override("font_hover_color", Color(0.05, 0.03, 0.02))
+	b.add_theme_color_override("font_pressed_color", Color(0.05, 0.03, 0.02))
+	b.add_theme_color_override("font_focus_color", Color(0.13, 0.1, 0.08))
+	b.add_theme_color_override("font_disabled_color", Color(0.45, 0.42, 0.38))
+	var renk: Color = s["renk"]
+	b.add_theme_stylebox_override("normal", _stil_kutusu(Color(1, 1, 1, 0.55), 10, renk, 3))
+	b.add_theme_stylebox_override("hover", _stil_kutusu(Color(1, 1, 1, 0.85), 10, renk, 3))
+	b.add_theme_stylebox_override("pressed", _stil_kutusu(Color(1, 1, 1, 0.35), 10, renk, 3))
+	b.add_theme_stylebox_override("disabled", _stil_kutusu(Color(1, 1, 1, 0.25), 10, Color(renk, 0.35), 2))
+	b.set_meta("aktif", bool(s["aktif"]))
+	var deger: String = str(s["deger"])
+	b.pressed.connect(func(): _on_kart_secenek_basildi(deger))
+	return b
+
+# Butonlar ve "... seçiyor" yazısı, kararı kimin verdiğine göre
+func _kart_butonlarini_yenile():
+	if _kart_secenek_izgara == null:
+		return
+	var bende = _kontrol_bende()
+	for b in _kart_secenek_izgara.get_children():
+		if b is Button:
+			b.disabled = not (bende and bool(b.get_meta("aktif", false)))
+	karti_kapat_butonu.disabled = not bende
+	var isim = oyuncular[aktif_oyuncu_indeksi]["isim"]
+	if _bekleyen_secimli:
+		_kart_durum.text = "Seçimini yap" if bende else isim + " seçiyor..."
+	elif not bende:
+		_kart_durum.text = isim + " kartı okuyor..."
+	else:
+		_kart_durum.text = ""
+	_kart_durum.visible = _kart_durum.text != ""
+
+# Kartın altındaki, o anki duruma göre hesaplanan bilgi satırı
+func _kart_ek_bilgisi(kart: String, secenekler: Array) -> String:
+	var ben = aktif_oyuncu_indeksi
+	var o = oyuncular[ben]
+	var tur = str(KART_BILGILERI[kart]["tur"])
+	var uyari = "[color=#b3261e][b]DİKKAT: Bakiyen eksiye düşecek![/b][/color]"
+	match kart:
+		"ucak_bileti":
+			if secenekler.is_empty():
+				return "Boş şehir kalmadı: bilet iade edildi, [b]100 TL[/b] alırsın."
+		"komsu_pazarligi":
+			if secenekler.is_empty():
+				return "Satın alınabilecek şehir yok."
+			for s in secenekler:
+				if str(s["deger"]) != "-" and s["aktif"]:
+					return ""
+			return "Paran hiçbir şehre yetmiyor."
+		"hayirsever":
+			var notlar = []
+			if o["kartlar"].size() >= EL_SINIRI:
+				notlar.append("Elin dolu olduğu için kalkan verilemez.")
+			if o["para"] < 100:
+				notlar.append(uyari)
+			if not secenekler.is_empty():
+				return "\n".join(PackedStringArray(notlar))
+		"cay_ocagi":
+			var z = _en_zengin()
+			return "En zengin: " + _renkli_isim(z) + "  (" + str(oyuncular[z]["para"]) + " TL)"
+		"bayram_harcligi":
+			var f = _en_fakir()
+			return "En fakir: " + _renkli_isim(f) + "  (" + str(oyuncular[f]["para"]) + " TL)"
+		"yazi_tura":
+			return "Rakibin: " + _renkli_isim(_sonraki_aktif(ben))
+		"dugun":
+			return "Parası yetmeyen elindeki kadarını verir."
+		"dedikodu":
+			return _servet_siralamasi()
+		"trafik_cezasi":
+			if o["para"] < 100:
+				return uyari
+		"emlak_vergisi":
+			var kat = _toplam_kat(ben)
+			if kat == 0:
+				return "Hiç katın yok: vergi çıkmadı."
+			var metin = "Senin katların: " + str(kat) + "  →  [b]" + str(kat * 25) + " TL[/b]"
+			if o["para"] < kat * 25:
+				metin += "\n" + uyari
+			return metin
+		"kentsel_donusum":
+			var h = _kentsel_donusum_hedefi(ben)
+			if h == "":
+				return "Kat çıkabileceğin şehir yok: [b]100 TL[/b] destek alırsın."
+			return "Bedava kat: [b]" + _gorunen_ad(h) + "[/b]"
+		"otoyol":
+			return "Maaş: [b]+" + str(tur_maasi) + " TL[/b]"
+		"yanlis_adres":
+			if o["kartlar"].has("torpil"):
+				return "[color=#1e6b2a][b]Torpilin var: hapse girmeyeceksin![/b][/color]"
+		"piyango":
+			if o["para"] < 30:
+				return "Kaybedersen bakiyen eksiye düşebilir."
+	if tur == "oyuncu" and secenekler.is_empty():
+		return "Seçilebilecek oyuncu yok: kartın etkisi olmadı."
+	if tur == "el":
+		if o["kartlar"].size() >= EL_SINIRI:
+			return "[color=#b3261e]Elin dolu (en fazla " + str(EL_SINIRI) + " kart): bu kart desteye geri döner.[/color]"
+		return "Kart, bakiye panelinde adının altında görünür."
+	return ""
+
+# Kart desteden kalkıp ortaya uçar, ardından kart yüzü belirir
+func _kart_animasyonu():
+	_kart_kutu.modulate.a = 0.0
+	var ucan = _kart_arkasi_olustur()
+	ucan.position = DESTE_KONUMU
+	$Arayuz.add_child(ucan)
+	var hedef = Vector2(960, 540) - DESTE_KART_BOYU / 2.0
+	var tw = create_tween().set_parallel(true)
+	tw.tween_property(ucan, "position", hedef, 0.45).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(ucan, "scale", Vector2(2.6, 2.6), 0.45).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(ucan, "rotation_degrees", -6.0, 0.45)
+	tw.chain().tween_property(ucan, "modulate:a", 0.0, 0.18)
+	tw.chain().tween_callback(ucan.queue_free)
+	await get_tree().create_timer(0.38).timeout
+	if not is_inside_tree() or not sans_karti_paneli.visible:
+		return
+	_kart_kutu.pivot_offset = _kart_kutu.size / 2.0
+	_kart_kutu.scale = Vector2(0.85, 0.85)
+	var tw2 = create_tween().set_parallel(true)
+	tw2.tween_property(_kart_kutu, "modulate:a", 1.0, 0.22)
+	tw2.tween_property(_kart_kutu, "scale", Vector2.ONE, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+# --- TAHTADAKİ DESTE (zarların üstünde) ---
+func _kart_arkasi_olustur() -> Control:
+	var kart = Panel.new()
+	kart.size = DESTE_KART_BOYU
+	kart.pivot_offset = DESTE_KART_BOYU / 2.0
+	kart.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var stil = StyleBoxFlat.new()
+	stil.bg_color = Color(0.89, 0.87, 0.81)
+	stil.set_corner_radius_all(12)
+	stil.border_color = Color(0.29, 0.25, 0.21)
+	stil.set_border_width_all(3)
+	stil.shadow_color = Color(0, 0, 0, 0.35)
+	stil.shadow_size = 6
+	stil.shadow_offset = Vector2(3, 4)
+	kart.add_theme_stylebox_override("panel", stil)
+
+	var ic = Panel.new()
+	ic.position = Vector2(6, 6)
+	ic.size = DESTE_KART_BOYU - Vector2(12, 12)
+	ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ic_stil = StyleBoxFlat.new()
+	ic_stil.bg_color = Color(0, 0, 0, 0)
+	ic_stil.set_corner_radius_all(8)
+	ic_stil.border_color = Color(0.6, 0.56, 0.49)
+	ic_stil.set_border_width_all(1)
+	ic.add_theme_stylebox_override("panel", ic_stil)
+	kart.add_child(ic)
+
+	var baslik = Label.new()
+	baslik.text = "ŞANS"
+	baslik.position = Vector2(0, 9)
+	baslik.size = Vector2(DESTE_KART_BOYU.x, 26)
+	baslik.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	baslik.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	baslik.add_theme_font_override("font", _serif_yazi_tipi())
+	baslik.add_theme_font_size_override("font_size", 20)
+	baslik.add_theme_color_override("font_color", Color(0.18, 0.15, 0.12))
+	kart.add_child(baslik)
+
+	var kutu = Panel.new()
+	kutu.position = Vector2(26, 40)
+	kutu.size = Vector2(60, 90)
+	kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var kutu_stil = StyleBoxFlat.new()
+	kutu_stil.bg_color = Color(0.94, 0.92, 0.88)
+	kutu_stil.set_corner_radius_all(7)
+	kutu_stil.border_color = Color(0.16, 0.14, 0.12)
+	kutu_stil.set_border_width_all(3)
+	kutu.add_theme_stylebox_override("panel", kutu_stil)
+	kart.add_child(kutu)
+
+	var soru = Label.new()
+	soru.text = "?"
+	soru.size = Vector2(60, 90)
+	soru.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	soru.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	soru.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	soru.add_theme_font_override("font", _serif_yazi_tipi())
+	soru.add_theme_font_size_override("font_size", 60)
+	soru.add_theme_color_override("font_color", Color(0.27, 0.15, 0.4))
+	kutu.add_child(soru)
+	return kart
+
+func _desteyi_kur():
+	var deste = Node2D.new()
+	deste.name = "SansDestesi"
+	add_child(deste)
+	move_child(deste, 1)   # Tahta görselinin hemen üstü; arabalar ve arayüz bunun üstünde kalır
+
+	_deste_bos = Panel.new()
+	_deste_bos.position = DESTE_KONUMU
+	_deste_bos.size = DESTE_KART_BOYU
+	_deste_bos.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bos_stil = StyleBoxFlat.new()
+	bos_stil.bg_color = Color(0, 0, 0, 0.18)
+	bos_stil.set_corner_radius_all(12)
+	bos_stil.border_color = Color(1, 1, 1, 0.45)
+	bos_stil.set_border_width_all(2)
+	_deste_bos.add_theme_stylebox_override("panel", bos_stil)
+	deste.add_child(_deste_bos)
+
+	# Alttaki kartlar hafif kaydırılıp döndürülür, deste kalınlığı belli olsun
+	var acilar = [0.0, -3.0, 2.5, -2.0, 3.5]
+	_deste_kartlari.resize(5)
+	for k in range(4, -1, -1):
+		var kart = _kart_arkasi_olustur()
+		kart.position = DESTE_KONUMU + Vector2(-2.5 * k, 3.0 * k)
+		kart.rotation_degrees = acilar[k]
+		deste.add_child(kart)
+		_deste_kartlari[k] = kart
+
+	# Sağ üstte kalan kart sayısı
+	var rozet = Panel.new()
+	rozet.size = Vector2(44, 44)
+	rozet.position = DESTE_KONUMU + Vector2(DESTE_KART_BOYU.x - 26, -18)
+	rozet.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var rozet_stil = StyleBoxFlat.new()
+	rozet_stil.bg_color = Color(0.85, 0.64, 0.17)
+	rozet_stil.set_corner_radius_all(22)
+	rozet_stil.border_color = Color(0.24, 0.16, 0.04)
+	rozet_stil.set_border_width_all(3)
+	rozet_stil.shadow_color = Color(0, 0, 0, 0.35)
+	rozet_stil.shadow_size = 4
+	rozet.add_theme_stylebox_override("panel", rozet_stil)
+	deste.add_child(rozet)
+	_deste_sayac = Label.new()
+	_deste_sayac.size = Vector2(44, 44)
+	_deste_sayac.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_deste_sayac.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_deste_sayac.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_deste_sayac.add_theme_font_size_override("font_size", 20)
+	_deste_sayac.add_theme_color_override("font_color", Color(0.12, 0.08, 0.02))
+	rozet.add_child(_deste_sayac)
+
+	# Altta "ŞANS DESTESİ" yazısı
+	var yazi_kutu = Panel.new()
+	yazi_kutu.size = Vector2(184, 32)
+	yazi_kutu.position = Vector2(DESTE_KONUMU.x + DESTE_KART_BOYU.x / 2.0 - 92, DESTE_KONUMU.y + DESTE_KART_BOYU.y + 20)
+	yazi_kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var yazi_stil = StyleBoxFlat.new()
+	yazi_stil.bg_color = Color(0.04, 0.05, 0.08, 0.86)
+	yazi_stil.set_corner_radius_all(16)
+	yazi_stil.border_color = Color(0.85, 0.64, 0.17)
+	yazi_stil.set_border_width_all(2)
+	yazi_kutu.add_theme_stylebox_override("panel", yazi_stil)
+	deste.add_child(yazi_kutu)
+	var yazi = Label.new()
+	yazi.text = "ŞANS DESTESİ"
+	yazi.size = Vector2(184, 32)
+	yazi.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	yazi.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	yazi.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	yazi.add_theme_font_size_override("font_size", 17)
+	yazi.add_theme_color_override("font_color", Color.WHITE)
+	yazi_kutu.add_child(yazi)
+	_desteyi_ciz()
+
+# Deste kalınlığı ve sayaç, kalan kart sayısına göre
+func _desteyi_ciz():
+	if _deste_sayac == null:
+		return
+	var katman = clampi(_deste_kalan, 0, 5)
+	for k in range(5):
+		_deste_kartlari[k].visible = k < katman
+	_deste_bos.visible = _deste_kalan <= 0
+	_deste_sayac.text = str(_deste_kalan)
 
 func _on_tamam_basildi():
 	if not bildirim_paneli.visible or not _kontrol_bende(): return
@@ -1161,6 +2157,7 @@ func borc_kontrolu():
 		ihale_paneli.hide()
 		o_oyuncu["aktif_mi"] = false
 		o_oyuncu["piyon"].hide()
+		o_oyuncu["kartlar"].clear()
 		if aktif_oyuncu_indeksi == _yerel() and not o_oyuncu["yapay_zeka"]:
 			_titret(500)
 
@@ -1459,6 +2456,12 @@ func _ihale_sonuclandir():
 
 	if k != -1:
 		var alici = oyuncular[k]
+		var indirim_notu = ""
+		if satici_no == -1 and alici["kartlar"].has("ihale_karti"):
+			var indirimli = maxi(10, int(round(bedel * 0.8 / 10.0)) * 10)
+			indirim_notu = "\n[color=#ffd34d]İhale Kartı: %20 indirim (" + str(bedel) + " → " + str(indirimli) + " TL)[/color]"
+			bedel = indirimli
+			alici["kartlar"].erase("ihale_karti")
 		alici["para"] -= bedel
 		_para_sesini_tek_cal()
 		if satici_no >= 0:
@@ -1472,7 +2475,7 @@ func _ihale_sonuclandir():
 			insaa_et_gorsel_ev(konum, alici["renk"], 0)
 
 		var hex_renk = alici["renk"].to_html(false)
-		ihale_durum_yazisi.text = "[center][font_size=21][b][color=gold]İHALE BİTTİ![/color][/b][/font_size]\n\nSATILAN KİŞİ: [color=#" + hex_renk + "]" + alici["isim"] + "[/color]\nÖDENEN TUTAR: [color=green]" + str(bedel) + " TL[/color][/center]"
+		ihale_durum_yazisi.text = "[center][font_size=21][b][color=gold]İHALE BİTTİ![/color][/b][/font_size]\n\nSATILAN KİŞİ: [color=#" + hex_renk + "]" + alici["isim"] + "[/color]\nÖDENEN TUTAR: [color=green]" + str(bedel) + " TL[/color]" + indirim_notu + "[/center]"
 		if k == _yerel() and not alici["yapay_zeka"]:
 			_titret(120)
 		_tekel_kontrol(k, s)
