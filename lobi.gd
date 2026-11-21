@@ -45,11 +45,13 @@ var oda_durum_etiketi: Label
 var oda_isim_satiri: HBoxContainer
 var oda_isim_kutusu: LineEdit
 var cik_butonu: Button
+var enf_butonu: Button
 
 # Kaydedilen tercih (bir sonraki odaya bununla girilir)
 var tercih_araba := 0
 var tercih_renk := 0
 var cevrimdisi := false   # "Oyuna Başla" ile gelindiyse: ağ yok, sen + botlar
+var ayar_dosyasi_enflasyon := -1   # Kayıtlı enflasyon tercihi (oda kurarken kullanılır)
 
 
 func _ready():
@@ -329,6 +331,11 @@ func _oda_ekranini_kur():
 	cik_butonu = _buton("ODADAN ÇIK", _on_odadan_cik_basildi, "tehlike", 100)
 	cik_butonu.custom_minimum_size.x = 380
 	alt.add_child(cik_butonu)
+	# Enflasyon kuralı: oda sahibi basınca Kapalı → Normal → Yüksek arasında döner
+	enf_butonu = _buton("", _on_enf_basildi, "ikincil", 100)
+	enf_butonu.custom_minimum_size.x = 360
+	enf_butonu.add_theme_font_size_override("font_size", 24)
+	alt.add_child(enf_butonu)
 	baslat_butonu = _buton("OYUNU BAŞLAT", _on_baslat_basildi, "birincil", 100)
 	baslat_butonu.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	baslat_butonu.add_theme_font_size_override("font_size", 38)
@@ -448,6 +455,11 @@ func _profili_kaydet():
 	ayar.set_value("profil", "araba", tercih_araba)
 	ayar.set_value("profil", "renk", tercih_renk)
 	ayar.set_value("profil", "son_ip", ip_kutusu.text.strip_edges())
+	if Ag.sunucu_mu():
+		ayar_dosyasi_enflasyon = int(Ag.oyun_ayarlari.get("enflasyon", 1))
+		ayar.set_value("oyun", "enflasyon", ayar_dosyasi_enflasyon)
+	elif ayar_dosyasi_enflasyon >= 0:
+		ayar.set_value("oyun", "enflasyon", ayar_dosyasi_enflasyon)
 	ayar.save(AYAR_DOSYASI)
 
 
@@ -458,6 +470,10 @@ func _profil_ayarlarini_yukle():
 		tercih_araba = clampi(int(ayar.get_value("profil", "araba", 0)), 0, arabalar.size() - 1)
 		tercih_renk = clampi(int(ayar.get_value("profil", "renk", 0)), 0, Ag.RENKLER.size() - 1)
 		set_meta("son_ip", str(ayar.get_value("profil", "son_ip", "")))
+		ayar_dosyasi_enflasyon = clampi(int(ayar.get_value("oyun", "enflasyon", 1)), 0, 2)
+	# Odayı biz kuracaksak kayıtlı enflasyon tercihiyle başla (katılınca oda sahibininki gelir)
+	if not Ag.online:
+		Ag.oyun_ayarlari["enflasyon"] = ayar_dosyasi_enflasyon if ayar_dosyasi_enflasyon >= 0 else 1
 
 
 # ----------------------------------------------------------
@@ -465,6 +481,8 @@ func _profil_ayarlarini_yukle():
 # ----------------------------------------------------------
 func _on_oda_kur_basildi():
 	_profili_kaydet()
+	# Başka bir odadan çıkıp kendi odamızı kuruyorsak kendi enflasyon tercihimize dön
+	Ag.oyun_ayarlari["enflasyon"] = ayar_dosyasi_enflasyon if ayar_dosyasi_enflasyon >= 0 else 1
 	Ag.oda_aramayi_durdur()
 	if Ag.oda_kur():
 		_lobi_yenile()
@@ -481,6 +499,12 @@ func _katil(ip: String):
 func _on_oda_isim_degisti(yeni: String):
 	isim_kutusu.text = yeni
 	Ag.yerel_isim_degistir(yeni)
+
+
+func _on_enf_basildi():
+	var yeni = (int(Ag.oyun_ayarlari.get("enflasyon", 1)) + 1) % 3
+	Ag.ayar_degistir("enflasyon", yeni)
+	_profili_kaydet()
 
 
 func _on_baslat_basildi():
@@ -604,6 +628,9 @@ func _lobi_yenile():
 
 	baslat_butonu.visible = sunucu
 	bekleme_etiketi.visible = not sunucu
+	var enf = clampi(int(Ag.oyun_ayarlari.get("enflasyon", 1)), 0, 2)
+	enf_butonu.text = "ENFLASYON: " + Ag.ENFLASYON_ADLARI[enf] + "\n" + Ag.ENFLASYON_ACIKLAMALARI[enf]
+	enf_butonu.disabled = not sunucu
 	baslat_butonu.disabled = Ag.yuvalar.size() < 2
 	if sunucu and Ag.yuvalar.size() < 2:
 		oda_durum_etiketi.text = "Başlatmak için en az 2 oyuncu gerekli. Bot ekle." if cevrimdisi else "Başlatmak için en az 2 oyuncu gerekli. Arkadaşını bekle ya da bot ekle."

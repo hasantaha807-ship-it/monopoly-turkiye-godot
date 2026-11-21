@@ -110,7 +110,30 @@ var bekleyen_sans_karti_degeri = 0
 
 var ihale_suresi = 8
 var ihale_aktif = false
-var ihale_verileri = {"sehir": "", "guncel_teklif": 0, "kazanan_indeks": -1, "satici": -1, "cekilenler": []}
+var ihale_verileri = {"sehir": "", "guncel_teklif": 0, "kazanan_indeks": -1, "satici": -1, "artis": 50, "cekilenler": []}
+
+# --- RENK GRUPLARI (TEKEL) ---
+var gruplar := {}                  # grup rengi -> tahtadaki sırasıyla şehirler
+const GORUNEN_ADLAR := {"Eskisehir": "Eskişehir", "Adiyaman": "Adıyaman", "Istanbul": "İstanbul"}
+
+# --- ENFLASYON ---
+var tur_sayaci := 0                # tamamlanan tur (her oyuncu bir kez oynayınca +1)
+var enf_kademe := 0                # kaç kez enflasyon oldu
+var enf_aralik := 10               # kaç turda bir (0 = kapalı)
+var enf_oran := 0.2                # her seferinde kira artışı
+
+# --- YENİ ARAYÜZ PARÇALARI ---
+var _gosterge: Label = null        # sol üstte "TUR 7 · KİRA ×1,20"
+var _insa_butonu_kutusu: Control = null
+var _insa_butonu: Button = null
+var _insa_paneli: Control = null
+var _insa_listesi: VBoxContainer = null
+var _bilgi_kuyrugu: Array = []     # sırada bekleyen bilgi şeritleri
+var _bilgi_oncelikli := false
+var _salla_bekleme := 0.0
+var _salla_ipucu_gosterildi := false
+var _ekstra_zar_bekliyor := false   # telefonda: ekstra zar seçildi, sallama bekleniyor
+var _ekstra_buton_metni := ""
 
 var sehirler = {
 	"Samsun": {"fiyat": 180, "baslangic_kirasi": 40, "renk": Color(0.8, 0.4, 0.6)},
@@ -128,7 +151,7 @@ var sehirler = {
 	"Gaziantep": {"fiyat": 300, "baslangic_kirasi": 70, "renk": Color(0.9, 0.8, 0.2)},
 	"Kocaeli": {"fiyat": 320, "baslangic_kirasi": 75, "renk": Color(0.9, 0.8, 0.2)},
 	"Bursa": {"fiyat": 350, "baslangic_kirasi": 80, "renk": Color(0.2, 0.6, 0.3)},
-	"Adiyaman": {"fiyat": 400, "baslangic_kirasi": 150, "renk": Color(0.2, 0.6, 0.3)},
+	"Adiyaman": {"fiyat": 600, "baslangic_kirasi": 150, "renk": Color(0.2, 0.6, 0.3)},
 	"Ankara": {"fiyat": 450, "baslangic_kirasi": 100, "renk": Color(0.2, 0.4, 0.8)},
 	"Istanbul": {"fiyat": 500, "baslangic_kirasi": 120, "renk": Color(0.2, 0.4, 0.8)}
 }
@@ -239,6 +262,7 @@ func _komutu_isle(ad: String, a: Array):
 		"tamam": _tamam()
 		"satin_al": _satin_al(str(a[0]))
 		"pas_gec": _pas_gec()
+		"insa": _insa(str(a[0]))
 		"evet": _yukselt()
 		"hayir": _yukseltme_iptal()
 		"kefalet": _kefalet()
@@ -278,6 +302,10 @@ func _komut_gecerli(ad: String, a: Array, g: int) -> bool:
 			return tapu_karti.visible and a.size() == 1 and str(a[0]) == harita_sirasi[o["konum"]]
 		"pas_gec":
 			return tapu_karti.visible
+		"insa":
+			if a.size() != 1 or not sehirler.has(str(a[0])):
+				return false
+			return _tur_basi and not hareket_ediyor and not o["hapiste_mi"] and not _panel_acik_mi() and _insa_edilebilir_mi(aktif_oyuncu_indeksi, str(a[0])) and o["para"] >= _insa_bedeli(str(a[0]))
 		"evet", "hayir":
 			return yukseltme_paneli.visible
 		"kefalet", "yat":
@@ -293,7 +321,7 @@ func _komut_gecerli(ad: String, a: Array, g: int) -> bool:
 			var i = int(a[0])
 			if i < 0 or i > 3:
 				return false
-			return oyuncular[i]["aktif_mi"] and i != ihale_verileri["satici"] and not ihale_verileri["cekilenler"].has(i) and oyuncular[i]["para"] >= ihale_verileri["guncel_teklif"] + 50
+			return oyuncular[i]["aktif_mi"] and i != ihale_verileri["satici"] and i != ihale_verileri["kazanan_indeks"] and not ihale_verileri["cekilenler"].has(i) and oyuncular[i]["para"] >= _siradaki_teklif()
 		"ihale_pas":
 			return ihale_aktif
 		"ihale_bitti":
@@ -311,7 +339,7 @@ func _durum_al() -> Dictionary:
 	var liste = []
 	for o in oyuncular:
 		liste.append({"para": o["para"], "konum": o["konum"], "hapiste_mi": o["hapiste_mi"], "hapis_turu": o["hapis_turu"], "aktif_mi": o["aktif_mi"], "yapay_zeka": o["yapay_zeka"]})
-	return {"aktif": aktif_oyuncu_indeksi, "oyuncular": liste, "mulk": mülkiyet_durumu.duplicate(true), "tur_basi": _tur_basi}
+	return {"aktif": aktif_oyuncu_indeksi, "oyuncular": liste, "mulk": mülkiyet_durumu.duplicate(true), "tur_basi": _tur_basi, "tur": tur_sayaci, "enf": enf_kademe}
 
 func _durum_yayinla():
 	if online and multiplayer.is_server():
@@ -343,6 +371,10 @@ func _durumu_uygula(d: Dictionary):
 		mülkiyet_durumu = d["mulk"].duplicate(true)
 		_evleri_yeniden_ciz()
 	_tur_basi = bool(d["tur_basi"])
+	tur_sayaci = int(d.get("tur", tur_sayaci))
+	enf_kademe = int(d.get("enf", enf_kademe))
+	_tum_kiralari_guncelle()
+	_gostergeyi_guncelle()
 	piyonlarin_konumlarini_duzenle()
 	arayuzu_guncelle()
 	_butonlari_yenile()
@@ -386,7 +418,7 @@ func _evleri_yeniden_ciz():
 			else:
 				for j in range(seviye + 1):
 					insaa_et_gorsel_ev(konum, renk, j)
-		haritadaki_kirayi_guncelle(sehir, seviye)
+	_tum_kiralari_guncelle()
 
 func _butonlari_yenile():
 	var kontrol = not _kontrol_bende()
@@ -400,6 +432,7 @@ func _butonlari_yenile():
 	tamam_butonu.disabled = kontrol
 	sat_butonu.disabled = kontrol
 	ihaleye_cikar_butonu.disabled = kontrol
+	_insa_arayuzunu_yenile()
 
 # --- BAĞLANTI OLAYLARI (sunucu) ---
 func _cevrimici_hazirla():
@@ -503,9 +536,15 @@ func _bot_hapis_karari():
 		_komut("yat")
 
 # --- KISA BİLGİ YAZISI (ekranın üstünde) ---
-func _bilgi_goster(metin: String, sure := 4.0, renk := Color(1, 0.82, 0.3)):
+func _bilgi_goster(metin: String, sure := 4.0, renk := Color(1, 0.82, 0.3), oncelikli := false):
 	if _bilgi_etiketi == null:
 		return
+	# Ekranda önemli bir mesaj varsa yenisi sıraya girer (en fazla 3); yoksa hemen gösterilir
+	if _bilgi_kutusu.visible and _bilgi_sayaci > 0 and (_bilgi_oncelikli or not _bilgi_kuyrugu.is_empty()):
+		if _bilgi_kuyrugu.size() < 3:
+			_bilgi_kuyrugu.append([metin, sure, renk, oncelikli])
+		return
+	_bilgi_oncelikli = oncelikli
 	_bilgi_etiketi.text = metin
 	_bilgi_stili.border_color = renk
 	_bilgi_kutusu.visible = true
@@ -583,6 +622,9 @@ func _ready():
 	yeniden_baslat_butonu_menu.pressed.connect(_on_yeniden_baslat_basildi)
 	ana_menu_butonu.pressed.connect(_on_ana_menu_basildi)
 	ayarlar_butonu.pressed.connect(oyunu_duraklat_veya_devam_et)
+	# Kodla sonradan eklenen arayüz parçaları (inşaat butonu, gösterge, uçan yazılar...)
+	# Ayarlar ekranının üstüne çıkmasın: her yeni eklemede Ayarlar en üste alınır
+	$Arayuz.child_entered_tree.connect(func(_n): _ayarlari_en_uste_al.call_deferred())
 	# Başlangıç değerlerini senkronize et
 	var muzik_bus = AudioServer.get_bus_index("Muzik")
 	var efekt_bus = AudioServer.get_bus_index("Efekt")
@@ -602,6 +644,21 @@ func _ready():
 
 	# Üstte kısa bilgi şeridi
 	_bilgi_kutusunu_kur()
+
+	# Renk grupları, enflasyon ayarı ve yeni arayüz parçaları
+	_gruplari_hazirla()
+	var enf_modu = int(Ag.oyun_ayarlari.get("enflasyon", 1))
+	if enf_modu == 0:
+		enf_aralik = 0
+	elif enf_modu == 2:
+		enf_aralik = 8
+		enf_oran = 0.25
+	else:
+		enf_aralik = 10
+		enf_oran = 0.2
+	_grup_seritlerini_ciz()
+	_gostergeyi_kur()
+	_insa_arayuzunu_kur()
 
 	# ----------------------------------------------------
 
@@ -683,6 +740,8 @@ func _ready():
 		ihale_timer.timeout.connect(_on_ihale_timer_timeout)
 
 	piyonlarin_konumlarini_duzenle()
+	_tum_kiralari_guncelle()
+	_gostergeyi_guncelle()
 	if online:
 		_cevrimici_hazirla()
 	else:
@@ -721,12 +780,16 @@ func arayuzu_guncelle():
 		bakiye_etiketi.text = bakiye_metni
 
 func sirayi_sonraki_oyuncuya_gecir():
+	var onceki = aktif_oyuncu_indeksi
 	var dongu_korumasi = 0
 	while dongu_korumasi < 4:
 		aktif_oyuncu_indeksi = (aktif_oyuncu_indeksi + 1) % 4
 		if oyuncular[aktif_oyuncu_indeksi]["aktif_mi"]:
 			break
 		dongu_korumasi += 1
+	# Sıra başa döndüyse bir tur tamamlandı
+	if aktif_oyuncu_indeksi <= onceki:
+		_tur_tamamlandi()
 
 	arayuzu_guncelle()
 	zar_paneli.hide()
@@ -750,8 +813,10 @@ func siradaki_turu_baslat():
 	_durum_yayinla()
 	arayuzu_guncelle()
 
-	if online and _kontrol_bende():
-		_bilgi_goster("SIRA SENDE!", 2.5, o_oyuncu_rengi())
+	if _kontrol_bende():
+		_titret(60)
+		if online:
+			_bilgi_goster("SIRA SENDE!", 2.5, o_oyuncu_rengi())
 
 	if o_oyuncu["hapiste_mi"]:
 		zar_at_ve_ilerle(false)
@@ -771,21 +836,50 @@ func _zar_panelini_goster():
 		taktiksel_zar_butonu.disabled = true
 	else:
 		taktiksel_zar_butonu.disabled = false
+	_ekstra_zar_secimini_sifirla()
 	zar_secim_paneli.show()
+	_insa_arayuzunu_yenile()
+	if OS.has_feature("mobile") and not _salla_ipucu_gosterildi:
+		_salla_ipucu_gosterildi = true
+		_bilgi_goster("İpucu: Telefonu sallayarak zar atabilirsin! Ekstra zar için önce butona bas, sonra salla.", 4.0)
 
 func _on_normal_zar_basildi():
 	if not zar_secim_paneli.visible or not _kontrol_bende(): return
+	_ekstra_zar_secimini_sifirla()
 	_oyuncu_komutu("zar", [false])
 
+# PC'de ekstra zar butona basınca direkt atılır.
+# Telefonda önce seçilir ("Telefonu Salla!"), 100 TL ancak sallayınca düşer.
+# Seçiliyken butona tekrar basılırsa sallamadan atılır.
 func _on_taktiksel_zar_basildi():
 	if not zar_secim_paneli.visible or not _kontrol_bende(): return
-	var o_oyuncu = oyuncular[aktif_oyuncu_indeksi]
-	if o_oyuncu["para"] >= 100:
+	if oyuncular[aktif_oyuncu_indeksi]["para"] < 100: return
+	if OS.has_feature("mobile") and not _ekstra_zar_bekliyor:
+		_ekstra_zar_bekliyor = true
+		if _ekstra_buton_metni == "":
+			_ekstra_buton_metni = taktiksel_zar_butonu.text
+		taktiksel_zar_butonu.text = "TELEFONU SALLA!\n(100 TL)"
+		taktiksel_zar_butonu.modulate = Color(1.25, 1.15, 0.6)
+		_titret(40)
+		_bilgi_goster("Ekstra zar seçildi — telefonu salla! (Bedava zar için Zar At butonuna bas)", 2.5)
+		return
+	_ekstra_zar_at()
+
+func _ekstra_zar_at():
+	_ekstra_zar_secimini_sifirla()
+	if oyuncular[aktif_oyuncu_indeksi]["para"] >= 100:
 		_oyuncu_komutu("zar", [true])
+
+func _ekstra_zar_secimini_sifirla():
+	_ekstra_zar_bekliyor = false
+	if _ekstra_buton_metni != "":
+		taktiksel_zar_butonu.text = _ekstra_buton_metni
+	taktiksel_zar_butonu.modulate = Color.WHITE
 
 func _zar_komutu(ekstra_zar: bool):
 	_tur_basi = false
 	zar_secim_paneli.hide()
+	_insa_arayuzunu_yenile()
 	var o_oyuncu = oyuncular[aktif_oyuncu_indeksi]
 	if ekstra_zar:
 		if o_oyuncu["para"] >= 100:
@@ -799,6 +893,17 @@ func _zar_komutu(ekstra_zar: bool):
 func ai_hamle_yap():
 	await get_tree().create_timer(1.0).timeout
 	if not is_inside_tree(): return
+	# Tekeli varsa önce inşaat: en pahalı şehirden başlar, en fazla 2 kat, 200 TL yedek bırakır
+	for _kat in range(2):
+		var secenek = _insa_secenekleri(aktif_oyuncu_indeksi)
+		if secenek.is_empty():
+			break
+		secenek.sort_custom(func(x, y): return sehirler[x]["fiyat"] > sehirler[y]["fiyat"])
+		if oyuncular[aktif_oyuncu_indeksi]["para"] - _insa_bedeli(secenek[0]) < 200:
+			break
+		_komut("insa", [secenek[0]])
+		await get_tree().create_timer(0.7).timeout
+		if not is_inside_tree(): return
 	var o_oyuncu = oyuncular[aktif_oyuncu_indeksi]
 	var ekstra_zar_kullan = false
 
@@ -891,6 +996,8 @@ func _hareketi_oynat(zar1: int, zar2: int, ekstra_zar: bool):
 	elif durulan_yer == "Hapishane":
 		o_oyuncu["hapiste_mi"] = true
 		o_oyuncu["hapis_turu"] = 1
+		if _kontrol_bende():
+			_titret(300)
 		bildirim_yazisi.text = "[center]\n\n\n[font_size=20][b][color=#ff3333]KADER MAHKÛMU![/color][/b][/font_size]\n\nPolis çevirmesine takıldın. Doğruca hapishaneye gidiyorsun![/center]"
 		tamam_butonu.disabled = not _kontrol_bende()
 		bildirim_paneli.show()
@@ -906,7 +1013,7 @@ func _hareketi_oynat(zar1: int, zar2: int, ekstra_zar: bool):
 			if sahip_indeksi == aktif_oyuncu_indeksi:
 				if mevcut_seviye < 4:
 					var yukseltme_bedeli = int(fiyat * [0.5, 0.75, 1.0, 1.5][mevcut_seviye])
-					var sonraki_kira = int(fiyat * [0.5, 1.0, 1.5, 2.0][mevcut_seviye])
+					var sonraki_kira = _kira_hesapla(durulan_yer, mevcut_seviye + 1)
 
 					evet_butonu.disabled = not _kontrol_bende()
 					hayir_butonu.disabled = not _kontrol_bende()
@@ -917,14 +1024,21 @@ func _hareketi_oynat(zar1: int, zar2: int, ekstra_zar: bool):
 				else:
 					sirayi_sonraki_oyuncuya_gecir()
 			else:
-				var kira_bedeli = 0
-				if mevcut_seviye == 0:
-					kira_bedeli = sehirler[durulan_yer]["baslangic_kirasi"]
-				else:
-					kira_bedeli = int(fiyat * [0.5, 1.0, 1.5, 2.0][mevcut_seviye-1])
+				var kira_bedeli = _kira_hesapla(durulan_yer)
+				# Kiranın neden yüksek olduğunu söyle: tekel ve/veya enflasyon
+				var aciklama = "(Tamam'a bastığında bakiyenden düşülecektir)"
+				var notlar = []
+				if _tekel_mi(sahip_indeksi, durulan_yer):
+					notlar.append("[color=gold]TEKEL: grubun tamamı onun[/color]")
+				if enf_kademe > 0:
+					notlar.append("[color=#ff7766]enflasyon ×" + _carpan_yazisi() + "[/color]")
+				if not notlar.is_empty():
+					aciklama = " · ".join(PackedStringArray(notlar))
 
 				bekleyen_kira = {"aktif": true, "odeyen": aktif_oyuncu_indeksi, "alan": sahip_indeksi, "miktar": kira_bedeli}
-				bildirim_yazisi.text = "[center]\n[font_size=20][b][color=#ffaa00]KİRA ÖDEMESİ![/color][/b][/font_size]\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n\n[b]Ödemen Gereken: " + str(kira_bedeli) + " TL[/b]\n\n(Tamam'a bastığında bakiyenden düşülecektir)[/center]"
+				bildirim_yazisi.text = "[center]\n[font_size=20][b][color=#ffaa00]KİRA ÖDEMESİ![/color][/b][/font_size]\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n\n[b]Ödemen Gereken: " + str(kira_bedeli) + " TL[/b]\n\n" + aciklama + "[/center]"
+				if _kontrol_bende():
+					_titret(220)
 				tamam_butonu.disabled = not _kontrol_bende()
 				bildirim_paneli.show()
 
@@ -1006,6 +1120,8 @@ func _tamam():
 		odeyen["para"] -= bekleyen_kira["miktar"]
 		alan["para"] += bekleyen_kira["miktar"]
 		_para_sesini_tek_cal()
+		if bekleyen_kira["alan"] == _yerel() and not alan["yapay_zeka"]:
+			_titret(40)
 		bekleyen_kira["aktif"] = false
 		arayuzu_guncelle()
 
@@ -1029,6 +1145,8 @@ func borc_kontrolu():
 		ihale_paneli.hide()
 		o_oyuncu["aktif_mi"] = false
 		o_oyuncu["piyon"].hide()
+		if aktif_oyuncu_indeksi == _yerel() and not o_oyuncu["yapay_zeka"]:
+			_titret(500)
 
 		var kalan = []
 		for p in oyuncular:
@@ -1139,17 +1257,38 @@ func _ihale_butonlarini_ayarla():
 	var katilabilir = ben >= 0 and ben != ihale_verileri["satici"] and oyuncular[ben]["aktif_mi"] and not oyuncular[ben]["yapay_zeka"] and not ihale_verileri["cekilenler"].has(ben)
 	teklif_butonu.disabled = not katilabilir
 	pas_butonu.disabled = not katilabilir
+	teklif_butonu.text = "Teklif Ver\n" + str(_siradaki_teklif()) + " TL"
 
-func _ihale_kurulumu_yap(sehir_adi, baslangic_fiyati):
+# Teklif artışı şehrin fiyatına göre: Kars'ta 10 TL, İstanbul'da 50 TL
+func _ihale_artisi(sehir: String) -> int:
+	return maxi(10, int(round(sehirler[sehir]["fiyat"] * 0.1 / 10.0)) * 10)
+
+# İlk teklif başlangıç fiyatıdır, sonrakiler birer artış üstüne çıkar
+func _siradaki_teklif() -> int:
+	if ihale_verileri["kazanan_indeks"] == -1:
+		return ihale_verileri["guncel_teklif"]
+	return ihale_verileri["guncel_teklif"] + ihale_verileri["artis"]
+
+# satici = -1: pas geçilen şehir (banka ihalesi); satici >= 0: borcunu kapatmak için satılan şehir
+func _ihale_kurulumu_yap(sehir_adi, baslangic_fiyati, satici: int = -2):
+	if satici == -2:
+		satici = aktif_oyuncu_indeksi
 	satis_paneli.hide()
+	tapu_karti.hide()
 	ihale_verileri["sehir"] = sehir_adi
 	ihale_verileri["guncel_teklif"] = baslangic_fiyati
 	ihale_verileri["kazanan_indeks"] = -1
-	ihale_verileri["satici"] = aktif_oyuncu_indeksi
+	ihale_verileri["satici"] = satici
+	ihale_verileri["artis"] = _ihale_artisi(sehir_adi)
 	ihale_verileri["cekilenler"].clear()
 
-	ihale_mulk_bilgisi.text = "[center]Satılan Mülk:\n[font_size=28][b][color=gold]" + sehir_adi.to_upper() + "[/color][/b][/font_size] (Başlangıç: [color=green]" + str(baslangic_fiyati) + " TL[/color])[/center]"
-	ihale_durum_yazisi.text = "[center][font_size=23][b][color=cyan]AÇIK ARTIRMA BAŞLADI![/color][/b][/font_size]\nTeklifler bekleniyor...[/center]"
+	if satici == -1:
+		ihale_baslik.text = "BANKA İHALESİ!"
+		ihale_mulk_bilgisi.text = "[center]Kimse almadı:\n[font_size=28][b][color=gold]" + sehir_adi.to_upper() + "[/color][/b][/font_size] (Liste fiyatı: " + str(sehirler[sehir_adi]["fiyat"]) + " TL)[/center]"
+	else:
+		ihale_baslik.text = "AÇIK ARTIRMA BAŞLADI!"
+		ihale_mulk_bilgisi.text = "[center]Satılan Mülk:\n[font_size=28][b][color=gold]" + sehir_adi.to_upper() + "[/color][/b][/font_size] (Başlangıç: [color=green]" + str(baslangic_fiyati) + " TL[/color])[/center]"
+	ihale_durum_yazisi.text = "[center][font_size=23][b][color=cyan]İlk teklif: " + str(baslangic_fiyati) + " TL[/color][/b][/font_size]\nTeklifler bekleniyor...[/center]"
 
 	ihale_suresi = 8
 	sure_yazisi.text = "Kalan Süre: 8"
@@ -1157,6 +1296,8 @@ func _ihale_kurulumu_yap(sehir_adi, baslangic_fiyati):
 	teklif_butonu.show()
 	pas_butonu.show()
 	_ihale_butonlarini_ayarla()
+	if not teklif_butonu.disabled:
+		_titret(60)
 
 	ihale_paneli.visible = true
 	ihale_paneli.scale = Vector2(0, 0)
@@ -1176,31 +1317,19 @@ func _on_ihale_timer_timeout():
 	var yeni_sure = ihale_suresi - 1
 	_komut("ihale_sure", [yeni_sure])
 
-	if yeni_sure > 0 and yeni_sure <= 5:
+	var teklif_verildi = false
+	if yeni_sure > 0:
 		var adaylar = []
-
-		var ihaledeki_sehir = ihale_verileri["sehir"]
-		var f = sehirler[ihaledeki_sehir]["fiyat"]
-		var gercek_deger = f
-
-		if mülkiyet_durumu.has(ihaledeki_sehir):
-			var s = mülkiyet_durumu[ihaledeki_sehir]["seviye"]
-			if s >= 1: gercek_deger += int(f * 0.50)
-			if s >= 2: gercek_deger += int(f * 0.75)
-			if s >= 3: gercek_deger += int(f * 1.00)
-			if s >= 4: gercek_deger += int(f * 1.50)
-
-		var maksimum_teklif_siniri = int(gercek_deger * 1.5)
-
+		var siradaki = _siradaki_teklif()
 		for i in range(4):
-			if oyuncular[i]["yapay_zeka"] and oyuncular[i]["aktif_mi"] and i != ihale_verileri["satici"] and not ihale_verileri["cekilenler"].has(i) and i != ihale_verileri["kazanan_indeks"]:
-				var verilecek_teklif = ihale_verileri["guncel_teklif"] + 50
-
-				if oyuncular[i]["para"] >= verilecek_teklif and verilecek_teklif <= maksimum_teklif_siniri:
-					adaylar.append(i)
-				elif verilecek_teklif > maksimum_teklif_siniri:
-					if not ihale_verileri["cekilenler"].has(i):
-						ihale_verileri["cekilenler"].append(i)
+			if not oyuncular[i]["yapay_zeka"] or not oyuncular[i]["aktif_mi"]:
+				continue
+			if i == ihale_verileri["satici"] or i == ihale_verileri["kazanan_indeks"] or ihale_verileri["cekilenler"].has(i):
+				continue
+			if siradaki > _bot_ihale_siniri(i):
+				ihale_verileri["cekilenler"].append(i)   # bu fiyata değmez, çekilir
+			elif oyuncular[i]["para"] - siradaki >= 100:
+				adaylar.append(i)
 
 		if adaylar.size() > 0:
 			var sans = 25
@@ -1208,9 +1337,52 @@ func _on_ihale_timer_timeout():
 			if yeni_sure == 1: sans = 80
 			if randi() % 100 < sans:
 				_komut("teklif", [adaylar[randi() % adaylar.size()]])
+				teklif_verildi = true
 
-	if yeni_sure <= 0:
+	# Süre bittiyse ya da teklif verebilecek kimse kalmadıysa beklemeden bitir
+	if yeni_sure <= 0 or (not teklif_verildi and _ihalede_aday_kalmadi()):
 		_komut("ihale_bitti")
+
+# Hâlâ teklif verebilecek biri var mı? (botlar 100 TL yedek bırakır)
+func _ihalede_aday_kalmadi() -> bool:
+	var siradaki = _siradaki_teklif()
+	for i in range(4):
+		if not oyuncular[i]["aktif_mi"]:
+			continue
+		if i == ihale_verileri["satici"] or i == ihale_verileri["kazanan_indeks"] or ihale_verileri["cekilenler"].has(i):
+			continue
+		var gerekli = siradaki + (100 if oyuncular[i]["yapay_zeka"] else 0)
+		if oyuncular[i]["para"] >= gerekli:
+			return false
+	return true
+
+# Bot bu şehre en fazla ne öder? Grubunu tamamlıyorsa çok, rakibinkini bozuyorsa biraz daha fazla
+func _bot_ihale_siniri(i: int) -> int:
+	var s = ihale_verileri["sehir"]
+	var f = sehirler[s]["fiyat"]
+	var deger = f
+	if mülkiyet_durumu.has(s):
+		for x in range(mülkiyet_durumu[s]["seviye"]):
+			deger += int(f * [0.5, 0.75, 1.0, 1.5][x])
+	var carpan = 1.0 if ihale_verileri["satici"] == -1 else 1.3
+	var grup = _grup_sehirleri(s)
+	var bende = 0
+	var rakipte = {}
+	for g in grup:
+		if g == s or not mülkiyet_durumu.has(g):
+			continue
+		var sahip = mülkiyet_durumu[g]["sahip"]
+		if sahip == i:
+			bende += 1
+		else:
+			rakipte[sahip] = rakipte.get(sahip, 0) + 1
+	if bende == grup.size() - 1:
+		carpan += 0.6
+	else:
+		for sahip in rakipte:
+			if rakipte[sahip] == grup.size() - 1:
+				carpan += 0.3
+	return int(deger * carpan)
 
 func _ihale_sure(kalan: int):
 	ihale_suresi = kalan
@@ -1218,11 +1390,13 @@ func _ihale_sure(kalan: int):
 		sure_yazisi.text = "Kalan Süre: " + str(ihale_suresi)
 
 func _on_teklif_butonu_basildi():
-	if not ihale_paneli.visible: return
+	if not ihale_paneli.visible or not ihale_aktif: return
 	var ben = _yerel()
 	if ben < 0 or not oyuncular[ben]["aktif_mi"]: return
-
-	if oyuncular[ben]["para"] >= ihale_verileri["guncel_teklif"] + 50:
+	if ben == ihale_verileri["kazanan_indeks"]:
+		sure_yazisi.text = "EN YÜKSEK\nTEKLİF SENDE"
+		return
+	if oyuncular[ben]["para"] >= _siradaki_teklif():
 		_oyuncu_komutu("teklif", [ben])
 	else:
 		sure_yazisi.text = "BAKİYE\nYETERSİZ!"
@@ -1242,13 +1416,18 @@ func _ihale_pas(indeks: int):
 		sure_yazisi.text = "İHALEDEN\nÇEKİLDİN"
 
 func _teklifi_artir(veren_indeks):
-	ihale_verileri["guncel_teklif"] += 50
+	var onceki = ihale_verileri["kazanan_indeks"]
+	ihale_verileri["guncel_teklif"] = _siradaki_teklif()
 	ihale_verileri["kazanan_indeks"] = veren_indeks
 	ihale_suresi = 8
 	sure_yazisi.text = "Kalan Süre: 8"
+	teklif_butonu.text = "Teklif Ver\n" + str(_siradaki_teklif()) + " TL"
 
 	var hex_renk = oyuncular[veren_indeks]["renk"].to_html(false)
 	ihale_durum_yazisi.text = "[center][color=#" + hex_renk + "][font_size=23][b]" + oyuncular[veren_indeks]["isim"] + "[/b][/font_size][/color] teklifi [color=green][font_size=23][b]" + str(ihale_verileri["guncel_teklif"]) + " TL[/b][/font_size][/color]'ye yükseltti!\nBaşka artıran var mı?[/center]"
+	# Teklifi geçilen oyuncunun telefonu kısa titrer
+	if onceki == _yerel() and onceki != veren_indeks and not oyuncular[onceki]["yapay_zeka"]:
+		_titret(80)
 
 func _ihale_sonuclandir():
 	ihale_aktif = false
@@ -1259,64 +1438,369 @@ func _ihale_sonuclandir():
 	var s = ihale_verileri["sehir"]
 	var k = ihale_verileri["kazanan_indeks"]
 	var bedel = ihale_verileri["guncel_teklif"]
-	var satici = oyuncular[ihale_verileri["satici"]]
+	var satici_no = ihale_verileri["satici"]
+	var konum = harita_sirasi.find(s)
 
 	if k != -1:
 		var alici = oyuncular[k]
 		alici["para"] -= bedel
-		satici["para"] += bedel
 		_para_sesini_tek_cal()
-		mülkiyet_durumu[s]["sahip"] = k
-
-		var konum = harita_sirasi.find(s)
-		for i in range(5):
-			var ev_node = path_2d.get_node_or_null("Ev_" + str(konum) + "_" + str(i))
-			if ev_node: ev_node.modulate = alici["renk"]
+		if satici_no >= 0:
+			oyuncular[satici_no]["para"] += bedel
+			mülkiyet_durumu[s]["sahip"] = k
+			for i in range(5):
+				var ev_node = path_2d.get_node_or_null("Ev_" + str(konum) + "_" + str(i))
+				if ev_node: ev_node.modulate = alici["renk"]
+		else:
+			mülkiyet_durumu[s] = {"sahip": k, "seviye": 0}
+			insaa_et_gorsel_ev(konum, alici["renk"], 0)
 
 		var hex_renk = alici["renk"].to_html(false)
 		ihale_durum_yazisi.text = "[center][font_size=21][b][color=gold]İHALE BİTTİ![/color][/b][/font_size]\n\nSATILAN KİŞİ: [color=#" + hex_renk + "]" + alici["isim"] + "[/color]\nÖDENEN TUTAR: [color=green]" + str(bedel) + " TL[/color][/center]"
-	else:
-		satici["para"] += bedel
-		var konum = harita_sirasi.find(s)
+		if k == _yerel() and not alici["yapay_zeka"]:
+			_titret(120)
+		_tekel_kontrol(k, s)
+	elif satici_no >= 0:
+		oyuncular[satici_no]["para"] += bedel
 		for i in range(5):
 			var ev_node = path_2d.get_node_or_null("Ev_" + str(konum) + "_" + str(i))
 			if ev_node:
 				path_2d.remove_child(ev_node)
 				ev_node.queue_free()
-
 		mülkiyet_durumu.erase(s)
-		haritadaki_kirayi_guncelle(s, 0)
 		ihale_durum_yazisi.text = "[center][b][color=red]İHALE BİTTİ![/color][/b]\n\nKimse teklif vermedi.\nMülk bankaya iade edildi.[/center]"
+	else:
+		ihale_durum_yazisi.text = "[center][b][color=red]İHALE BİTTİ![/color][/b]\n\nKimse teklif vermedi.\nŞehir bankada kaldı.[/center]"
 
+	_tum_kiralari_guncelle()
 	arayuzu_guncelle()
-	# 3 saniyelik bekleme sunucuda tutulur ki herkes aynı anda devam etsin
+	# Bekleme sunucuda tutulur ki herkes aynı anda devam etsin
 	if _yetkili():
-		_gecikmeli(3.0, "ihale_kapat")
+		_gecikmeli(3.0 if k != -1 else 1.5, "ihale_kapat")
 
 func _ihale_kapat():
 	ihale_paneli.hide()
-	var satici = oyuncular[ihale_verileri["satici"]]
-
-	if satici["para"] < 0:
+	var satici_no = ihale_verileri["satici"]
+	if satici_no == -1:
+		# Banka ihalesi bitti: pas geçen oyuncunun turu sona erer
+		sirayi_sonraki_oyuncuya_gecir()
+		return
+	if oyuncular[satici_no]["para"] < 0:
 		borc_kontrolu()
-	else:
-		if ihale_verileri["satici"] == aktif_oyuncu_indeksi:
-			sirayi_sonraki_oyuncuya_gecir()
+	elif satici_no == aktif_oyuncu_indeksi:
+		sirayi_sonraki_oyuncuya_gecir()
 
-func haritadaki_kirayi_guncelle(sehir_adi: String, yeni_seviye: int):
-	if kira_etiketleri == null: return
-	var etiket = kira_etiketleri.get_node_or_null(sehir_adi)
+# Eski çağrılar için: artık tek bir şehir değil, tüm etiketler güncellenir (tekel komşu şehirleri de etkiler)
+func haritadaki_kirayi_guncelle(_sehir_adi: String, _yeni_seviye: int = 0):
+	_tum_kiralari_guncelle()
 
-	if etiket:
-		var fiyat = sehirler[sehir_adi]["fiyat"]
-		var yeni_kira = 0
-		if yeni_seviye == 0: yeni_kira = sehirler[sehir_adi]["baslangic_kirasi"]
-		elif yeni_seviye == 1: yeni_kira = int(fiyat * 0.50)
-		elif yeni_seviye == 2: yeni_kira = int(fiyat * 1.00)
-		elif yeni_seviye == 3: yeni_kira = int(fiyat * 1.50)
-		elif yeni_seviye == 4: yeni_kira = int(fiyat * 2.00)
+# ==========================================
+# RENK GRUPLARI VE TEKEL
+# ==========================================
+func _gruplari_hazirla():
+	gruplar.clear()
+	for sehir in harita_sirasi:
+		if sehirler.has(sehir):
+			var anahtar = sehirler[sehir]["renk"].to_html(false)
+			if not gruplar.has(anahtar):
+				gruplar[anahtar] = []
+			gruplar[anahtar].append(sehir)
 
-		etiket.text = "Fiyat: " + str(fiyat) + " TL\nKira: " + str(yeni_kira) + " TL"
+func _grup_sehirleri(sehir: String) -> Array:
+	return gruplar.get(sehirler[sehir]["renk"].to_html(false), [sehir])
+
+func _gorunen_ad(sehir: String) -> String:
+	return GORUNEN_ADLAR.get(sehir, sehir)
+
+# Oyuncu bu şehrin grubundaki tüm şehirlere sahip mi?
+func _tekel_mi(sahip: int, sehir: String) -> bool:
+	if sahip < 0:
+		return false
+	for g in _grup_sehirleri(sehir):
+		if not mülkiyet_durumu.has(g) or mülkiyet_durumu[g]["sahip"] != sahip:
+			return false
+	return true
+
+# Yeni bir tekel oluştuysa herkese duyur
+func _tekel_kontrol(oyuncu: int, sehir: String):
+	if not _tekel_mi(oyuncu, sehir):
+		return
+	var adlar = []
+	for g in _grup_sehirleri(sehir):
+		adlar.append(_gorunen_ad(g))
+	_bilgi_goster("TEKEL! " + oyuncular[oyuncu]["isim"] + ": " + " · ".join(PackedStringArray(adlar)) + "  (kira ×2)", 3.5, oyuncular[oyuncu]["renk"], true)
+	if oyuncu == _yerel() and not oyuncular[oyuncu]["yapay_zeka"]:
+		_titret(150)
+
+# Kira: seviye, tekel ve enflasyon dahil. seviye verilmezse şehrin mevcut seviyesi kullanılır
+func _kira_hesapla(sehir: String, seviye: int = -1) -> int:
+	var f = sehirler[sehir]["fiyat"]
+	var sv = 0
+	var tekel = false
+	if mülkiyet_durumu.has(sehir):
+		sv = mülkiyet_durumu[sehir]["seviye"]
+		tekel = _tekel_mi(mülkiyet_durumu[sehir]["sahip"], sehir)
+	if seviye >= 0:
+		sv = seviye
+	var k = sehirler[sehir]["baslangic_kirasi"] if sv == 0 else int(f * [0.5, 1.0, 1.5, 2.0][sv - 1])
+	if tekel:
+		k = k * 2 if sv == 0 else int(k * 1.5)
+	return int(round(k * _kira_carpani()))
+
+func _tum_kiralari_guncelle():
+	if kira_etiketleri == null:
+		return
+	for sehir in sehirler.keys():
+		var etiket = kira_etiketleri.get_node_or_null(sehir)
+		if etiket == null:
+			continue
+		etiket.text = "Fiyat: " + str(sehirler[sehir]["fiyat"]) + " TL\nKira: " + str(_kira_hesapla(sehir)) + " TL"
+		# Tekeldeki şehirlerin kirası altın renkte görünür
+		if mülkiyet_durumu.has(sehir) and _tekel_mi(mülkiyet_durumu[sehir]["sahip"], sehir):
+			etiket.add_theme_color_override("font_color", Color(1, 0.84, 0.2))
+		else:
+			etiket.remove_theme_color_override("font_color")
+
+# Tahtadaki renk bantları grupları göstermediği için her şehrin etiketinin üstüne grup rengi şerit
+func _grup_seritlerini_ciz():
+	if kira_etiketleri == null:
+		return
+	for sehir in sehirler.keys():
+		var etiket = kira_etiketleri.get_node_or_null(sehir)
+		if etiket == null or etiket.has_node("GrupSeridi"):
+			continue
+		var serit = ColorRect.new()
+		serit.name = "GrupSeridi"
+		serit.color = sehirler[sehir]["renk"]
+		serit.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		serit.position = Vector2(0, -7)
+		serit.size = Vector2(etiket.size.x, 6)
+		etiket.add_child(serit)
+
+# ==========================================
+# İNŞAAT (TEKELDEKİ ŞEHİRLERE SIRA SENDEYKEN KAT ÇIKMA)
+# ==========================================
+func _insa_bedeli(sehir: String) -> int:
+	return int(sehirler[sehir]["fiyat"] * [0.5, 0.75, 1.0, 1.5][mülkiyet_durumu[sehir]["seviye"]])
+
+# Dengeli inşaat: gruptaki en düşük katlı şehirlere önce kat çıkılır
+func _insa_edilebilir_mi(oyuncu: int, sehir: String) -> bool:
+	if not mülkiyet_durumu.has(sehir) or mülkiyet_durumu[sehir]["sahip"] != oyuncu:
+		return false
+	var sv = mülkiyet_durumu[sehir]["seviye"]
+	if sv >= 4 or not _tekel_mi(oyuncu, sehir):
+		return false
+	for g in _grup_sehirleri(sehir):
+		if mülkiyet_durumu[g]["seviye"] < sv:
+			return false
+	return true
+
+func _insa_secenekleri(oyuncu: int) -> Array:
+	var liste = []
+	for sehir in harita_sirasi:
+		if sehirler.has(sehir) and _insa_edilebilir_mi(oyuncu, sehir):
+			liste.append(sehir)
+	return liste
+
+# "insa" komutu: tüm cihazlarda aynı şekilde çalışır
+func _insa(sehir: String):
+	var o = oyuncular[aktif_oyuncu_indeksi]
+	if not _insa_edilebilir_mi(aktif_oyuncu_indeksi, sehir):
+		return
+	var bedel = _insa_bedeli(sehir)
+	if o["para"] < bedel:
+		return
+	o["para"] -= bedel
+	_para_sesini_tek_cal()
+	mülkiyet_durumu[sehir]["seviye"] += 1
+	var kat = mülkiyet_durumu[sehir]["seviye"]
+	insaa_et_gorsel_ev(harita_sirasi.find(sehir), o["renk"], kat)
+	_tum_kiralari_guncelle()
+	arayuzu_guncelle()
+	var yapi = "plaza" if kat == 4 else str(kat) + ". kat"
+	_bilgi_goster(o["isim"] + ": " + _gorunen_ad(sehir) + " → " + yapi + "  (kira " + str(_kira_hesapla(sehir)) + " TL)", 2.5, o["renk"])
+	_insa_arayuzunu_yenile()
+
+func _stil_kutusu(renk: Color, kose: int, kenar_rengi := Color(0, 0, 0, 0), kenar := 0) -> StyleBoxFlat:
+	var s = StyleBoxFlat.new()
+	s.bg_color = renk
+	s.set_corner_radius_all(kose)
+	if kenar > 0:
+		s.border_color = kenar_rengi
+		s.set_border_width_all(kenar)
+	s.content_margin_left = 16
+	s.content_margin_right = 16
+	s.content_margin_top = 8
+	s.content_margin_bottom = 8
+	return s
+
+func _insa_arayuzunu_kur():
+	# Zar seçim panelinin hemen altında "İNŞAAT YAP" butonu
+	_insa_butonu_kutusu = CenterContainer.new()
+	_insa_butonu_kutusu.anchor_left = 0.0
+	_insa_butonu_kutusu.anchor_right = 1.0
+	_insa_butonu_kutusu.offset_top = 658
+	_insa_butonu_kutusu.offset_bottom = 734
+	_insa_butonu_kutusu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$Arayuz.add_child(_insa_butonu_kutusu)
+	_insa_butonu = Button.new()
+	_insa_butonu.text = "İNŞAAT YAP"
+	_insa_butonu.custom_minimum_size = Vector2(369, 70)
+	_insa_butonu.add_theme_font_size_override("font_size", 28)
+	_insa_butonu.add_theme_color_override("font_color", Color.WHITE)
+	_insa_butonu.add_theme_stylebox_override("normal", _stil_kutusu(Color(0.85, 0.5, 0.08), 10))
+	_insa_butonu.add_theme_stylebox_override("hover", _stil_kutusu(Color(0.95, 0.6, 0.15), 10))
+	_insa_butonu.add_theme_stylebox_override("pressed", _stil_kutusu(Color(0.7, 0.4, 0.05), 10))
+	_insa_butonu.pressed.connect(_on_insa_butonu_basildi)
+	_insa_butonu_kutusu.add_child(_insa_butonu)
+	_insa_butonu_kutusu.hide()
+
+	# İnşaat paneli (ortada)
+	_insa_paneli = CenterContainer.new()
+	_insa_paneli.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_insa_paneli.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$Arayuz.add_child(_insa_paneli)
+	var kart = PanelContainer.new()
+	kart.custom_minimum_size = Vector2(660, 0)
+	var stil = _stil_kutusu(Color(0.07, 0.09, 0.13, 0.97), 18, Color(0.95, 0.6, 0.15), 3)
+	stil.content_margin_left = 28
+	stil.content_margin_right = 28
+	stil.content_margin_top = 20
+	stil.content_margin_bottom = 20
+	kart.add_theme_stylebox_override("panel", stil)
+	_insa_paneli.add_child(kart)
+	var v = VBoxContainer.new()
+	v.add_theme_constant_override("separation", 12)
+	kart.add_child(v)
+	var baslik = Label.new()
+	baslik.text = "İNŞAAT"
+	baslik.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	baslik.add_theme_font_size_override("font_size", 36)
+	baslik.add_theme_color_override("font_color", Color(1, 0.75, 0.3))
+	v.add_child(baslik)
+	var aciklama = Label.new()
+	aciklama.text = "Tekelindeki şehirlere kat çıkabilirsin. Katlar dengeli dikilir: gruptaki en az katlı şehirden başlanır."
+	aciklama.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	aciklama.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	aciklama.add_theme_font_size_override("font_size", 20)
+	aciklama.add_theme_color_override("font_color", Color(0.75, 0.78, 0.85))
+	v.add_child(aciklama)
+	_insa_listesi = VBoxContainer.new()
+	_insa_listesi.add_theme_constant_override("separation", 8)
+	v.add_child(_insa_listesi)
+	var kapat = Button.new()
+	kapat.text = "TAMAM"
+	kapat.custom_minimum_size = Vector2(0, 64)
+	kapat.add_theme_font_size_override("font_size", 26)
+	kapat.add_theme_stylebox_override("normal", _stil_kutusu(Color(0.17, 0.55, 0.13), 10))
+	kapat.add_theme_stylebox_override("hover", _stil_kutusu(Color(0.22, 0.65, 0.18), 10))
+	kapat.add_theme_stylebox_override("pressed", _stil_kutusu(Color(0.12, 0.42, 0.1), 10))
+	kapat.pressed.connect(_on_insa_kapat_basildi)
+	v.add_child(kapat)
+	_insa_paneli.hide()
+
+# Butonun ve panelin görünürlüğünü / listesini güncel duruma göre ayarlar
+func _insa_arayuzunu_yenile():
+	if _insa_butonu_kutusu == null:
+		return
+	var sira_bende = _kontrol_bende() and _tur_basi and not hareket_ediyor and not oyuncular[aktif_oyuncu_indeksi]["hapiste_mi"]
+	var secenekler = _insa_secenekleri(aktif_oyuncu_indeksi) if sira_bende else []
+	if _insa_paneli.visible:
+		if not sira_bende:
+			_insa_paneli.hide()
+		else:
+			_insa_listesini_doldur(secenekler)
+	_insa_butonu_kutusu.visible = sira_bende and zar_secim_paneli.visible and not secenekler.is_empty() and not _insa_paneli.visible
+
+func _insa_listesini_doldur(secenekler: Array):
+	for c in _insa_listesi.get_children():
+		c.queue_free()
+	if secenekler.is_empty():
+		var bos = Label.new()
+		bos.text = "Şu an kat çıkılabilecek şehir yok."
+		bos.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		bos.add_theme_font_size_override("font_size", 22)
+		_insa_listesi.add_child(bos)
+		return
+	var para = oyuncular[aktif_oyuncu_indeksi]["para"]
+	for sehir in secenekler:
+		var kat = mülkiyet_durumu[sehir]["seviye"] + 1
+		var bedel = _insa_bedeli(sehir)
+		var yapi = "Plaza" if kat == 4 else str(kat) + ". kat"
+		var b = Button.new()
+		b.text = _gorunen_ad(sehir) + "  →  " + yapi + "   ·   " + str(bedel) + " TL   (yeni kira " + str(_kira_hesapla(sehir, kat)) + " TL)"
+		b.custom_minimum_size = Vector2(0, 58)
+		b.add_theme_font_size_override("font_size", 22)
+		b.add_theme_stylebox_override("normal", _stil_kutusu(Color(1, 1, 1, 0.08), 10, sehirler[sehir]["renk"], 2))
+		b.add_theme_stylebox_override("hover", _stil_kutusu(Color(1, 1, 1, 0.16), 10, sehirler[sehir]["renk"], 2))
+		b.add_theme_stylebox_override("pressed", _stil_kutusu(Color(1, 1, 1, 0.04), 10, sehirler[sehir]["renk"], 2))
+		b.add_theme_stylebox_override("disabled", _stil_kutusu(Color(1, 1, 1, 0.03), 10, Color(1, 1, 1, 0.1), 2))
+		b.disabled = para < bedel
+		var hedef: String = sehir
+		b.pressed.connect(func(): _oyuncu_komutu("insa", [hedef]))
+		_insa_listesi.add_child(b)
+
+func _on_insa_butonu_basildi():
+	if not _kontrol_bende() or not _tur_basi:
+		return
+	zar_secim_paneli.hide()
+	_insa_butonu_kutusu.hide()
+	_insa_paneli.show()
+	_insa_arayuzunu_yenile()
+
+func _on_insa_kapat_basildi():
+	_insa_paneli.hide()
+	if _kontrol_bende() and _tur_basi and not hareket_ediyor:
+		_zar_panelini_goster()
+
+# ==========================================
+# ENFLASYON VE TUR GÖSTERGESİ
+# ==========================================
+func _kira_carpani() -> float:
+	return pow(1.0 + enf_oran, enf_kademe)
+
+func _carpan_yazisi() -> String:
+	return ("%.2f" % _kira_carpani()).replace(".", ",")
+
+# Her oyuncu bir kez oynayınca çağrılır (tüm cihazlarda aynı anda)
+func _tur_tamamlandi():
+	tur_sayaci += 1
+	if enf_aralik > 0 and tur_sayaci % enf_aralik == 0:
+		enf_kademe += 1
+		_tum_kiralari_guncelle()
+		_bilgi_goster("ENFLASYON! Tüm kiralar %" + str(int(round(enf_oran * 100))) + " arttı  (kira ×" + _carpan_yazisi() + ")", 4.0, Color(1, 0.4, 0.35), true)
+		_titret(150)
+	_gostergeyi_guncelle()
+
+func _gostergeyi_kur():
+	var kutu = PanelContainer.new()
+	kutu.position = Vector2(257, 472)
+	kutu.custom_minimum_size = Vector2(298, 0)
+	kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	kutu.add_theme_stylebox_override("panel", _stil_kutusu(Color(0.05, 0.07, 0.1, 0.82), 10))
+	$Arayuz.add_child(kutu)
+	_gosterge = Label.new()
+	_gosterge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_gosterge.add_theme_font_size_override("font_size", 19)
+	_gosterge.add_theme_color_override("font_color", Color(0.92, 0.92, 0.95))
+	kutu.add_child(_gosterge)
+
+func _gostergeyi_guncelle():
+	if _gosterge == null:
+		return
+	var metin = "TUR " + str(tur_sayaci + 1)
+	if enf_aralik > 0:
+		var kalan = enf_aralik - (tur_sayaci % enf_aralik)
+		metin += "   ·   KİRA ×" + _carpan_yazisi() + "\nEnflasyona " + str(kalan) + " tur"
+		_gosterge.add_theme_color_override("font_color", Color(1, 0.55, 0.5) if kalan == 1 else Color(0.92, 0.92, 0.95))
+	_gosterge.text = metin
+
+# ==========================================
+# TİTREŞİM (sadece telefonda)
+# ==========================================
+func _titret(ms: int):
+	if OS.has_feature("mobile"):
+		Input.vibrate_handheld(ms)
 
 func _on_kefalet_basildi():
 	if not hapishane_paneli.visible or not _kontrol_bende(): return
@@ -1360,7 +1844,17 @@ func tapu_kartini_goster(sehir_anahtari: String):
 	sehir_adi_etiketi.text = sehir_anahtari.to_upper()
 	renk_bandi.color = sehirler[sehir_anahtari]["renk"]
 
-	detay_yazisi.text = "Satın Alma Bedeli: %d TL\n\nBaşlangıç Kirası: %d TL\n1. Seviye Kira: %d TL\n2. Seviye Kira: %d TL\n3. Seviye Kira: %d TL\n4. Seviye Kira: %d TL" % [f, sehirler[sehir_anahtari]["baslangic_kirasi"], int(f * 0.50), int(f * 1.00), int(f * 1.50), int(f * 2.00)]
+	# Gruptan kaç şehir bu oyuncuda? (tapu kartındaki boş satıra yazılır)
+	var grup = _grup_sehirleri(sehir_anahtari)
+	var bende = 0
+	for g in grup:
+		if mülkiyet_durumu.has(g) and mülkiyet_durumu[g]["sahip"] == aktif_oyuncu_indeksi:
+			bende += 1
+	var grup_satiri = "Tekel olursa kira ×2"
+	if bende > 0:
+		grup_satiri = "Grup: %d/%d sende" % [bende, grup.size()]
+	var c = _kira_carpani()
+	detay_yazisi.text = "Satın Alma Bedeli: %d TL\n%s\nBaşlangıç Kirası: %d TL\n1. Seviye Kira: %d TL\n2. Seviye Kira: %d TL\n3. Seviye Kira: %d TL\n4. Seviye Kira: %d TL" % [f, grup_satiri, int(round(sehirler[sehir_anahtari]["baslangic_kirasi"] * c)), int(round(int(f * 0.50) * c)), int(round(int(f * 1.00) * c)), int(round(int(f * 1.50) * c)), int(round(int(f * 2.00) * c))]
 
 	karar_timer.start(15)
 
@@ -1387,6 +1881,8 @@ func _satin_al(dy: String):
 		mülkiyet_durumu[dy] = {"sahip": aktif_oyuncu_indeksi, "seviye": 0}
 		arayuzu_guncelle()
 		insaa_et_gorsel_ev(harita_sirasi.find(dy), o["renk"], 0)
+		_tum_kiralari_guncelle()
+		_tekel_kontrol(aktif_oyuncu_indeksi, dy)
 		tapu_karti.hide()
 		karar_timer.stop()
 		sirayi_sonraki_oyuncuya_gecir()
@@ -1433,7 +1929,18 @@ func _on_pas_gec_basildi():
 func _pas_gec():
 	tapu_karti.hide()
 	karar_timer.stop()
-	sirayi_sonraki_oyuncuya_gecir()
+	var sehir = harita_sirasi[oyuncular[aktif_oyuncu_indeksi]["konum"]]
+	if sehirler.has(sehir) and not mülkiyet_durumu.has(sehir):
+		_ihale_kurulumu_yap(sehir, _banka_ihale_baslangici(sehir), -1)
+	else:
+		sirayi_sonraki_oyuncuya_gecir()
+
+# Banka ihalesinin taban fiyatı: liste fiyatının %70'i (10'a yuvarlanır).
+# Pas diyen oyuncu da ihaleye girebilir ama arsayı yarı fiyata kapatamaz.
+const BANKA_IHALE_TABAN_ORANI := 0.7
+
+func _banka_ihale_baslangici(sehir: String) -> int:
+	return maxi(10, floori(sehirler[sehir]["fiyat"] * BANKA_IHALE_TABAN_ORANI / 10.0) * 10)
 
 func _on_sure_bitti():
 	# 15 saniyelik karar süresini sunucu bitirir
@@ -1589,7 +2096,16 @@ func _input(event):
 	if event.is_action_pressed("ui_cancel"): 
 		oyunu_duraklat_veya_devam_et()
 
+# Ayarlar ekranı ve Ayarlar butonu her zaman Arayuz katmanının en üstünde çizilsin
+func _ayarlari_en_uste_al():
+	if not is_inside_tree():
+		return
+	var arayuz = $Arayuz
+	arayuz.move_child(duraklatma_ekrani, -1)
+	arayuz.move_child(ayarlar_butonu, -1)
+
 func oyunu_duraklat_veya_devam_et():
+	_ayarlari_en_uste_al()
 	# Çevrimiçi oyunda oyun durdurulamaz (diğer telefonlarla senkron bozulur), sadece menü açılır
 	if online:
 		duraklatma_ekrani.visible = not duraklatma_ekrani.visible
@@ -1651,8 +2167,27 @@ func _process(delta):
 	# Üstteki bilgi yazısının süresi
 	if _bilgi_kutusu and _bilgi_kutusu.visible:
 		_bilgi_sayaci -= delta
+		# Sırada mesaj varsa mevcut olanı fazla bekletme
+		if not _bilgi_kuyrugu.is_empty() and not _bilgi_oncelikli:
+			_bilgi_sayaci = minf(_bilgi_sayaci, 1.2)
 		if _bilgi_sayaci <= 0:
 			_bilgi_kutusu.hide()
+			_bilgi_oncelikli = false
+			if not _bilgi_kuyrugu.is_empty():
+				var m = _bilgi_kuyrugu.pop_front()
+				_bilgi_goster(m[0], m[1], m[2], m[3])
+
+	# Telefonu sallayarak zar atma (sadece mobilde, zar seçimi ekrandayken)
+	if _salla_bekleme > 0.0:
+		_salla_bekleme -= delta
+	elif OS.has_feature("mobile") and zar_secim_paneli.visible and _kontrol_bende() and not duraklatma_ekrani.visible:
+		if Input.get_accelerometer().length() > 22.0:
+			_salla_bekleme = 1.5
+			_titret(60)
+			if _ekstra_zar_bekliyor:
+				_ekstra_zar_at()
+			else:
+				_on_normal_zar_basildi()
 	
 	# 1. ŞEHİR ALMA (TAPU) KARTI SÜRESİ (15 Saniye)
 	# Eğer tapu kartı ekrandaysa ve timer çalışıyorsa, kalan süreyi sayaca yaz:

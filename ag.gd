@@ -6,7 +6,7 @@ extends Node
 # Oyun mantığının ağ kısmı node_2d.gd içindedir.
 # ==========================================================
 
-const SURUM := 1                 # Farklı sürümler birbirine bağlanmasın diye
+const SURUM := 2                 # Farklı sürümler birbirine bağlanmasın diye (2: ihale, tekel, enflasyon)
 const OYUN_PORTU := 7777         # ENet (oyun trafiği)
 const KESIF_PORTU := 7778        # UDP yayını (oda bulma)
 const MAKS_OYUNCU := 4
@@ -17,6 +17,8 @@ const BAGLANMA_ZAMAN_ASIMI := 8.0
 const RENKLER := [Color("ff5943"), Color("599eff"), Color("ffcc00"), Color("3de865"), Color("ff9a2e"), Color("b57bff"), Color("ff74c0"), Color("2fd8d0")]
 const RENK_ADLARI := ["Kırmızı", "Mavi", "Sarı", "Yeşil", "Turuncu", "Mor", "Pembe", "Turkuaz"]
 const ARABA_SAYISI := 5
+const ENFLASYON_ADLARI := ["KAPALI", "NORMAL", "YÜKSEK"]
+const ENFLASYON_ACIKLAMALARI := ["kiralar sabit kalır", "her 10 turda kira +%20", "her 8 turda kira +%25"]
 
 signal lobi_degisti
 signal odalar_degisti
@@ -28,6 +30,7 @@ signal oyuncu_geri_dondu(indeks: int, peer_id: int)
 var online := false
 var cevrimdisi_oda := false       # Tek cihazda botlara karşı oyun için aynı oda ekranı
 var acilis_modu := ""             # Ana menü lobiyi "cevrimdisi" modda açmak isterse
+var oyun_ayarlari := {"enflasyon": 1}   # Oda sahibinin seçtiği kurallar (0 kapalı, 1 normal, 2 yüksek)
 var oyun_basladi := false
 var yeniden_baglaniyor := false   # Oyun ortasında geri dönen istemci
 var yuvalar: Array = []           # [{peer, isim, araba, renk(indeks), bot, bagli}]
@@ -152,6 +155,14 @@ func _secimi_uygula(peer_id: int, araba: int, renk: int):
 	_lobi_yayinla()
 
 
+# Oda sahibi (veya çevrimdışı oyuncu) oyun kuralını değiştirir; herkese yayınlanır
+func ayar_degistir(anahtar: String, deger):
+	if not sunucu_mu() or oyun_basladi:
+		return
+	oyun_ayarlari[anahtar] = deger
+	_lobi_yayinla()
+
+
 func oyunu_baslat():
 	if not sunucu_mu() or oyun_basladi or yuvalar.size() < 2:
 		return
@@ -162,7 +173,7 @@ func oyunu_baslat():
 		return
 	oyun_basladi = true
 	hazir_peerler.clear()
-	_oyunu_baslat_rpc.rpc(yuvalar)
+	_oyunu_baslat_rpc.rpc(yuvalar, oyun_ayarlari)
 
 
 # ----------------------------------------------------------
@@ -426,7 +437,7 @@ func _katil_istegi(isim, araba, renk, surum):
 			if not y["bot"] and not y["bagli"] and str(y["isim"]).to_lower() == isim.to_lower():
 				y["peer"] = peer_id
 				y["bagli"] = true
-				_yeniden_katil_rpc.rpc_id(peer_id, yuvalar, i)
+				_yeniden_katil_rpc.rpc_id(peer_id, yuvalar, i, oyun_ayarlari)
 				oyuncu_geri_dondu.emit(i, peer_id)
 				return
 		_reddet(peer_id, "Bu odada oyun başladı. Oyundan koptuysan aynı isimle tekrar katıl.")
@@ -462,15 +473,17 @@ func _reddedildi(mesaj: String):
 
 
 @rpc("authority", "call_local", "reliable")
-func _lobi_guncelle(liste: Array):
+func _lobi_guncelle(liste: Array, ayarlar: Dictionary):
 	yuvalar = liste
+	oyun_ayarlari = ayarlar
 	_yerel_indeksi_bul()
 	lobi_degisti.emit()
 
 
 @rpc("authority", "call_local", "reliable")
-func _oyunu_baslat_rpc(liste: Array):
+func _oyunu_baslat_rpc(liste: Array, ayarlar: Dictionary):
 	yuvalar = liste
+	oyun_ayarlari = ayarlar
 	_yerel_indeksi_bul()
 	oyun_basladi = true
 	yeniden_baglaniyor = false
@@ -482,8 +495,9 @@ func _oyunu_baslat_rpc(liste: Array):
 
 
 @rpc("authority", "call_remote", "reliable")
-func _yeniden_katil_rpc(liste: Array, indeks: int):
+func _yeniden_katil_rpc(liste: Array, indeks: int, ayarlar: Dictionary):
 	yuvalar = liste
+	oyun_ayarlari = ayarlar
 	yerel_indeks = indeks
 	oyun_basladi = true
 	yeniden_baglaniyor = true
@@ -510,7 +524,7 @@ func _lobi_yayinla():
 	if cevrimdisi_oda:
 		lobi_degisti.emit()
 		return
-	_lobi_guncelle.rpc(yuvalar)
+	_lobi_guncelle.rpc(yuvalar, oyun_ayarlari)
 
 
 func _reddet(peer_id: int, mesaj: String):

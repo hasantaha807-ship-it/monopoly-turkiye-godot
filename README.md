@@ -36,3 +36,10 @@ Ana menüdeki **ÇEVRİMİÇİ OYNA (AYNI Wİ-Fİ)** butonuyla 2-4 kişi kendi t
 - Bağlantısı kopan oyuncunun yerine bot oynar; aynı isimle odaya tekrar katılırsa sıradaki turdan itibaren kontrolü geri alır.
 - Oda sahibi oyundan çıkarsa oyun herkes için biter.
 - Kullanılan portlar: 7777 (oyun, ENet/UDP) ve 7778 (oda bulma yayını, UDP). Bilgisayarda oda kurarken Windows Güvenlik Duvarı izin isterse "Özel ağlar" için izin verin.
+
+## 🎲 Kurallar (v2.1)
+- **Banka ihalesi:** Durduğun şehri almazsan (ya da 15 saniye içinde karar vermezsen) şehir anında açık artırmaya çıkar. Sen dahil herkes teklif verebilir; ihale liste fiyatının yarısından başlar. Teklif verebilecek kimse kalmazsa ihale beklemeden kapanır.
+- **Tekel:** Bir renk grubunun tamamına sahip olan, o gruptaki evsiz şehirlerde 2 kat, evli şehirlerde 1,5 kat kira alır. Gruplar, tahtadaki kira etiketlerinin üstündeki renkli şeritlerle gösterilir; tekeldeki şehirlerin kirası altın renginde yazar.
+- **İnşaat:** Tekelin varsa, sıra sendeyken zar atmadan önce **İNŞAAT YAP** ile o gruptaki şehirlere kat çıkabilirsin. Katlar dengeli dikilir: gruptaki en az katlı şehirden başlanır.
+- **Enflasyon:** Oda ekranından seçilir. *Normal:* her 10 turda tüm kiralar %20 artar. *Yüksek:* her 8 turda %25. *Kapalı:* kiralar sabit. Sol üstteki gösterge turu, kira çarpanını ve bir sonraki enflasyona kalan turu gösterir.
+- **Telefonda:** Sıra sana gelince, kira öderken, ihalede teklifin geçilince telefon titrer. Zar seçimi ekrandayken telefonu sallamak "Zar At"a basmakla aynıdır.
