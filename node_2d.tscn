@@ -339,6 +339,836 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_v23"]
+
+[sub_resource type="SystemFont" id="SystemFont_v23"]
+font_names = PackedStringArray("Georgia", "Cambria", "Times New Roman", "Noto Serif", "serif")
+font_weight = 700
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_1"]
+bg_color = Color(0.06, 0.08, 0.12, 0.97)
+border_width_left = 2
+border_width_top = 8
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.96, 0.76, 0.26, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.0, 0.0, 0.0, 0.6)
+shadow_size = 26
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_2"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.16, 0.6, 0.27, 1.0)
+border_width_bottom = 5
+border_color = Color(0.08800000000000001, 0.33, 0.14850000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_3"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.28600000000000003, 0.6599999999999999, 0.3795, 1.0)
+border_width_bottom = 5
+border_color = Color(0.15730000000000002, 0.363, 0.20872500000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_4"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.128, 0.48, 0.21600000000000003, 1.0)
+border_width_bottom = 2
+border_color = Color(0.0704, 0.264, 0.11880000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_5"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_6"]
+bg_color = Color(0.06, 0.08, 0.12, 0.97)
+border_width_left = 2
+border_width_top = 8
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.96, 0.76, 0.26, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.0, 0.0, 0.0, 0.6)
+shadow_size = 26
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_7"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.2, 0.5, 0.85, 1.0)
+border_width_bottom = 5
+border_color = Color(0.11000000000000001, 0.275, 0.4675, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_8"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.32, 0.575, 0.8724999999999999, 1.0)
+border_width_bottom = 5
+border_color = Color(0.17600000000000002, 0.31625, 0.479875, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_9"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.16000000000000003, 0.4, 0.68, 1.0)
+border_width_bottom = 2
+border_color = Color(0.08800000000000002, 0.22000000000000003, 0.37400000000000005, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_10"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_11"]
+bg_color = Color(0.06, 0.08, 0.12, 0.97)
+border_width_left = 2
+border_width_top = 8
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.8, 1.0, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.0, 0.0, 0.0, 0.6)
+shadow_size = 26
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_12"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.16, 0.6, 0.27, 1.0)
+border_width_bottom = 5
+border_color = Color(0.08800000000000001, 0.33, 0.14850000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_13"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.28600000000000003, 0.6599999999999999, 0.3795, 1.0)
+border_width_bottom = 5
+border_color = Color(0.15730000000000002, 0.363, 0.20872500000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_14"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.128, 0.48, 0.21600000000000003, 1.0)
+border_width_bottom = 2
+border_color = Color(0.0704, 0.264, 0.11880000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_15"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_16"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.3, 0.34, 0.42, 1.0)
+border_width_bottom = 5
+border_color = Color(0.165, 0.18700000000000003, 0.231, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_17"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.40499999999999997, 0.439, 0.507, 1.0)
+border_width_bottom = 5
+border_color = Color(0.22275, 0.24145000000000003, 0.27885000000000004, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_18"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.24, 0.272, 0.336, 1.0)
+border_width_bottom = 2
+border_color = Color(0.132, 0.1496, 0.18480000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_19"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_20"]
+bg_color = Color(0.06, 0.08, 0.12, 0.97)
+border_width_left = 2
+border_width_top = 8
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.82, 0.2, 0.2, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.0, 0.0, 0.0, 0.6)
+shadow_size = 26
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_21"]
+bg_color = Color(0.94, 0.94, 0.96, 1.0)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_22"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.82, 0.58, 0.1, 1.0)
+border_width_bottom = 5
+border_color = Color(0.451, 0.319, 0.05500000000000001, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_23"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.847, 0.643, 0.23500000000000001, 1.0)
+border_width_bottom = 5
+border_color = Color(0.46585000000000004, 0.35365, 0.12925000000000003, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_24"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.656, 0.46399999999999997, 0.08000000000000002, 1.0)
+border_width_bottom = 2
+border_color = Color(0.36080000000000007, 0.2552, 0.04400000000000001, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_25"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_26"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.3, 0.34, 0.42, 1.0)
+border_width_bottom = 5
+border_color = Color(0.165, 0.18700000000000003, 0.231, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_27"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.40499999999999997, 0.439, 0.507, 1.0)
+border_width_bottom = 5
+border_color = Color(0.22275, 0.24145000000000003, 0.27885000000000004, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_28"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.24, 0.272, 0.336, 1.0)
+border_width_bottom = 2
+border_color = Color(0.132, 0.1496, 0.18480000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_29"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_30"]
+bg_color = Color(0.06, 0.08, 0.12, 0.97)
+border_width_left = 2
+border_width_top = 8
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.82, 0.2, 0.2, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.0, 0.0, 0.0, 0.6)
+shadow_size = 26
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_31"]
+bg_color = Color(0.0, 0.0, 0.0, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.82, 0.2, 0.2, 0.7)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_32"]
+content_margin_left = 14.0
+content_margin_top = 0.0
+content_margin_right = 14.0
+content_margin_bottom = 0.0
+bg_color = Color(0.13, 0.16, 0.22, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1.0, 1.0, 1.0, 0.25)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_33"]
+content_margin_left = 14.0
+content_margin_top = 0.0
+content_margin_right = 14.0
+content_margin_bottom = 0.0
+bg_color = Color(0.18, 0.22, 0.3, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1.0, 1.0, 1.0, 0.25)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_34"]
+content_margin_left = 14.0
+content_margin_top = 0.0
+content_margin_right = 14.0
+content_margin_bottom = 0.0
+bg_color = Color(0.13, 0.16, 0.22, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1.0, 1.0, 1.0, 0.25)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_35"]
+content_margin_left = 14.0
+content_margin_top = 0.0
+content_margin_right = 14.0
+content_margin_bottom = 0.0
+bg_color = Color(0.13, 0.16, 0.22, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1.0, 1.0, 1.0, 0.25)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_36"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.93, 0.52, 0.1, 1.0)
+border_width_bottom = 5
+border_color = Color(0.5115000000000001, 0.28600000000000003, 0.05500000000000001, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_37"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.9405, 0.592, 0.23500000000000001, 1.0)
+border_width_bottom = 5
+border_color = Color(0.517275, 0.3256, 0.12925000000000003, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_38"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.7440000000000001, 0.41600000000000004, 0.08000000000000002, 1.0)
+border_width_bottom = 2
+border_color = Color(0.40920000000000006, 0.22880000000000003, 0.04400000000000001, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_39"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_40"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.82, 0.2, 0.2, 1.0)
+border_width_bottom = 5
+border_color = Color(0.451, 0.11000000000000001, 0.11000000000000001, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_41"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.847, 0.32, 0.32, 1.0)
+border_width_bottom = 5
+border_color = Color(0.46585000000000004, 0.17600000000000002, 0.17600000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_42"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.656, 0.16000000000000003, 0.16000000000000003, 1.0)
+border_width_bottom = 2
+border_color = Color(0.36080000000000007, 0.08800000000000002, 0.08800000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_43"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_44"]
+bg_color = Color(0.06, 0.08, 0.12, 0.97)
+border_width_left = 2
+border_width_top = 8
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.93, 0.52, 0.1, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.0, 0.0, 0.0, 0.6)
+shadow_size = 26
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_45"]
+bg_color = Color(1.0, 1.0, 1.0, 0.06)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.93, 0.52, 0.1, 0.45)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_46"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.82, 0.2, 0.2, 1.0)
+border_width_bottom = 5
+border_color = Color(0.451, 0.11000000000000001, 0.11000000000000001, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_47"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.847, 0.32, 0.32, 1.0)
+border_width_bottom = 5
+border_color = Color(0.46585000000000004, 0.17600000000000002, 0.17600000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_48"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.656, 0.16000000000000003, 0.16000000000000003, 1.0)
+border_width_bottom = 2
+border_color = Color(0.36080000000000007, 0.08800000000000002, 0.08800000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_49"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_50"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.16, 0.6, 0.27, 1.0)
+border_width_bottom = 5
+border_color = Color(0.08800000000000001, 0.33, 0.14850000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_51"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.28600000000000003, 0.6599999999999999, 0.3795, 1.0)
+border_width_bottom = 5
+border_color = Color(0.15730000000000002, 0.363, 0.20872500000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_52"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.128, 0.48, 0.21600000000000003, 1.0)
+border_width_bottom = 2
+border_color = Color(0.0704, 0.264, 0.11880000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_53"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_54"]
+bg_color = Color(0.93, 0.91, 0.85, 1.0)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.29, 0.25, 0.21, 1.0)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0.0, 0.0, 0.0, 0.55)
+shadow_size = 24
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_55"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.16, 0.6, 0.27, 1.0)
+border_width_bottom = 5
+border_color = Color(0.08800000000000001, 0.33, 0.14850000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_56"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.28600000000000003, 0.6599999999999999, 0.3795, 1.0)
+border_width_bottom = 5
+border_color = Color(0.15730000000000002, 0.363, 0.20872500000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_57"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.128, 0.48, 0.21600000000000003, 1.0)
+border_width_bottom = 2
+border_color = Color(0.0704, 0.264, 0.11880000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_58"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_59"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.3, 0.34, 0.42, 1.0)
+border_width_bottom = 5
+border_color = Color(0.165, 0.18700000000000003, 0.231, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_60"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.40499999999999997, 0.439, 0.507, 1.0)
+border_width_bottom = 5
+border_color = Color(0.22275, 0.24145000000000003, 0.27885000000000004, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_61"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.24, 0.272, 0.336, 1.0)
+border_width_bottom = 2
+border_color = Color(0.132, 0.1496, 0.18480000000000002, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_62"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.27, 0.31, 1.0)
+border_width_bottom = 5
+border_color = Color(0.1375, 0.14850000000000002, 0.1705, 1.0)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v23_63"]
+bg_color = Color(0.05, 0.07, 0.1, 0.82)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
 [node name="Node2D" type="Node2D" unique_id=1687317604]
 script = ExtResource("1_epypp")
 
@@ -607,31 +1437,50 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -178.0
-offset_top = -262.0
-offset_right = 178.0
-offset_bottom = 166.0
+offset_left = -210.0
+offset_top = -280.0
+offset_right = 210.0
+offset_bottom = 280.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_q6r6c")
+pivot_offset = Vector2(210, 280)
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_54")
 
 [node name="RenkBandi" type="ColorRect" parent="Arayuz/TapuKarti" unique_id=1982188100]
-layout_mode = 0
-offset_right = 357.0
-offset_bottom = 112.0
 color = Color(0.6109069, 0, 0.008355691, 1)
+layout_mode = 0
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 402.0
+offset_bottom = 134.0
 
 [node name="SehirAdi" type="Label" parent="Arayuz/TapuKarti/RenkBandi" unique_id=1639795386]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 50
 text = "İSTANBUL"
 horizontal_alignment = 1
 vertical_alignment = 1
+layout_mode = 0
+offset_left = 0.0
+offset_top = 32.0
+offset_right = 384.0
+offset_bottom = 108.0
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_outline_color = Color(0.0, 0.0, 0.0, 0.55)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = SubResource("SystemFont_v23")
+theme_override_font_sizes/font_size = 44
+
+[node name="TapuSenedi" type="Label" parent="Arayuz/TapuKarti/RenkBandi" unique_id=279423724]
+layout_mode = 0
+offset_top = 10.0
+offset_right = 384.0
+offset_bottom = 32.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_outline_color = Color(0.0, 0.0, 0.0, 0.7)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 15
+text = "T A P U   S E N E D İ"
+horizontal_alignment = 1
 
 [node name="DetayYazisi" type="Label" parent="Arayuz/TapuKarti" unique_id=1066633414]
 layout_mode = 1
@@ -654,71 +1503,82 @@ Başlangıç Kirası: 120 TL
 4. Seviye Kira: 1000 TL
 "
 horizontal_alignment = 1
+visible = false
+
+[node name="KiraTablosu" type="RichTextLabel" parent="Arayuz/TapuKarti" unique_id=136671725]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 144.0
+offset_right = 390.0
+offset_bottom = 464.0
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.2, 0.17, 0.13, 1.0)
+theme_override_constants/table_h_separation = 48
+theme_override_constants/table_v_separation = 6
+theme_override_font_sizes/normal_font_size = 22
+theme_override_font_sizes/bold_font_size = 22
+bbcode_enabled = true
+scroll_active = false
 
 [node name="SatinAlButonu" type="Button" parent="Arayuz/TapuKarti" unique_id=2050357247]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -1.0
-offset_right = 136.0
-offset_bottom = 72.0
-grow_vertical = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 30
-theme_override_styles/normal = SubResource("StyleBoxFlat_rj586")
-theme_override_styles/hover = SubResource("StyleBoxFlat_1v26u")
 text = "Satın Al"
+layout_mode = 0
+offset_left = 24.0
+offset_top = 474.0
+offset_right = 174.0
+offset_bottom = 538.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_55")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_56")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_57")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_58")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 24
 
 [node name="PasGecButonu" type="Button" parent="Arayuz/TapuKarti" unique_id=601847231]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -138.0
-offset_bottom = 72.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 30
-theme_override_styles/normal = SubResource("StyleBoxFlat_nr8wp")
-theme_override_styles/hover = SubResource("StyleBoxFlat_7h0q2")
 text = "Pas"
+layout_mode = 0
+offset_left = 246.0
+offset_top = 474.0
+offset_right = 396.0
+offset_bottom = 538.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_59")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_60")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_61")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_62")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 24
 
 [node name="ColorRect" type="ColorRect" parent="Arayuz/TapuKarti" unique_id=902685974]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -43.0
-offset_top = -1.0
-offset_right = 40.0
-offset_bottom = 72.0
-grow_horizontal = 2
-grow_vertical = 0
+layout_mode = 0
+offset_left = 180.0
+offset_top = 474.0
+offset_right = 240.0
+offset_bottom = 538.0
+color = Color(0.29, 0.25, 0.21, 1.0)
 
 [node name="Sayac" type="Label" parent="Arayuz/TapuKarti/ColorRect" unique_id=306109949]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -51.0
-offset_top = -74.0
-offset_right = 50.0
-offset_bottom = 2.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(0.0010853444, 0.0010853446, 0.0010853445, 1)
-theme_override_font_sizes/font_size = 40
 text = "15"
 horizontal_alignment = 1
 vertical_alignment = 1
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 60.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(1.0, 0.88, 0.55, 1.0)
+theme_override_font_sizes/font_size = 30
 
 [node name="KararTimer" type="Timer" parent="Arayuz/TapuKarti" unique_id=1377952948]
 wait_time = 10.0
@@ -751,31 +1611,21 @@ text = "Bakiye: 1500 TL"
 fit_content = true
 
 [node name="BildirimPaneli" type="Panel" parent="Arayuz" unique_id=924259163]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -249.0
-offset_top = -189.0
-offset_right = 294.0
-offset_bottom = 123.0
+offset_left = -300.0
+offset_top = -200.0
+offset_right = 300.0
+offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ta5nu")
+pivot_offset = Vector2(300.0, 200.0)
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_1")
 
 [node name="BildirimYazisi" type="RichTextLabel" parent="Arayuz/BildirimPaneli" unique_id=2052143527]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = 15.0
-offset_right = -11.0
-offset_bottom = -9.0
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 text = "
@@ -786,51 +1636,49 @@ Polis çevirmesine takıldın. Doğruca hapishaneye gidiyorsun!"
 fit_content = true
 autowrap_mode = 2
 horizontal_alignment = 1
+layout_mode = 0
+offset_left = 28.0
+offset_top = 22.0
+offset_right = 572.0
+offset_bottom = 308.0
+theme_override_font_sizes/bold_font_size = 20
 
 [node name="TamamButonu" type="Button" parent="Arayuz/BildirimPaneli" unique_id=469036407]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -60.5
-offset_right = 56.5
-offset_bottom = 65.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_font_sizes/font_size = 25
-theme_override_styles/normal = SubResource("StyleBoxFlat_d2bti")
-theme_override_styles/hover = SubResource("StyleBoxFlat_fs4d3")
 text = "Tamam"
+layout_mode = 0
+offset_left = 200.0
+offset_top = 314.0
+offset_right = 400.0
+offset_bottom = 378.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_2")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_3")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_4")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_5")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 26
 
 [node name="OyunBittiPaneli" type="Panel" parent="Arayuz" unique_id=224949387]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -214.0
-offset_top = -113.0
-offset_right = 165.0
-offset_bottom = 103.0
+offset_left = -380.0
+offset_top = -290.0
+offset_right = 380.0
+offset_bottom = 290.0
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(189.5, 108)
-theme_override_styles/panel = SubResource("StyleBoxFlat_k73cj")
+pivot_offset = Vector2(380.0, 290.0)
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_6")
 
 [node name="KazananYazisi" type="RichTextLabel" parent="Arayuz/OyunBittiPaneli" unique_id=253186531]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 11.0
-offset_top = 11.0
-offset_right = -11.0
-offset_bottom = -10.0
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 text = "o<nsdboı<nbınoı<fb
@@ -840,83 +1688,104 @@ obgu<nbOInİn"
 fit_content = true
 autowrap_mode = 2
 horizontal_alignment = 1
+layout_mode = 0
+offset_left = 30.0
+offset_top = 22.0
+offset_right = 730.0
+offset_bottom = 478.0
+theme_override_font_sizes/bold_font_size = 20
 
 [node name="YenidenBaslatButonu" type="Button" parent="Arayuz/OyunBittiPaneli" unique_id=1551935995]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -56.5
-offset_right = 56.5
-offset_bottom = 60.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_flf07")
-theme_override_styles/hover = SubResource("StyleBoxFlat_rjqkl")
 text = "Yeniden Başlat"
 autowrap_mode = 2
+layout_mode = 0
+offset_left = 260.0
+offset_top = 494.0
+offset_right = 500.0
+offset_bottom = 558.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_7")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_8")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_9")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_10")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 22
 
 [node name="YukseltmePaneli" type="Panel" parent="Arayuz" unique_id=701153022]
-visible = false
-offset_left = 792.0
-offset_top = 349.0
-offset_right = 1108.0
-offset_bottom = 670.0
-pivot_offset = Vector2(158, 151)
-theme_override_styles/panel = SubResource("StyleBoxFlat_554du")
-
-[node name="SoruYazisi" type="RichTextLabel" parent="Arayuz/YukseltmePaneli" unique_id=1184932094]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = 5.0
-offset_right = -11.0
-offset_bottom = -8.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -230.0
+offset_top = -190.0
+offset_right = 230.0
+offset_bottom = 190.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(230.0, 190.0)
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_11")
+
+[node name="SoruYazisi" type="RichTextLabel" parent="Arayuz/YukseltmePaneli" unique_id=1184932094]
 theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 text = "[center][b][color=cyan]MÜLK YÜKSELTME[/color][/b]\\n\\n[color=gold]SAMSUN[/color] şehrine bir ev dikmek istiyor musun?\\n\\nİnşaat Bedeli: [color=green]150 TL[/color][/center]"
 fit_content = true
 autowrap_mode = 2
 horizontal_alignment = 1
+layout_mode = 0
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 436.0
+offset_bottom = 286.0
+theme_override_font_sizes/bold_font_size = 20
 
 [node name="EvetButonu" type="Button" parent="Arayuz/YukseltmePaneli" unique_id=864559640]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_right = 119.0
-offset_bottom = 68.0
-grow_vertical = 0
-theme_override_font_sizes/font_size = 23
-theme_override_styles/normal = SubResource("StyleBoxFlat_oesjf")
-theme_override_styles/hover = SubResource("StyleBoxFlat_ei405")
 text = "Yükselt"
+layout_mode = 0
+offset_left = 24.0
+offset_top = 294.0
+offset_right = 220.0
+offset_bottom = 358.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_12")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_13")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_14")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_15")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 24
 
 [node name="HayirButonu" type="Button" parent="Arayuz/YukseltmePaneli" unique_id=2004734144]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -120.0
-offset_bottom = 68.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_font_sizes/font_size = 23
-theme_override_styles/normal = SubResource("StyleBoxFlat_273db")
-theme_override_styles/hover = SubResource("StyleBoxFlat_e8dv2")
 text = "Pas"
+layout_mode = 0
+offset_left = 240.0
+offset_top = 294.0
+offset_right = 436.0
+offset_bottom = 358.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_16")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_17")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_18")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_19")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 24
 
 [node name="SansKartiPaneli" type="Panel" parent="Arayuz" unique_id=270796520]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -965,97 +1834,110 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_2nhjh")
 text = "Devam Et"
 
 [node name="HapishanePaneli" type="Panel" parent="Arayuz" unique_id=361359409]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -170.0
-offset_top = -234.0
-offset_right = 169.0
-offset_bottom = 179.0
+offset_left = -230.0
+offset_top = -280.0
+offset_right = 230.0
+offset_bottom = 280.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_epypp")
+pivot_offset = Vector2(230.0, 280.0)
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_20")
+
+[node name="Rozet" type="Panel" parent="Arayuz/HapishanePaneli" unique_id=1773711575]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 28.0
+offset_right = 300.0
+offset_bottom = 168.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_21")
 
 [node name="kadermahkumu" type="Label" parent="Arayuz/HapishanePaneli" unique_id=808485389]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = -1.0
-offset_top = 101.0
-offset_right = -1.0
-offset_bottom = 173.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(0.98039216, 0, 0, 1)
-theme_override_colors/font_outline_color = Color(0.81960785, 0, 0, 1)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 28
 text = "Kader Mahkûmu"
 horizontal_alignment = 1
 vertical_alignment = 1
+layout_mode = 0
+offset_left = 0.0
+offset_top = 178.0
+offset_right = 460.0
+offset_bottom = 230.0
+theme_override_colors/font_color = Color(1.0, 0.32, 0.3, 1.0)
+theme_override_colors/font_outline_color = Color(0.0, 0.0, 0.0, 0.85)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 34
 
 [node name="HapisYazisi" type="Label" parent="Arayuz/HapishanePaneli" unique_id=2025268211]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = -249.0
-offset_right = -11.0
-offset_bottom = -9.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 21
 horizontal_alignment = 1
 autowrap_mode = 2
+layout_mode = 0
+offset_left = 24.0
+offset_top = 236.0
+offset_right = 436.0
+offset_bottom = 462.0
 
 [node name="Sprite2D" type="Sprite2D" parent="Arayuz/HapishanePaneli" unique_id=710771844]
-position = Vector2(173, 66.00001)
-scale = Vector2(0.12745106, 0.13153598)
+position = Vector2(230, 98)
+scale = Vector2(0.19, 0.19)
 texture = ExtResource("4_0hol4")
 
 [node name="KefaletButonu" type="Button" parent="Arayuz/HapishanePaneli" unique_id=782097540]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_right = 138.0
-offset_bottom = 56.0
-grow_vertical = 0
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_jwyb2")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bjha6")
 text = "300 TL 
 Kefalet Öde"
+layout_mode = 0
+offset_left = 24.0
+offset_top = 476.0
+offset_right = 224.0
+offset_bottom = 540.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_22")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_23")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_24")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_25")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 20
 
 [node name="YatButonu" type="Button" parent="Arayuz/HapishanePaneli" unique_id=461576120]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -137.0
-offset_bottom = 56.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_t1sh6")
-theme_override_styles/hover = SubResource("StyleBoxFlat_1fr6y")
 text = "Bir Tur 
 Bekle"
+layout_mode = 0
+offset_left = 236.0
+offset_top = 476.0
+offset_right = 436.0
+offset_bottom = 540.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_26")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_27")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_28")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_29")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 20
 
 [node name="ZarPaneli" type="Panel" parent="Arayuz" unique_id=1094462396]
-offset_left = 597.0
-offset_top = 249.0
-offset_right = 650.0
-offset_bottom = 301.0
+layout_mode = 0
+offset_left = 257.0
+offset_top = 236.0
+offset_right = 555.0
+offset_bottom = 332.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_63")
 
 [node name="ZarGorseli" type="Sprite2D" parent="Arayuz/ZarPaneli" unique_id=624647483]
-position = Vector2(30.000008, 30.000006)
+position = Vector2(104, 48)
 scale = Vector2(0.26433155, 0.25624996)
 texture = ExtResource("5_q6r6c")
 hframes = 3
@@ -1063,92 +1945,108 @@ vframes = 2
 
 [node name="EkstraZarGorseli" type="Sprite2D" parent="Arayuz/ZarPaneli" unique_id=1529862374]
 modulate = Color(1, 0.23908132, 0.1824697, 1)
-position = Vector2(119.999985, 29.999989)
+position = Vector2(194, 48)
 scale = Vector2(0.26188242, 0.25937498)
 texture = ExtResource("5_q6r6c")
 hframes = 3
 vframes = 2
 
 [node name="SatisPaneli" type="Panel" parent="Arayuz" unique_id=1371331616]
-visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -204.0
-offset_top = -225.0
-offset_right = 197.0
-offset_bottom = 207.0
+offset_left = -260.0
+offset_top = -290.0
+offset_right = 260.0
+offset_bottom = 290.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_te0f0")
+pivot_offset = Vector2(260.0, 290.0)
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_30")
+
+[node name="ResimCercevesi" type="Panel" parent="Arayuz/SatisPaneli" unique_id=722591254]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 86.0
+offset_right = 486.0
+offset_bottom = 314.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_31")
 
 [node name="UyariYazisi" type="Label" parent="Arayuz/SatisPaneli" unique_id=918399305]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 14.0
-offset_bottom = 82.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 0, 0, 1)
-theme_override_colors/font_outline_color = Color(1, 0, 0, 1)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 30
 text = " İFLASIN EŞİĞİNDESİN! "
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
+layout_mode = 0
+offset_left = 0.0
+offset_top = 20.0
+offset_right = 520.0
+offset_bottom = 76.0
+theme_override_colors/font_color = Color(1.0, 0.3, 0.28, 1.0)
+theme_override_colors/font_outline_color = Color(0.0, 0.0, 0.0, 0.85)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 32
 
 [node name="Sprite2D" type="Sprite2D" parent="Arayuz/SatisPaneli" unique_id=1647762009]
-position = Vector2(198, 161.00003)
-scale = Vector2(0.37417218, 0.34234235)
+position = Vector2(260, 200)
+scale = Vector2(0.4857, 0.4857)
 texture = ExtResource("6_kdubu")
 
 [node name="MulkListesi" type="OptionButton" parent="Arayuz/SatisPaneli" unique_id=1425987771]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -152.5
-offset_top = 56.0
-offset_right = 152.5
-offset_bottom = 118.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 0
+offset_left = 40.0
+offset_top = 334.0
+offset_right = 480.0
+offset_bottom = 396.0
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_32")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_33")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_34")
+theme_override_styles/focus = SubResource("StyleBoxFlat_v23_35")
 
 [node name="SatButonu" type="Button" parent="Arayuz/SatisPaneli" unique_id=1841578307]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -140.0
-offset_top = -64.0
-grow_horizontal = 0
-grow_vertical = 0
-offset_transform_enabled = true
-theme_override_colors/font_color = Color(1, 0, 0, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_yoh3i")
 text = "Satışı Onayla"
+layout_mode = 0
+offset_left = 268.0
+offset_top = 490.0
+offset_right = 496.0
+offset_bottom = 556.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_40")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_41")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_42")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_43")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 19
 
 [node name="IhaleyeCikarButonu" type="Button" parent="Arayuz/SatisPaneli" unique_id=2125573219]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -64.0
-offset_right = 151.0
-grow_vertical = 0
-theme_override_colors/font_color = Color(0.19607843, 0.9843137, 0.050980393, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_qlvxw")
 text = "Açık Artırmaya
- Çıkar"
+Çıkar"
+layout_mode = 0
+offset_left = 24.0
+offset_top = 490.0
+offset_right = 252.0
+offset_bottom = 556.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_36")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_37")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_38")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_39")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 19
 
 [node name="IhalePaneli" type="Panel" parent="Arayuz" unique_id=707010011]
 anchors_preset = 8
@@ -1156,40 +2054,39 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -270.0
-offset_top = -230.0
-offset_right = 247.0
-offset_bottom = 216.0
+offset_left = -300.0
+offset_top = -270.0
+offset_right = 300.0
+offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(258.5, 223)
-theme_override_styles/panel = SubResource("StyleBoxFlat_12cob")
+pivot_offset = Vector2(300.0, 270.0)
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_44")
+
+[node name="TeklifKutusu" type="Panel" parent="Arayuz/IhalePaneli" unique_id=1881644014]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 222.0
+offset_right = 576.0
+offset_bottom = 374.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_v23_45")
 
 [node name="BaslikYazisi" type="Label" parent="Arayuz/IhalePaneli" unique_id=1117870382]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 11.0
-offset_bottom = 87.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 0, 0, 1)
-theme_override_colors/font_outline_color = Color(1, 0, 0, 1)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 35
 text = "AÇIK ARTIRMA BAŞLADI!"
 horizontal_alignment = 1
 vertical_alignment = 1
+layout_mode = 0
+offset_left = 0.0
+offset_top = 18.0
+offset_right = 600.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(1.0, 0.8, 0.3, 1.0)
+theme_override_colors/font_outline_color = Color(0.0, 0.0, 0.0, 0.85)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 36
 
 [node name="MulkBilgisi" type="RichTextLabel" parent="Arayuz/IhalePaneli" unique_id=1412764298]
-layout_mode = 1
-anchors_preset = 14
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_top = -137.0
-offset_bottom = -10.0
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_constants/outline_size = 1
 theme_override_font_sizes/normal_font_size = 28
 bbcode_enabled = true
@@ -1198,85 +2095,83 @@ ADANA (Başlangıç: 140 TL)"
 fit_content = true
 horizontal_alignment = 1
 vertical_alignment = 1
+layout_mode = 0
+offset_left = 24.0
+offset_top = 86.0
+offset_right = 576.0
+offset_bottom = 214.0
+theme_override_font_sizes/bold_font_size = 28
 
 [node name="DurumYazisi" type="RichTextLabel" parent="Arayuz/IhalePaneli" unique_id=769127106]
-layout_mode = 1
-anchors_preset = 14
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = 15.0
-offset_top = -4.0
-offset_right = -16.0
-offset_bottom = 111.0
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_font_sizes/normal_font_size = 23
 bbcode_enabled = true
 text = "Mavi düşünüyor...\\nSarı 200 TL teklif etti!"
 fit_content = true
 horizontal_alignment = 1
 vertical_alignment = 1
+layout_mode = 0
+offset_left = 36.0
+offset_top = 230.0
+offset_right = 564.0
+offset_bottom = 366.0
+theme_override_font_sizes/bold_font_size = 23
 
 [node name="IhaleTimer" type="Timer" parent="Arayuz/IhalePaneli" unique_id=985515883]
 
 [node name="SureYazisi" type="Label" parent="Arayuz/IhalePaneli" unique_id=911158379]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -78.5
-offset_top = -68.0
-offset_right = 73.0
-offset_bottom = -4.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 23
 text = "Kalan Süre: 5"
 horizontal_alignment = 1
 vertical_alignment = 1
+layout_mode = 0
+offset_left = 210.0
+offset_top = 452.0
+offset_right = 390.0
+offset_bottom = 518.0
+theme_override_colors/font_color = Color(1.0, 0.85, 0.45, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 21
 
 [node name="TeklifButonu" type="Button" parent="Arayuz/IhalePaneli" unique_id=1404659768]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -157.0
-offset_top = -62.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 23
-theme_override_styles/normal = SubResource("StyleBoxFlat_dmqsj")
-theme_override_styles/hover = SubResource("StyleBoxFlat_drddx")
 text = "Teklif Ver 
 +50 TL"
+layout_mode = 0
+offset_left = 396.0
+offset_top = 452.0
+offset_right = 576.0
+offset_bottom = 518.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_50")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_51")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_52")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_53")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 21
 
 [node name="PasButonu" type="Button" parent="Arayuz/IhalePaneli" unique_id=391412463]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -71.0
-offset_right = 157.0
-grow_vertical = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
-theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 23
-theme_override_styles/normal = SubResource("StyleBoxFlat_8sb0c")
-theme_override_styles/hover = SubResource("StyleBoxFlat_cs8s0")
 text = "İhaleden 
 Çekil"
+layout_mode = 0
+offset_left = 24.0
+offset_top = 452.0
+offset_right = 204.0
+offset_bottom = 518.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_v23_46")
+theme_override_styles/hover = SubResource("StyleBoxFlat_v23_47")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_v23_48")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_v23_49")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_v23")
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_pressed_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_focus_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_colors/font_disabled_color = Color(0.6, 0.62, 0.66, 1.0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 21
 
 [node name="ZarSecimPaneli" type="Panel" parent="Arayuz" unique_id=1049129494]
 visible = false

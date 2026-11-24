@@ -774,7 +774,6 @@ func _ready():
 	_insa_arayuzunu_kur()
 	_desteyi_kur()
 	_kart_arayuzunu_kur()
-	_panelleri_guzellestir()
 	_ekstra_buton_metni = taktiksel_zar_butonu.text
 	_tepki_arayuzunu_kur()
 	_dunya_orijin = position
@@ -3129,12 +3128,6 @@ func oyun_bitti_animasyonunu_baslat(kazanan_isim: String, renk_hex: String):
 	var yazi = $Arayuz/OyunBittiPaneli/KazananYazisi
 	
 	panel.visible = true
-	# Ödüller sığsın diye panel büyütülür
-	panel.offset_left = -380
-	panel.offset_right = 380
-	panel.offset_top = -290
-	panel.offset_bottom = 290
-	panel.pivot_offset = Vector2(380, 290)
 	panel.scale = Vector2(0, 0)
 	yazi.text = "\n[center][font_size=30][b][color=gold]OYUN BİTTİ[/color][/b][/font_size]\n\n[font_size=34]Kazanan: [color=#" + renk_hex + "]" + kazanan_isim + "[/color][/font_size]\n\n" + _odul_metni() + "[/center]"
 	_konfeti(get_viewport_rect().size / 2.0, 160)
@@ -3597,245 +3590,12 @@ func _odul_metni() -> String:
 
 
 # ==========================================
-# v2.3 — PANEL GÖRÜNÜMLERİ
+# v2.3 — TAPU KARTI KİRA TABLOSU
 # ------------------------------------------
-# Sahnedeki paneller (bildirim, oyun sonu, yükseltme, hapishane, satış, ihale)
-# kodla yeniden giydirilir: koyu kart, üstte panelin renginde şerit, gölge,
-# butonlar panelin içinde ve renkleriyle ne yaptıklarını anlatır.
-# Panellerin resimleri (hapishane parmaklığı, "Hemen panik yap" adamı) korunur.
+# Panellerin görünümü (renkler, butonlar, yerleşim) node_2d.tscn sahne dosyasında;
+# Godot editöründe doğrudan düzenlenebilir. Burada sadece tapu kartındaki tablo doldurulur.
 # ==========================================
-const P_ALTIN := Color(0.96, 0.76, 0.26)
-const P_YESIL := Color(0.16, 0.6, 0.27)
-const P_KIRMIZI := Color(0.82, 0.2, 0.2)
-const P_MAVI := Color(0.2, 0.5, 0.85)
-const P_TURUNCU := Color(0.93, 0.52, 0.1)
-const P_GRI := Color(0.3, 0.34, 0.42)
-const P_CAMGOBEGI := Color(0.3, 0.8, 1.0)
-
-func _panel_kur(p: Control, w: float, h: float, vurgu: Color):
-	p.set_anchors_preset(Control.PRESET_CENTER)
-	p.offset_left = -w / 2.0
-	p.offset_right = w / 2.0
-	p.offset_top = -h / 2.0
-	p.offset_bottom = h / 2.0
-	p.pivot_offset = Vector2(w / 2.0, h / 2.0)
-	var s = StyleBoxFlat.new()
-	s.bg_color = Color(0.06, 0.08, 0.12, 0.97)
-	s.set_corner_radius_all(20)
-	s.border_color = vurgu
-	s.set_border_width_all(2)
-	s.border_width_top = 8
-	s.shadow_color = Color(0, 0, 0, 0.6)
-	s.shadow_size = 26
-	p.add_theme_stylebox_override("panel", s)
-
-func _yerlestir(c: Control, x: float, y: float, w: float, h: float):
-	c.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	c.offset_left = x
-	c.offset_top = y
-	c.offset_right = x + w
-	c.offset_bottom = y + h
-
-func _buton_boya(b: Button, renk: Color, yazi := 22):
-	var durumlar = {"normal": renk, "hover": renk.lightened(0.15), "pressed": renk.darkened(0.2), "disabled": Color(0.25, 0.27, 0.31)}
-	for d in durumlar:
-		var s = StyleBoxFlat.new()
-		s.bg_color = durumlar[d]
-		s.set_corner_radius_all(14)
-		s.border_width_bottom = 5 if d != "pressed" else 2
-		s.border_color = durumlar[d].darkened(0.45)
-		s.content_margin_left = 10
-		s.content_margin_right = 10
-		b.add_theme_stylebox_override(d, s)
-	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
-	for c in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
-		b.add_theme_color_override(c, Color.WHITE)
-	b.add_theme_color_override("font_disabled_color", Color(0.6, 0.62, 0.66))
-	b.add_theme_constant_override("outline_size", 0)
-	b.add_theme_font_size_override("font_size", yazi)
-
-# Panelin içinde, diğer her şeyin arkasında duran kutu (resim çerçevesi, teklif alanı)
-func _ic_kutu(p: Control, x: float, y: float, w: float, h: float, renk: Color, kose := 14, kenar_rengi := Color(0, 0, 0, 0), kenar := 0) -> Panel:
-	var k = Panel.new()
-	k.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var s = StyleBoxFlat.new()
-	s.bg_color = renk
-	s.set_corner_radius_all(kose)
-	if kenar > 0:
-		s.border_color = kenar_rengi
-		s.set_border_width_all(kenar)
-	k.add_theme_stylebox_override("panel", s)
-	p.add_child(k)
-	p.move_child(k, 0)
-	_yerlestir(k, x, y, w, h)
-	return k
-
-func _baslik_boya(l: Label, renk: Color, boyut: int):
-	l.add_theme_color_override("font_color", renk)
-	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
-	l.add_theme_constant_override("outline_size", 6)
-	l.add_theme_font_size_override("font_size", boyut)
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-
-func _panelleri_guzellestir():
-	# --- Bildirim (kira, hapis, iflas mesajları) ---
-	_panel_kur(bildirim_paneli, 600, 400, P_ALTIN)
-	_yerlestir(bildirim_yazisi, 28, 22, 544, 286)
-	_yerlestir(tamam_butonu, 200, 314, 200, 64)
-	_buton_boya(tamam_butonu, P_YESIL, 26)
-
-	# --- Oyun sonu (kazanan + ödüller) ---
-	_panel_kur(oyun_bitti_paneli, 760, 580, P_ALTIN)
-	_yerlestir(kazanan_yazisi, 30, 22, 700, 456)
-	_yerlestir(yeniden_baslat_butonu, 260, 494, 240, 64)
-	_buton_boya(yeniden_baslat_butonu, P_MAVI, 22)
-
-	# --- Mülk yükseltme ---
-	_panel_kur(yukseltme_paneli, 460, 380, P_CAMGOBEGI)
-	_yerlestir(soru_yazisi, 24, 18, 412, 268)
-	_yerlestir(evet_butonu, 24, 294, 196, 64)
-	_buton_boya(evet_butonu, P_YESIL, 24)
-	_yerlestir(hayir_butonu, 240, 294, 196, 64)
-	_buton_boya(hayir_butonu, P_GRI, 24)
-
-	# --- Hapishane: parmaklık resmi beyaz bir rozetin içinde ---
-	_panel_kur(hapishane_paneli, 460, 560, P_KIRMIZI)
-	_ic_kutu(hapishane_paneli, 160, 28, 140, 140, Color(0.94, 0.94, 0.96), 26)
-	var parmaklik = hapishane_paneli.get_node_or_null("Sprite2D")
-	if parmaklik:
-		parmaklik.position = Vector2(230, 98)
-		parmaklik.scale = Vector2(0.19, 0.19)
-	var kader = hapishane_paneli.get_node_or_null("kadermahkumu")
-	if kader:
-		_yerlestir(kader, 0, 178, 460, 52)
-		_baslik_boya(kader, Color(1, 0.32, 0.3), 34)
-	_yerlestir(hapis_yazisi, 24, 236, 412, 226)
-	hapis_yazisi.add_theme_font_size_override("font_size", 21)
-	_yerlestir(kefalet_butonu, 24, 476, 200, 64)
-	_buton_boya(kefalet_butonu, Color(0.82, 0.58, 0.1), 20)
-	_yerlestir(yat_butonu, 236, 476, 200, 64)
-	_buton_boya(yat_butonu, P_GRI, 20)
-
-	# --- Satış (iflasın eşiği): "Hemen panik yap" adamı çerçevenin içinde ---
-	_panel_kur(satis_paneli, 520, 580, P_KIRMIZI)
-	var uyari = satis_paneli.get_node_or_null("UyariYazisi")
-	if uyari:
-		_yerlestir(uyari, 0, 20, 520, 56)
-		_baslik_boya(uyari, Color(1, 0.3, 0.28), 32)
-	_ic_kutu(satis_paneli, 34, 86, 452, 228, Color(0, 0, 0), 14, Color(0.82, 0.2, 0.2, 0.7), 2)
-	var adam = satis_paneli.get_node_or_null("Sprite2D")
-	if adam:
-		adam.position = Vector2(260, 200)
-		adam.scale = Vector2(0.4857, 0.4857)
-	_yerlestir(mulk_listesi, 40, 334, 440, 62)
-	mulk_listesi.add_theme_font_size_override("font_size", 20)
-	for d in ["normal", "hover", "pressed", "focus"]:
-		var s = StyleBoxFlat.new()
-		s.bg_color = Color(0.13, 0.16, 0.22) if d != "hover" else Color(0.18, 0.22, 0.3)
-		s.set_corner_radius_all(12)
-		s.border_color = Color(1, 1, 1, 0.25)
-		s.set_border_width_all(2)
-		s.content_margin_left = 14
-		s.content_margin_right = 14
-		mulk_listesi.add_theme_stylebox_override(d, s)
-	_yerlestir(ihaleye_cikar_butonu, 24, 490, 228, 66)
-	_buton_boya(ihaleye_cikar_butonu, P_TURUNCU, 19)
-	_yerlestir(sat_butonu, 268, 490, 228, 66)
-	_buton_boya(sat_butonu, P_KIRMIZI, 19)
-
-	# Kalın yazılar ([b]) normal yazıyla aynı boyda olsun
-	for yazi in [bildirim_yazisi, soru_yazisi, kazanan_yazisi, ihale_mulk_bilgisi, ihale_durum_yazisi]:
-		yazi.add_theme_font_size_override("bold_font_size", yazi.get_theme_font_size("normal_font_size"))
-	ihaleye_cikar_butonu.text = "Açık Artırmaya\nÇıkar"
-
-	# --- İhale ---
-	_tapu_kartini_giydir()
-	_zar_tepsisini_kur()
-
-	_panel_kur(ihale_paneli, 600, 540, P_TURUNCU)
-	_yerlestir(ihale_baslik, 0, 18, 600, 60)
-	_baslik_boya(ihale_baslik, Color(1, 0.8, 0.3), 36)
-	_yerlestir(ihale_mulk_bilgisi, 24, 86, 552, 128)
-	_ic_kutu(ihale_paneli, 24, 222, 552, 152, Color(1, 1, 1, 0.06), 16, Color(0.93, 0.52, 0.1, 0.45), 2)
-	_yerlestir(ihale_durum_yazisi, 36, 230, 528, 136)
-	_yerlestir(sure_yazisi, 210, 452, 180, 66)
-	sure_yazisi.add_theme_constant_override("outline_size", 0)
-	sure_yazisi.add_theme_color_override("font_color", Color(1, 0.85, 0.45))
-	sure_yazisi.add_theme_font_size_override("font_size", 21)
-	_yerlestir(pas_butonu, 24, 452, 180, 66)
-	_buton_boya(pas_butonu, P_KIRMIZI, 21)
-	_yerlestir(teklif_butonu, 396, 452, 180, 66)
-	_buton_boya(teklif_butonu, P_YESIL, 21)
-
-
-# --- Tapu kartı: krem renkli tapu senedi (şans kartıyla aynı dil) ---
-var _tapu_tablo: RichTextLabel = null
-
-func _tapu_kartini_giydir():
-	var w = 420.0
-	var h = 560.0
-	tapu_karti.set_anchors_preset(Control.PRESET_CENTER)
-	tapu_karti.offset_left = -w / 2.0
-	tapu_karti.offset_right = w / 2.0
-	tapu_karti.offset_top = -h / 2.0
-	tapu_karti.offset_bottom = h / 2.0
-	tapu_karti.pivot_offset = Vector2(w / 2.0, h / 2.0)
-	var s = StyleBoxFlat.new()
-	s.bg_color = Color(0.93, 0.91, 0.85)
-	s.set_corner_radius_all(18)
-	s.border_color = Color(0.29, 0.25, 0.21)
-	s.set_border_width_all(5)
-	s.shadow_color = Color(0, 0, 0, 0.55)
-	s.shadow_size = 24
-	tapu_karti.add_theme_stylebox_override("panel", s)
-
-	# Renk bandı: kartın içinde, kenardan boşluklu (klasik tapu senedi gibi)
-	_yerlestir(renk_bandi, 18, 18, w - 36, 116)
-	var ust = Label.new()
-	ust.text = "T A P U   S E N E D İ"
-	ust.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ust.add_theme_font_size_override("font_size", 15)
-	ust.add_theme_color_override("font_color", Color.WHITE)
-	ust.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
-	ust.add_theme_constant_override("outline_size", 7)
-	ust.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	renk_bandi.add_child(ust)
-	_yerlestir(ust, 0, 10, w - 36, 22)
-	_yerlestir(sehir_adi_etiketi, 0, 32, w - 36, 76)
-	sehir_adi_etiketi.add_theme_font_size_override("font_size", 44)
-	sehir_adi_etiketi.add_theme_color_override("font_color", Color.WHITE)
-	sehir_adi_etiketi.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.55))
-	sehir_adi_etiketi.add_theme_constant_override("outline_size", 8)
-	sehir_adi_etiketi.add_theme_font_override("font", _serif_yazi_tipi())
-
-	# Eski düz yazı yerine fiyat + kira tablosu
-	detay_yazisi.hide()
-	_tapu_tablo = RichTextLabel.new()
-	_tapu_tablo.bbcode_enabled = true
-	_tapu_tablo.scroll_active = false
-	_tapu_tablo.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_tapu_tablo.add_theme_color_override("default_color", Color(0.2, 0.17, 0.13))
-	_tapu_tablo.add_theme_font_size_override("normal_font_size", 22)
-	_tapu_tablo.add_theme_font_size_override("bold_font_size", 22)
-	_tapu_tablo.add_theme_constant_override("table_h_separation", 48)
-	_tapu_tablo.add_theme_constant_override("table_v_separation", 6)
-	tapu_karti.add_child(_tapu_tablo)
-	_yerlestir(_tapu_tablo, 30, 144, w - 60, 320)
-
-	# Butonlar kartın içinde, ortada geri sayım rozeti
-	_yerlestir(satin_al_butonu, 24, 474, 150, 64)
-	_buton_boya(satin_al_butonu, P_YESIL, 24)
-	_yerlestir(pas_gec_butonu, 246, 474, 150, 64)
-	_buton_boya(pas_gec_butonu, P_GRI, 24)
-	var rozet = sayac_etiketi.get_parent()
-	if rozet is ColorRect:
-		rozet.color = Color(0.29, 0.25, 0.21)
-		_yerlestir(rozet, 180, 474, 60, 64)
-	_yerlestir(sayac_etiketi, 0, 0, 60, 64)
-	sayac_etiketi.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	sayac_etiketi.add_theme_font_size_override("font_size", 30)
-	sayac_etiketi.add_theme_color_override("font_color", Color(1, 0.88, 0.55))
+@onready var _tapu_tablo: RichTextLabel = $Arayuz/TapuKarti/KiraTablosu
 
 func _tapu_tablosunu_doldur(sehir: String, grup_satiri: String, c: float):
 	if _tapu_tablo == null:
@@ -3855,13 +3615,3 @@ func _tapu_tablosunu_doldur(sehir: String, grup_satiri: String, c: float):
 		t += "[cell][left]" + s[0] + "[/left][/cell][cell][right][b]" + str(s[1]) + " TL[/b][/right][/cell]"
 	t += "[/table][/center]"
 	_tapu_tablo.text = t
-
-# --- Zar tepsisi: bakiye panelinin üstündeki boşlukta ---
-func _zar_tepsisini_kur():
-	zar_paneli.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	zar_paneli.position = Vector2(257, 236)
-	zar_paneli.size = Vector2(298, 96)
-	var s = _stil_kutusu(Color(0.05, 0.07, 0.1, 0.82), 12)
-	zar_paneli.add_theme_stylebox_override("panel", s)
-	zar_gorseli.position = Vector2(104, 48)
-	ekstra_zar_gorseli.position = Vector2(194, 48)
