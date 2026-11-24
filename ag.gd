@@ -6,7 +6,7 @@ extends Node
 # Oyun mantığının ağ kısmı node_2d.gd içindedir.
 # ==========================================================
 
-const SURUM := 3                 # Farklı sürümler birbirine bağlanmasın diye (2: ihale, tekel, enflasyon; 3: şans destesi)
+const SURUM := 4                 # Farklı sürümler birbirine bağlanmasın diye (2: ihale, tekel, enflasyon; 3: şans destesi; 4: tepkiler, bot kişilikleri)
 const OYUN_PORTU := 7777         # ENet (oyun trafiği)
 const KESIF_PORTU := 7778        # UDP yayını (oda bulma)
 const MAKS_OYUNCU := 4
@@ -101,13 +101,23 @@ func oda_kur() -> bool:
 	return true
 
 
+const BOT_ISIMLERI := ["Emlakçı Ekrem", "Temkinli Tülay", "Kumarbaz Kemal"]
+
 func bot_ekle():
 	if not sunucu_mu() or oyun_basladi or yuvalar.size() >= MAKS_OYUNCU:
 		return
-	var no := 1
-	while _isim_var_mi("Bot " + str(no)):
-		no += 1
-	yuvalar.append(_yuva_olustur(0, "Bot " + str(no), randi() % ARABA_SAYISI, _bos_renk(), true))
+	# Her botun bir kişiliği var: isim kişiliği belirler (node_2d.gd → BOT_KISILIKLERI)
+	var isim := ""
+	for aday in BOT_ISIMLERI:
+		if not _isim_var_mi(aday):
+			isim = aday
+			break
+	if isim == "":
+		var no := 1
+		while _isim_var_mi("Bot " + str(no)):
+			no += 1
+		isim = "Bot " + str(no)
+	yuvalar.append(_yuva_olustur(0, isim, randi() % ARABA_SAYISI, _bos_renk(), true))
 	_lobi_yayinla()
 
 

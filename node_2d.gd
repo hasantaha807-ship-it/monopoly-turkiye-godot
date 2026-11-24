@@ -232,6 +232,29 @@ var _tur_basi := false             # Zar atılmayı bekleyen tur başı mı?
 var _oyun_basladi_mi := false      # Sunucu: ilk tur başlatıldı mı?
 var _devir_bekleyen: Array = []    # Sunucu: geri dönen ve sıradaki turda kontrolü alacak oyuncular
 var _bilgi_etiketi: Label = null
+
+# --- v2.3: tepkiler, efektler, ödüller, bot kişilikleri ---
+const TEPKILER := ["Hahaha!", "Bravo!", "Of ya!", "Kirayı öde!", "Şanslısın!", "Hadi oyna!", "Bekle sen!", "GG"]
+const TEPKI_ARALIGI_MS := 1200      # Bir oyuncu en fazla bu sıklıkla tepki atabilir (sunucu kontrol eder)
+var _tepki_butonu: Button = null
+var _tepki_paneli: PanelContainer = null
+var _tepki_balonlari := {}          # oyuncu -> ekrandaki balon
+var _son_tepki := {}                # Sunucu: oyuncu -> son tepki zamanı
+var _son_yerel_tepki := -100000
+var _sarsinti_tween: Tween = null
+var _dunya_orijin := Vector2.ZERO
+var _borca_dusenler := {}           # borca girip mülk satan oyuncular ("Son Anda Kurtulan")
+
+# Bot kişilikleri isimden gelir (lobide bot eklenince bu isimler verilir)
+const VARSAYILAN_KISILIK := {"alim_yedek": 0, "ihale": 1.0, "ihale_yedek": 100, "insa_yedek": 200, "insa_kat": 2, "yukselt_yedek": 0, "ekstra": 30, "ekstra_para": 800, "kefalet": 300, "tepki": 35}
+const BOT_KISILIKLERI := {
+	# Her şeyi alır, ihalede coşar, parasını tuğlaya gömer
+	"Emlakçı Ekrem": {"alim_yedek": 0, "ihale": 1.3, "ihale_yedek": 50, "insa_yedek": 150, "insa_kat": 3, "yukselt_yedek": 0, "ekstra": 20, "ekstra_para": 600, "kefalet": 300, "tepki": 50},
+	# Kenara para koyar, ihalede ucuzcudur, hapiste beklemeyi kefalete tercih eder
+	"Temkinli Tülay": {"alim_yedek": 350, "ihale": 0.85, "ihale_yedek": 250, "insa_yedek": 500, "insa_kat": 1, "yukselt_yedek": 400, "ekstra": 0, "ekstra_para": 99999, "kefalet": 900, "tepki": 25},
+	# Ekstra zara bayılır, riskten korkmaz
+	"Kumarbaz Kemal": {"alim_yedek": 0, "ihale": 1.1, "ihale_yedek": 100, "insa_yedek": 150, "insa_kat": 2, "yukselt_yedek": 100, "ekstra": 70, "ekstra_para": 400, "kefalet": 300, "tepki": 70},
+}
 var _bilgi_kutusu: Control = null
 var _bilgi_stili: StyleBoxFlat = null
 var _bilgi_sayaci := 0.0
@@ -291,6 +314,11 @@ func _komut_istegi_isle(peer_id: int, ad: String, args: Array):
 
 # Komutlar sırayla işlenir; zar hareketi bitmeden sonraki komut başlamaz
 func _komutu_uygula(ad: String, args: Array):
+	# Tepkiler oyun akışını etkilemez: sıraya girmeden hemen gösterilir
+	if ad == "tepki":
+		if args.size() == 2:
+			_tepki_goster(int(args[0]), int(args[1]))
+		return
 	_kuyruk.append([ad, args])
 	if _isleniyor:
 		return
@@ -332,6 +360,8 @@ func _komutu_isle(ad: String, a: Array):
 
 # Sunucu, her komutu göndermeden önce oyun durumuna uygun mu diye kontrol eder
 func _komut_gecerli(ad: String, a: Array, g: int) -> bool:
+	if ad == "tepki":
+		return _tepki_gecerli(a, g)
 	if g >= 0:
 		if SADECE_SUNUCU.has(ad):
 			return false
@@ -392,7 +422,7 @@ func _gecikmeli(sure: float, ad: String, args: Array = []):
 func _durum_al() -> Dictionary:
 	var liste = []
 	for o in oyuncular:
-		liste.append({"para": o["para"], "konum": o["konum"], "hapiste_mi": o["hapiste_mi"], "hapis_turu": o["hapis_turu"], "aktif_mi": o["aktif_mi"], "yapay_zeka": o["yapay_zeka"], "kartlar": o["kartlar"].duplicate()})
+		liste.append({"para": o["para"], "konum": o["konum"], "hapiste_mi": o["hapiste_mi"], "hapis_turu": o["hapis_turu"], "aktif_mi": o["aktif_mi"], "yapay_zeka": o["yapay_zeka"], "kartlar": o["kartlar"].duplicate(), "ist": o["ist"].duplicate()})
 	return {"aktif": aktif_oyuncu_indeksi, "oyuncular": liste, "mulk": mülkiyet_durumu.duplicate(true), "tur_basi": _tur_basi, "tur": tur_sayaci, "enf": enf_kademe, "deste": _deste_kalan, "muaf": _muafiyetler.duplicate(true)}
 
 func _durum_yayinla():
@@ -416,6 +446,8 @@ func _durumu_uygula(d: Dictionary):
 		o["aktif_mi"] = bool(s["aktif_mi"])
 		o["yapay_zeka"] = bool(s["yapay_zeka"])
 		o["kartlar"] = s.get("kartlar", []).duplicate()
+		if s.has("ist"):
+			o["ist"] = s["ist"].duplicate()
 		if konum_degisti and not hareket_ediyor:
 			_piyonu_yerlestir(i)
 		if i < Global.oyuncu_sayisi:
@@ -576,7 +608,10 @@ func _bot_devral(i: int):
 func _bot_tapu_karari(sehir: String):
 	await get_tree().create_timer(1.0).timeout
 	if not is_inside_tree(): return
-	if oyuncular[aktif_oyuncu_indeksi]["para"] >= sehirler[sehir]["fiyat"]:
+	var i = aktif_oyuncu_indeksi
+	var para = oyuncular[i]["para"]
+	var fiyat = sehirler[sehir]["fiyat"]
+	if para >= fiyat and (para - fiyat >= int(_kisilik(i)["alim_yedek"]) or _grubu_tamamlar_mi(i, sehir)):
 		_komut("satin_al", [sehir])
 	else:
 		_komut("pas_gec")
@@ -584,7 +619,7 @@ func _bot_tapu_karari(sehir: String):
 func _bot_yukseltme_karari(bedel: int):
 	await get_tree().create_timer(1.5).timeout
 	if not is_inside_tree(): return
-	if oyuncular[aktif_oyuncu_indeksi]["para"] >= bedel:
+	if oyuncular[aktif_oyuncu_indeksi]["para"] - bedel >= int(_kisilik(aktif_oyuncu_indeksi)["yukselt_yedek"]):
 		_komut("evet")
 	else:
 		_komut("hayir")
@@ -592,7 +627,7 @@ func _bot_yukseltme_karari(bedel: int):
 func _bot_hapis_karari():
 	await get_tree().create_timer(2.0).timeout
 	if not is_inside_tree(): return
-	if oyuncular[aktif_oyuncu_indeksi]["para"] >= 300:
+	if oyuncular[aktif_oyuncu_indeksi]["para"] >= maxi(300, int(_kisilik(aktif_oyuncu_indeksi)["kefalet"])):
 		_komut("kefalet")
 	else:
 		_komut("yat")
@@ -739,7 +774,10 @@ func _ready():
 	_insa_arayuzunu_kur()
 	_desteyi_kur()
 	_kart_arayuzunu_kur()
+	_panelleri_guzellestir()
 	_ekstra_buton_metni = taktiksel_zar_butonu.text
+	_tepki_arayuzunu_kur()
+	_dunya_orijin = position
 
 	# ----------------------------------------------------
 
@@ -749,6 +787,8 @@ func _ready():
 		{"isim": "Bot 2", "para": 1500, "konum": 0, "renk": Color.YELLOW, "piyon": piyon_sari, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": true, "aktif_mi": true, "kartlar": []},
 		{"isim": "Bot 3", "para": 1500, "konum": 0, "renk": Color.GREEN, "piyon": piyon_yesil, "hapiste_mi": false, "hapis_turu": 0, "yapay_zeka": true, "aktif_mi": true, "kartlar": []}
 	]
+	for o in oyuncular:
+		o["ist"] = {"kira_aldi": 0, "kira_odedi": 0, "hapis": 0, "insa": 0, "kurtulus": 0}
 	if online:
 		for i in range(4):
 			if i < Ag.yuvalar.size():
@@ -865,6 +905,11 @@ func arayuzu_guncelle():
 
 func sirayi_sonraki_oyuncuya_gecir():
 	var onceki = aktif_oyuncu_indeksi
+	# Borca girip mülk satarak ayakta kalan oyuncu
+	if _borca_dusenler.has(onceki):
+		_borca_dusenler.erase(onceki)
+		if oyuncular[onceki]["aktif_mi"] and oyuncular[onceki]["para"] >= 0:
+			oyuncular[onceki]["ist"]["kurtulus"] += 1
 	var dongu_korumasi = 0
 	while dongu_korumasi < 4:
 		aktif_oyuncu_indeksi = (aktif_oyuncu_indeksi + 1) % 4
@@ -985,13 +1030,14 @@ func _zar_komutu(ekstra_zar: bool):
 func ai_hamle_yap():
 	await get_tree().create_timer(1.0).timeout
 	if not is_inside_tree(): return
-	# Tekeli varsa önce inşaat: en pahalı şehirden başlar, en fazla 2 kat, 200 TL yedek bırakır
-	for _kat in range(2):
+	# Tekeli varsa önce inşaat: en pahalı şehirden başlar; kat sayısı ve yedek para kişiliğe göre
+	var kisilik = _kisilik(aktif_oyuncu_indeksi)
+	for _kat in range(int(kisilik["insa_kat"])):
 		var secenek = _insa_secenekleri(aktif_oyuncu_indeksi)
 		if secenek.is_empty():
 			break
 		secenek.sort_custom(func(x, y): return sehirler[x]["fiyat"] > sehirler[y]["fiyat"])
-		if oyuncular[aktif_oyuncu_indeksi]["para"] - _insa_bedeli(secenek[0]) < 200:
+		if oyuncular[aktif_oyuncu_indeksi]["para"] - _insa_bedeli(secenek[0]) < int(kisilik["insa_yedek"]):
 			break
 		_komut("insa", [secenek[0]])
 		await get_tree().create_timer(0.7).timeout
@@ -999,8 +1045,8 @@ func ai_hamle_yap():
 	var o_oyuncu = oyuncular[aktif_oyuncu_indeksi]
 	var ekstra_zar_kullan = false
 
-	if not o_oyuncu["hapiste_mi"] and o_oyuncu["para"] > 800:
-		if randi() % 100 < 30:
+	if not o_oyuncu["hapiste_mi"] and o_oyuncu["para"] > int(kisilik["ekstra_para"]):
+		if randi() % 100 < int(kisilik["ekstra"]):
 			ekstra_zar_kullan = true
 	if not o_oyuncu["hapiste_mi"] and o_oyuncu["kartlar"].has("cift_zar"):
 		ekstra_zar_kullan = true
@@ -1042,6 +1088,8 @@ func _hareketi_oynat(zar1: int, zar2: int, ekstra_zar: bool):
 
 	zar_paneli.show()
 	zar_gorseli.show()
+	# Tek zar tepsinin ortasında, iki zar yan yana
+	zar_gorseli.position = Vector2(104, 48) if ekstra_zar else Vector2(149, 48)
 	if ekstra_zar:
 		ekstra_zar_gorseli.show()
 	else:
@@ -1101,6 +1149,8 @@ func _kareye_vardi():
 		else:
 			o_oyuncu["hapiste_mi"] = true
 			o_oyuncu["hapis_turu"] = 1
+			o_oyuncu["ist"]["hapis"] += 1
+			_rastgele_bot_tepkisi(aktif_oyuncu_indeksi, 0, 0.6)
 			if _kontrol_bende():
 				_titret(300)
 			bildirim_yazisi.text = "[center]\n\n\n[font_size=20][b][color=#ff3333]KADER MAHKÛMU![/color][/b][/font_size]\n\nPolis çevirmesine takıldın. Doğruca hapishaneye gidiyorsun![/center]"
@@ -1626,6 +1676,7 @@ func _kartla_hapse(i: int):
 	await _isinla(i, harita_sirasi.find("Hapishane"))
 	o["hapiste_mi"] = true
 	o["hapis_turu"] = 1
+	o["ist"]["hapis"] += 1
 	_kart_bilgisi(o["isim"] + " hapse girdi!", Color(1, 0.4, 0.35))
 
 # --- BOT KARARLARI (sunucuda) ---
@@ -2131,6 +2182,12 @@ func _tamam():
 
 		odeyen["para"] -= bekleyen_kira["miktar"]
 		alan["para"] += bekleyen_kira["miktar"]
+		odeyen["ist"]["kira_odedi"] += bekleyen_kira["miktar"]
+		alan["ist"]["kira_aldi"] += bekleyen_kira["miktar"]
+		_ucan_para(bekleyen_kira["odeyen"], bekleyen_kira["alan"], bekleyen_kira["miktar"])
+		_bot_tepkisi(bekleyen_kira["alan"], 0, 0.8)
+		if bekleyen_kira["miktar"] >= 200:
+			_bot_tepkisi(bekleyen_kira["odeyen"], [2, 6][randi() % 2], 0.8)
 		_para_sesini_tek_cal()
 		if bekleyen_kira["alan"] == _yerel() and not alan["yapay_zeka"]:
 			_titret(40)
@@ -2158,8 +2215,11 @@ func borc_kontrolu():
 		o_oyuncu["aktif_mi"] = false
 		o_oyuncu["piyon"].hide()
 		o_oyuncu["kartlar"].clear()
+		_borca_dusenler.erase(aktif_oyuncu_indeksi)
 		if aktif_oyuncu_indeksi == _yerel() and not o_oyuncu["yapay_zeka"]:
 			_titret(500)
+		_ekrani_sars()
+		_rastgele_bot_tepkisi(aktif_oyuncu_indeksi, 7, 1.5)
 
 		var kalan = []
 		for p in oyuncular:
@@ -2178,6 +2238,7 @@ func borc_kontrolu():
 			if _yetkili():
 				_gecikmeli(5.0, "sonraki_tur")
 	else:
+		_borca_dusenler[aktif_oyuncu_indeksi] = true
 		if o_oyuncu["yapay_zeka"]:
 			if _yetkili():
 				ai_mulk_sat(satilabilir_mulkler)
@@ -2334,6 +2395,8 @@ func _on_ihale_timer_timeout():
 	if yeni_sure > 0:
 		var adaylar = []
 		var siradaki = _siradaki_teklif()
+		# Banka ihalesinde fiyat hâlâ liste fiyatının altındaysa kelepirdir: botlar daha istekli olur
+		var kelepir = ihale_verileri["satici"] == -1 and siradaki < sehirler[ihale_verileri["sehir"]]["fiyat"]
 		for i in range(4):
 			if not oyuncular[i]["yapay_zeka"] or not oyuncular[i]["aktif_mi"]:
 				continue
@@ -2341,13 +2404,14 @@ func _on_ihale_timer_timeout():
 				continue
 			if siradaki > _bot_ihale_siniri(i):
 				ihale_verileri["cekilenler"].append(i)   # bu fiyata değmez, çekilir
-			elif oyuncular[i]["para"] - siradaki >= 100:
+			elif oyuncular[i]["para"] - siradaki >= (mini(100, int(_kisilik(i)["ihale_yedek"])) if kelepir else int(_kisilik(i)["ihale_yedek"])):
 				adaylar.append(i)
 
 		if adaylar.size() > 0:
-			var sans = 25
-			if yeni_sure <= 3: sans = 50
-			if yeni_sure == 1: sans = 80
+			var sans = 40
+			if yeni_sure <= 3: sans = 65
+			if yeni_sure == 1: sans = 90
+			if kelepir: sans += 15
 			if randi() % 100 < sans:
 				_komut("teklif", [adaylar[randi() % adaylar.size()]])
 				teklif_verildi = true
@@ -2395,7 +2459,7 @@ func _bot_ihale_siniri(i: int) -> int:
 		for sahip in rakipte:
 			if rakipte[sahip] == grup.size() - 1:
 				carpan += 0.3
-	return int(deger * carpan)
+	return int(deger * carpan * float(_kisilik(i)["ihale"]))
 
 func _ihale_sure(kalan: int):
 	ihale_suresi = kalan
@@ -2634,6 +2698,9 @@ func _insa(sehir: String):
 	mülkiyet_durumu[sehir]["seviye"] += 1
 	var kat = mülkiyet_durumu[sehir]["seviye"]
 	insaa_et_gorsel_ev(harita_sirasi.find(sehir), o["renk"], kat)
+	o["ist"]["insa"] += 1
+	if kat == 4:
+		_plaza_kutlamasi(harita_sirasi.find(sehir))
 	_tum_kiralari_guncelle()
 	arayuzu_guncelle()
 	var yapi = "plaza" if kat == 4 else str(kat) + ". kat"
@@ -2860,7 +2927,7 @@ func _yat():
 
 func tapu_kartini_goster(sehir_anahtari: String):
 	var f = sehirler[sehir_anahtari]["fiyat"]
-	sehir_adi_etiketi.text = sehir_anahtari.to_upper()
+	sehir_adi_etiketi.text = _gorunen_ad(sehir_anahtari).replace("i", "İ").to_upper()
 	renk_bandi.color = sehirler[sehir_anahtari]["renk"]
 
 	# Gruptan kaç şehir bu oyuncuda? (tapu kartındaki boş satıra yazılır)
@@ -2875,6 +2942,7 @@ func tapu_kartini_goster(sehir_anahtari: String):
 	var c = _kira_carpani()
 	detay_yazisi.text = "Satın Alma Bedeli: %d TL\n%s\nBaşlangıç Kirası: %d TL\n1. Seviye Kira: %d TL\n2. Seviye Kira: %d TL\n3. Seviye Kira: %d TL\n4. Seviye Kira: %d TL" % [f, grup_satiri, int(round(sehirler[sehir_anahtari]["baslangic_kirasi"] * c)), int(round(int(f * 0.50) * c)), int(round(int(f * 1.00) * c)), int(round(int(f * 1.50) * c)), int(round(int(f * 2.00) * c))]
 
+	_tapu_tablosunu_doldur(sehir_anahtari, grup_satiri, c)
 	karar_timer.start(15)
 
 	satin_al_butonu.disabled = not _kontrol_bende()
@@ -2925,6 +2993,9 @@ func _yukselt():
 		_para_sesini_tek_cal()
 		mülkiyet_durumu[dy]["seviye"] += 1
 		haritadaki_kirayi_guncelle(dy, mülkiyet_durumu[dy]["seviye"])
+		o["ist"]["insa"] += 1
+		if mülkiyet_durumu[dy]["seviye"] == 4:
+			_plaza_kutlamasi(o["konum"])
 		arayuzu_guncelle()
 		insaa_et_gorsel_ev(o["konum"], o["renk"], mülkiyet_durumu[dy]["seviye"])
 		yukseltme_paneli.hide()
@@ -3058,9 +3129,15 @@ func oyun_bitti_animasyonunu_baslat(kazanan_isim: String, renk_hex: String):
 	var yazi = $Arayuz/OyunBittiPaneli/KazananYazisi
 	
 	panel.visible = true
+	# Ödüller sığsın diye panel büyütülür
+	panel.offset_left = -380
+	panel.offset_right = 380
+	panel.offset_top = -290
+	panel.offset_bottom = 290
+	panel.pivot_offset = Vector2(380, 290)
 	panel.scale = Vector2(0, 0)
-	
-	yazi.text = "\n[center][font_size=20][b][color=gold]🏆 OYUN BİTTİ 🏆[/color][/b][/font_size]\n\n[font_size=25]Kazanan: [color=#" + renk_hex + "]" + kazanan_isim + "[/color][/font_size][/center]"
+	yazi.text = "\n[center][font_size=30][b][color=gold]OYUN BİTTİ[/color][/b][/font_size]\n\n[font_size=34]Kazanan: [color=#" + renk_hex + "]" + kazanan_isim + "[/color][/font_size]\n\n" + _odul_metni() + "[/center]"
+	_konfeti(get_viewport_rect().size / 2.0, 160)
 	
 	var tween = create_tween()
 	tween.set_trans(Tween.TRANS_BACK) 
@@ -3220,3 +3297,571 @@ func _process(delta):
 	if _yetkili() and ihale_paneli.visible and ihale_timer.is_stopped() and ihale_suresi > 0 and ihale_aktif:
 		ihale_timer.one_shot = false
 		ihale_timer.start(1.0)
+
+
+# ==========================================
+# v2.3 — HIZLI TEPKİLER
+# ------------------------------------------
+# "tepki" komutu sıraya girmez, herkesin ekranında o oyuncunun arabasının
+# üstünde bir balon olarak çıkar. Sunucu oyuncu başına sıklığı sınırlar.
+# ==========================================
+func _tepki_gecerli(a: Array, g: int) -> bool:
+	if a.size() != 2:
+		return false
+	var i = int(a[0])
+	var t = int(a[1])
+	if i < 0 or i > 3 or t < 0 or t >= TEPKILER.size():
+		return false
+	if g >= 0 and i != g:
+		return false
+	var simdi = Time.get_ticks_msec()
+	if simdi - int(_son_tepki.get(i, -100000)) < TEPKI_ARALIGI_MS:
+		return false
+	_son_tepki[i] = simdi
+	return true
+
+func _tepki_arayuzunu_kur():
+	_tepki_butonu = Button.new()
+	_tepki_butonu.text = "TEPKİ VER"
+	_tepki_butonu.position = Vector2(257, 652)
+	_tepki_butonu.custom_minimum_size = Vector2(298, 54)
+	_tepki_butonu.focus_mode = Control.FOCUS_NONE
+	_tepki_butonu.add_theme_font_size_override("font_size", 22)
+	_tepki_butonu.add_theme_stylebox_override("normal", _stil_kutusu(Color(0.1, 0.14, 0.22, 0.92), 10, Color(1, 1, 1, 0.25), 2))
+	_tepki_butonu.add_theme_stylebox_override("hover", _stil_kutusu(Color(0.16, 0.22, 0.34, 0.95), 10, Color(1, 1, 1, 0.4), 2))
+	_tepki_butonu.add_theme_stylebox_override("pressed", _stil_kutusu(Color(0.22, 0.3, 0.45, 0.95), 10, Color(1, 1, 1, 0.5), 2))
+	_tepki_butonu.pressed.connect(func(): _tepki_paneli.visible = not _tepki_paneli.visible)
+	$Arayuz.add_child(_tepki_butonu)
+
+	_tepki_paneli = PanelContainer.new()
+	_tepki_paneli.position = _tepki_butonu.position + Vector2(0, 62)
+	_tepki_paneli.custom_minimum_size = Vector2(298, 0)
+	var stil = _stil_kutusu(Color(0.05, 0.07, 0.1, 0.94), 10, Color(1, 1, 1, 0.2), 2)
+	stil.content_margin_left = 8
+	stil.content_margin_right = 8
+	_tepki_paneli.add_theme_stylebox_override("panel", stil)
+	_tepki_paneli.hide()
+	$Arayuz.add_child(_tepki_paneli)
+	var izgara = GridContainer.new()
+	izgara.columns = 2
+	izgara.add_theme_constant_override("h_separation", 8)
+	izgara.add_theme_constant_override("v_separation", 8)
+	_tepki_paneli.add_child(izgara)
+	for t in range(TEPKILER.size()):
+		var b = Button.new()
+		b.text = TEPKILER[t]
+		b.custom_minimum_size = Vector2(133, 50)
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_size_override("font_size", 19)
+		b.add_theme_stylebox_override("normal", _stil_kutusu(Color(0.95, 0.95, 0.97), 10))
+		b.add_theme_stylebox_override("hover", _stil_kutusu(Color(1, 0.9, 0.55), 10))
+		b.add_theme_stylebox_override("pressed", _stil_kutusu(Color(1, 0.8, 0.3), 10))
+		b.add_theme_color_override("font_color", Color(0.1, 0.1, 0.12))
+		b.add_theme_color_override("font_hover_color", Color(0.1, 0.1, 0.12))
+		b.add_theme_color_override("font_pressed_color", Color(0.1, 0.1, 0.12))
+		b.pressed.connect(_tepki_secildi.bind(t))
+		izgara.add_child(b)
+
+func _tepki_secildi(t: int):
+	_tepki_paneli.hide()
+	var simdi = Time.get_ticks_msec()
+	if simdi - _son_yerel_tepki < TEPKI_ARALIGI_MS + 100:
+		return
+	_son_yerel_tepki = simdi
+	_oyuncu_komutu("tepki", [_yerel(), t])
+
+# Oyuncunun ekrandaki yeri: arabası, araba yoksa (iflas) bakiye satırı
+func _oyuncu_ekran_konumu(i: int) -> Vector2:
+	var p = oyuncular[i]["piyon"]
+	if p.visible:
+		for alt in p.get_children():
+			if alt is Sprite2D:
+				return alt.global_position
+		return p.global_position
+	return bakiye_etiketi.global_position + Vector2(150, i * 55 + 20)
+
+func _tepki_goster(i: int, t: int):
+	if i < 0 or i > 3 or t < 0 or t >= TEPKILER.size():
+		return
+	if _tepki_balonlari.has(i) and is_instance_valid(_tepki_balonlari[i]):
+		_tepki_balonlari[i].queue_free()
+	var o = oyuncular[i]
+	var kutu = PanelContainer.new()
+	kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var stil = _stil_kutusu(Color(1, 1, 1, 0.97), 14, o["renk"], 3)
+	stil.content_margin_left = 14
+	stil.content_margin_right = 14
+	stil.content_margin_top = 6
+	stil.content_margin_bottom = 6
+	kutu.add_theme_stylebox_override("panel", stil)
+	var l = Label.new()
+	l.text = TEPKILER[t] if o["piyon"].visible else o["isim"] + ": " + TEPKILER[t]
+	l.add_theme_font_size_override("font_size", 24)
+	l.add_theme_color_override("font_color", Color(0.1, 0.1, 0.12))
+	kutu.add_child(l)
+	kutu.modulate.a = 0.0
+	$Arayuz.add_child(kutu)
+	_tepki_balonlari[i] = kutu
+	await get_tree().process_frame
+	if not is_instance_valid(kutu):
+		return
+	var hedef = _oyuncu_ekran_konumu(i)
+	var konum = hedef + Vector2(-kutu.size.x / 2.0, -kutu.size.y - 34)
+	konum.x = clampf(konum.x, 8, 1912 - kutu.size.x)
+	konum.y = clampf(konum.y, 8, 1072 - kutu.size.y)
+	kutu.position = konum
+	kutu.pivot_offset = Vector2(kutu.size.x / 2.0, kutu.size.y)
+	kutu.scale = Vector2(0.3, 0.3)
+	var tw = create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(kutu, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(kutu, "modulate:a", 1.0, 0.15)
+	tw.chain().tween_interval(2.2)
+	tw.chain().tween_property(kutu, "modulate:a", 0.0, 0.4)
+	tw.chain().tween_callback(kutu.queue_free)
+	if i != _yerel():
+		_titret(25)
+
+# Lobide eklenen gerçek botlar (bağlantısı kopan oyuncu değil)
+func _gercek_bot_mu(i: int) -> bool:
+	if not oyuncular[i]["yapay_zeka"] or not oyuncular[i]["aktif_mi"]:
+		return false
+	if online:
+		return i < Ag.yuvalar.size() and Ag.yuvalar[i]["bot"]
+	return true
+
+# Sunucu: bot, kişiliğine göre bir olaya tepki verebilir
+func _bot_tepkisi(i: int, t: int, carpan := 1.0):
+	if not _yetkili() or i < 0 or i > 3 or not _gercek_bot_mu(i):
+		return
+	if randi() % 100 >= int(float(_kisilik(i)["tepki"]) * carpan):
+		return
+	await get_tree().create_timer(randf_range(0.6, 1.4)).timeout
+	if not is_inside_tree():
+		return
+	_komut("tepki", [i, t])
+
+# Sunucu: olaya karışmayan botlardan biri tepki verebilir
+func _rastgele_bot_tepkisi(haric: int, t: int, carpan := 1.0):
+	if not _yetkili():
+		return
+	var adaylar = []
+	for i in range(4):
+		if i != haric and _gercek_bot_mu(i):
+			adaylar.append(i)
+	if adaylar.is_empty():
+		return
+	_bot_tepkisi(adaylar[randi() % adaylar.size()], t, carpan)
+
+# ==========================================
+# v2.3 — BOT KİŞİLİKLERİ
+# ==========================================
+func _kisilik(i: int) -> Dictionary:
+	return BOT_KISILIKLERI.get(str(oyuncular[i]["isim"]), VARSAYILAN_KISILIK)
+
+# Bu şehirle grubun tamamı bu oyuncunun olur mu?
+func _grubu_tamamlar_mi(i: int, sehir: String) -> bool:
+	var grup = _grup_sehirleri(sehir)
+	if grup.size() < 2:
+		return false
+	for g in grup:
+		if g == sehir:
+			continue
+		if not mülkiyet_durumu.has(g) or mülkiyet_durumu[g]["sahip"] != i:
+			return false
+	return true
+
+# ==========================================
+# v2.3 — GÖRSEL EFEKTLER
+# ==========================================
+# Kira ödenince paralar ödeyenin arabasından alanınkine uçar
+func _ucan_para(kimden: int, kime: int, miktar: int):
+	if kimden < 0 or kime < 0:
+		return
+	var a = _oyuncu_ekran_konumu(kimden)
+	var b = _oyuncu_ekran_konumu(kime)
+	var adet = clampi(int(miktar / 100.0) + 3, 4, 10)
+	for k in range(adet):
+		var para = Panel.new()
+		para.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		para.size = Vector2(28, 28)
+		para.add_theme_stylebox_override("panel", _stil_kutusu(Color(1, 0.82, 0.2), 14, Color(0.72, 0.5, 0.05), 3))
+		var yazi = Label.new()
+		yazi.text = "TL"
+		yazi.size = Vector2(28, 28)
+		yazi.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		yazi.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		yazi.add_theme_font_size_override("font_size", 11)
+		yazi.add_theme_color_override("font_color", Color(0.45, 0.3, 0.0))
+		para.add_child(yazi)
+		var baslangic = a + Vector2(randf_range(-12, 12), randf_range(-12, 12))
+		var orta = (a + b) / 2.0 + Vector2(randf_range(-60, 60), -110 - randf_range(0, 80))
+		para.position = baslangic - Vector2(14, 14)
+		para.modulate.a = 0.0
+		$Arayuz.add_child(para)
+		var tw = create_tween()
+		tw.tween_interval(k * 0.08)
+		tw.tween_property(para, "modulate:a", 1.0, 0.08)
+		var ucus = func(t: float):
+			var u = 1.0 - t
+			para.position = u * u * baslangic + 2.0 * u * t * orta + t * t * b - Vector2(14, 14)
+		tw.tween_method(ucus, 0.0, 1.0, 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tw.tween_property(para, "modulate:a", 0.0, 0.12)
+		tw.tween_callback(para.queue_free)
+
+func _konfeti(konum: Vector2, adet := 90):
+	var p = CPUParticles2D.new()
+	p.one_shot = true
+	p.amount = adet
+	p.lifetime = 1.8
+	p.explosiveness = 0.95
+	p.direction = Vector2(0, -1)
+	p.spread = 75.0
+	p.initial_velocity_min = 280.0
+	p.initial_velocity_max = 560.0
+	p.gravity = Vector2(0, 750)
+	p.damping_min = 20.0
+	p.damping_max = 70.0
+	p.scale_amount_min = 6.0
+	p.scale_amount_max = 11.0
+	p.angle_min = 0.0
+	p.angle_max = 360.0
+	p.angular_velocity_min = -420.0
+	p.angular_velocity_max = 420.0
+	var renkler = Gradient.new()
+	renkler.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CONSTANT
+	renkler.offsets = PackedFloat32Array([0.0, 0.17, 0.34, 0.5, 0.67, 0.84])
+	renkler.colors = PackedColorArray([Color(1, 0.25, 0.3), Color(1, 0.82, 0.2), Color(0.3, 0.85, 1), Color(0.35, 0.95, 0.45), Color(0.9, 0.4, 1), Color(1, 1, 1)])
+	p.color_initial_ramp = renkler
+	$Arayuz.add_child(p)
+	p.position = konum
+	p.emitting = true
+	await get_tree().create_timer(p.lifetime + 0.6).timeout
+	if is_instance_valid(p):
+		p.queue_free()
+
+func _plaza_kutlamasi(kare: int):
+	var nokta = path_2d.curve.get_point_position(clampi(kare, 0, path_2d.curve.get_point_count() - 1))
+	_konfeti(path_2d.to_global(nokta))
+	if aktif_oyuncu_indeksi == _yerel() and not oyuncular[aktif_oyuncu_indeksi]["yapay_zeka"]:
+		_titret(120)
+	_rastgele_bot_tepkisi(aktif_oyuncu_indeksi, 1, 1.2)
+
+# İflasta tahta sarsılır ve ekran kızarır
+func _ekrani_sars(guc := 20.0, sure := 0.55):
+	if _sarsinti_tween and _sarsinti_tween.is_valid():
+		_sarsinti_tween.kill()
+	_sarsinti_tween = create_tween()
+	var adim = 12
+	for k in range(adim):
+		var g = guc * (1.0 - float(k) / adim)
+		_sarsinti_tween.tween_property(self, "position", _dunya_orijin + Vector2(randf_range(-g, g), randf_range(-g, g)), sure / adim)
+	_sarsinti_tween.tween_property(self, "position", _dunya_orijin, 0.05)
+	var kizil = ColorRect.new()
+	kizil.color = Color(0.9, 0.05, 0.05, 0.28)
+	kizil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	kizil.position = Vector2.ZERO
+	kizil.size = Vector2(1920, 1080)
+	$Arayuz.add_child(kizil)
+	var tw = create_tween()
+	tw.tween_property(kizil, "color:a", 0.0, 0.8)
+	tw.tween_callback(kizil.queue_free)
+
+# ==========================================
+# v2.3 — OYUN SONU ÖDÜLLERİ
+# ==========================================
+func _odul_metni() -> String:
+	var oduller = [
+		["Ev Ağası", "kira_aldi", " TL kira topladı"],
+		["Kira Mağduru", "kira_odedi", " TL kira ödedi"],
+		["Müteahhit", "insa", " kat dikti"],
+		["Hapis Kuşu", "hapis", " kez hapse girdi"],
+		["Son Anda Kurtulan", "kurtulus", " kez borçtan döndü"],
+	]
+	var satirlar = []
+	for od in oduller:
+		var en_iyi = -1
+		var deger = 0
+		for i in range(Global.oyuncu_sayisi):
+			var v = int(oyuncular[i]["ist"].get(od[1], 0))
+			if v > deger:
+				deger = v
+				en_iyi = i
+		if en_iyi == -1:
+			continue
+		var renk = oyuncular[en_iyi]["renk"].to_html(false)
+		satirlar.append("[color=gold]" + od[0] + "[/color]  [color=#" + renk + "]" + oyuncular[en_iyi]["isim"] + "[/color] [color=#bbbbbb](" + str(deger) + od[2] + ")[/color]")
+	if satirlar.is_empty():
+		return ""
+	return "[font_size=24][b]ÖDÜLLER[/b][/font_size]\n[font_size=21]" + "\n".join(PackedStringArray(satirlar)) + "[/font_size]"
+
+
+# ==========================================
+# v2.3 — PANEL GÖRÜNÜMLERİ
+# ------------------------------------------
+# Sahnedeki paneller (bildirim, oyun sonu, yükseltme, hapishane, satış, ihale)
+# kodla yeniden giydirilir: koyu kart, üstte panelin renginde şerit, gölge,
+# butonlar panelin içinde ve renkleriyle ne yaptıklarını anlatır.
+# Panellerin resimleri (hapishane parmaklığı, "Hemen panik yap" adamı) korunur.
+# ==========================================
+const P_ALTIN := Color(0.96, 0.76, 0.26)
+const P_YESIL := Color(0.16, 0.6, 0.27)
+const P_KIRMIZI := Color(0.82, 0.2, 0.2)
+const P_MAVI := Color(0.2, 0.5, 0.85)
+const P_TURUNCU := Color(0.93, 0.52, 0.1)
+const P_GRI := Color(0.3, 0.34, 0.42)
+const P_CAMGOBEGI := Color(0.3, 0.8, 1.0)
+
+func _panel_kur(p: Control, w: float, h: float, vurgu: Color):
+	p.set_anchors_preset(Control.PRESET_CENTER)
+	p.offset_left = -w / 2.0
+	p.offset_right = w / 2.0
+	p.offset_top = -h / 2.0
+	p.offset_bottom = h / 2.0
+	p.pivot_offset = Vector2(w / 2.0, h / 2.0)
+	var s = StyleBoxFlat.new()
+	s.bg_color = Color(0.06, 0.08, 0.12, 0.97)
+	s.set_corner_radius_all(20)
+	s.border_color = vurgu
+	s.set_border_width_all(2)
+	s.border_width_top = 8
+	s.shadow_color = Color(0, 0, 0, 0.6)
+	s.shadow_size = 26
+	p.add_theme_stylebox_override("panel", s)
+
+func _yerlestir(c: Control, x: float, y: float, w: float, h: float):
+	c.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	c.offset_left = x
+	c.offset_top = y
+	c.offset_right = x + w
+	c.offset_bottom = y + h
+
+func _buton_boya(b: Button, renk: Color, yazi := 22):
+	var durumlar = {"normal": renk, "hover": renk.lightened(0.15), "pressed": renk.darkened(0.2), "disabled": Color(0.25, 0.27, 0.31)}
+	for d in durumlar:
+		var s = StyleBoxFlat.new()
+		s.bg_color = durumlar[d]
+		s.set_corner_radius_all(14)
+		s.border_width_bottom = 5 if d != "pressed" else 2
+		s.border_color = durumlar[d].darkened(0.45)
+		s.content_margin_left = 10
+		s.content_margin_right = 10
+		b.add_theme_stylebox_override(d, s)
+	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	for c in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		b.add_theme_color_override(c, Color.WHITE)
+	b.add_theme_color_override("font_disabled_color", Color(0.6, 0.62, 0.66))
+	b.add_theme_constant_override("outline_size", 0)
+	b.add_theme_font_size_override("font_size", yazi)
+
+# Panelin içinde, diğer her şeyin arkasında duran kutu (resim çerçevesi, teklif alanı)
+func _ic_kutu(p: Control, x: float, y: float, w: float, h: float, renk: Color, kose := 14, kenar_rengi := Color(0, 0, 0, 0), kenar := 0) -> Panel:
+	var k = Panel.new()
+	k.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var s = StyleBoxFlat.new()
+	s.bg_color = renk
+	s.set_corner_radius_all(kose)
+	if kenar > 0:
+		s.border_color = kenar_rengi
+		s.set_border_width_all(kenar)
+	k.add_theme_stylebox_override("panel", s)
+	p.add_child(k)
+	p.move_child(k, 0)
+	_yerlestir(k, x, y, w, h)
+	return k
+
+func _baslik_boya(l: Label, renk: Color, boyut: int):
+	l.add_theme_color_override("font_color", renk)
+	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	l.add_theme_constant_override("outline_size", 6)
+	l.add_theme_font_size_override("font_size", boyut)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+func _panelleri_guzellestir():
+	# --- Bildirim (kira, hapis, iflas mesajları) ---
+	_panel_kur(bildirim_paneli, 600, 400, P_ALTIN)
+	_yerlestir(bildirim_yazisi, 28, 22, 544, 286)
+	_yerlestir(tamam_butonu, 200, 314, 200, 64)
+	_buton_boya(tamam_butonu, P_YESIL, 26)
+
+	# --- Oyun sonu (kazanan + ödüller) ---
+	_panel_kur(oyun_bitti_paneli, 760, 580, P_ALTIN)
+	_yerlestir(kazanan_yazisi, 30, 22, 700, 456)
+	_yerlestir(yeniden_baslat_butonu, 260, 494, 240, 64)
+	_buton_boya(yeniden_baslat_butonu, P_MAVI, 22)
+
+	# --- Mülk yükseltme ---
+	_panel_kur(yukseltme_paneli, 460, 380, P_CAMGOBEGI)
+	_yerlestir(soru_yazisi, 24, 18, 412, 268)
+	_yerlestir(evet_butonu, 24, 294, 196, 64)
+	_buton_boya(evet_butonu, P_YESIL, 24)
+	_yerlestir(hayir_butonu, 240, 294, 196, 64)
+	_buton_boya(hayir_butonu, P_GRI, 24)
+
+	# --- Hapishane: parmaklık resmi beyaz bir rozetin içinde ---
+	_panel_kur(hapishane_paneli, 460, 560, P_KIRMIZI)
+	_ic_kutu(hapishane_paneli, 160, 28, 140, 140, Color(0.94, 0.94, 0.96), 26)
+	var parmaklik = hapishane_paneli.get_node_or_null("Sprite2D")
+	if parmaklik:
+		parmaklik.position = Vector2(230, 98)
+		parmaklik.scale = Vector2(0.19, 0.19)
+	var kader = hapishane_paneli.get_node_or_null("kadermahkumu")
+	if kader:
+		_yerlestir(kader, 0, 178, 460, 52)
+		_baslik_boya(kader, Color(1, 0.32, 0.3), 34)
+	_yerlestir(hapis_yazisi, 24, 236, 412, 226)
+	hapis_yazisi.add_theme_font_size_override("font_size", 21)
+	_yerlestir(kefalet_butonu, 24, 476, 200, 64)
+	_buton_boya(kefalet_butonu, Color(0.82, 0.58, 0.1), 20)
+	_yerlestir(yat_butonu, 236, 476, 200, 64)
+	_buton_boya(yat_butonu, P_GRI, 20)
+
+	# --- Satış (iflasın eşiği): "Hemen panik yap" adamı çerçevenin içinde ---
+	_panel_kur(satis_paneli, 520, 580, P_KIRMIZI)
+	var uyari = satis_paneli.get_node_or_null("UyariYazisi")
+	if uyari:
+		_yerlestir(uyari, 0, 20, 520, 56)
+		_baslik_boya(uyari, Color(1, 0.3, 0.28), 32)
+	_ic_kutu(satis_paneli, 34, 86, 452, 228, Color(0, 0, 0), 14, Color(0.82, 0.2, 0.2, 0.7), 2)
+	var adam = satis_paneli.get_node_or_null("Sprite2D")
+	if adam:
+		adam.position = Vector2(260, 200)
+		adam.scale = Vector2(0.4857, 0.4857)
+	_yerlestir(mulk_listesi, 40, 334, 440, 62)
+	mulk_listesi.add_theme_font_size_override("font_size", 20)
+	for d in ["normal", "hover", "pressed", "focus"]:
+		var s = StyleBoxFlat.new()
+		s.bg_color = Color(0.13, 0.16, 0.22) if d != "hover" else Color(0.18, 0.22, 0.3)
+		s.set_corner_radius_all(12)
+		s.border_color = Color(1, 1, 1, 0.25)
+		s.set_border_width_all(2)
+		s.content_margin_left = 14
+		s.content_margin_right = 14
+		mulk_listesi.add_theme_stylebox_override(d, s)
+	_yerlestir(ihaleye_cikar_butonu, 24, 490, 228, 66)
+	_buton_boya(ihaleye_cikar_butonu, P_TURUNCU, 19)
+	_yerlestir(sat_butonu, 268, 490, 228, 66)
+	_buton_boya(sat_butonu, P_KIRMIZI, 19)
+
+	# Kalın yazılar ([b]) normal yazıyla aynı boyda olsun
+	for yazi in [bildirim_yazisi, soru_yazisi, kazanan_yazisi, ihale_mulk_bilgisi, ihale_durum_yazisi]:
+		yazi.add_theme_font_size_override("bold_font_size", yazi.get_theme_font_size("normal_font_size"))
+	ihaleye_cikar_butonu.text = "Açık Artırmaya\nÇıkar"
+
+	# --- İhale ---
+	_tapu_kartini_giydir()
+	_zar_tepsisini_kur()
+
+	_panel_kur(ihale_paneli, 600, 540, P_TURUNCU)
+	_yerlestir(ihale_baslik, 0, 18, 600, 60)
+	_baslik_boya(ihale_baslik, Color(1, 0.8, 0.3), 36)
+	_yerlestir(ihale_mulk_bilgisi, 24, 86, 552, 128)
+	_ic_kutu(ihale_paneli, 24, 222, 552, 152, Color(1, 1, 1, 0.06), 16, Color(0.93, 0.52, 0.1, 0.45), 2)
+	_yerlestir(ihale_durum_yazisi, 36, 230, 528, 136)
+	_yerlestir(sure_yazisi, 210, 452, 180, 66)
+	sure_yazisi.add_theme_constant_override("outline_size", 0)
+	sure_yazisi.add_theme_color_override("font_color", Color(1, 0.85, 0.45))
+	sure_yazisi.add_theme_font_size_override("font_size", 21)
+	_yerlestir(pas_butonu, 24, 452, 180, 66)
+	_buton_boya(pas_butonu, P_KIRMIZI, 21)
+	_yerlestir(teklif_butonu, 396, 452, 180, 66)
+	_buton_boya(teklif_butonu, P_YESIL, 21)
+
+
+# --- Tapu kartı: krem renkli tapu senedi (şans kartıyla aynı dil) ---
+var _tapu_tablo: RichTextLabel = null
+
+func _tapu_kartini_giydir():
+	var w = 420.0
+	var h = 560.0
+	tapu_karti.set_anchors_preset(Control.PRESET_CENTER)
+	tapu_karti.offset_left = -w / 2.0
+	tapu_karti.offset_right = w / 2.0
+	tapu_karti.offset_top = -h / 2.0
+	tapu_karti.offset_bottom = h / 2.0
+	tapu_karti.pivot_offset = Vector2(w / 2.0, h / 2.0)
+	var s = StyleBoxFlat.new()
+	s.bg_color = Color(0.93, 0.91, 0.85)
+	s.set_corner_radius_all(18)
+	s.border_color = Color(0.29, 0.25, 0.21)
+	s.set_border_width_all(5)
+	s.shadow_color = Color(0, 0, 0, 0.55)
+	s.shadow_size = 24
+	tapu_karti.add_theme_stylebox_override("panel", s)
+
+	# Renk bandı: kartın içinde, kenardan boşluklu (klasik tapu senedi gibi)
+	_yerlestir(renk_bandi, 18, 18, w - 36, 116)
+	var ust = Label.new()
+	ust.text = "T A P U   S E N E D İ"
+	ust.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ust.add_theme_font_size_override("font_size", 15)
+	ust.add_theme_color_override("font_color", Color.WHITE)
+	ust.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+	ust.add_theme_constant_override("outline_size", 7)
+	ust.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	renk_bandi.add_child(ust)
+	_yerlestir(ust, 0, 10, w - 36, 22)
+	_yerlestir(sehir_adi_etiketi, 0, 32, w - 36, 76)
+	sehir_adi_etiketi.add_theme_font_size_override("font_size", 44)
+	sehir_adi_etiketi.add_theme_color_override("font_color", Color.WHITE)
+	sehir_adi_etiketi.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.55))
+	sehir_adi_etiketi.add_theme_constant_override("outline_size", 8)
+	sehir_adi_etiketi.add_theme_font_override("font", _serif_yazi_tipi())
+
+	# Eski düz yazı yerine fiyat + kira tablosu
+	detay_yazisi.hide()
+	_tapu_tablo = RichTextLabel.new()
+	_tapu_tablo.bbcode_enabled = true
+	_tapu_tablo.scroll_active = false
+	_tapu_tablo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tapu_tablo.add_theme_color_override("default_color", Color(0.2, 0.17, 0.13))
+	_tapu_tablo.add_theme_font_size_override("normal_font_size", 22)
+	_tapu_tablo.add_theme_font_size_override("bold_font_size", 22)
+	_tapu_tablo.add_theme_constant_override("table_h_separation", 48)
+	_tapu_tablo.add_theme_constant_override("table_v_separation", 6)
+	tapu_karti.add_child(_tapu_tablo)
+	_yerlestir(_tapu_tablo, 30, 144, w - 60, 320)
+
+	# Butonlar kartın içinde, ortada geri sayım rozeti
+	_yerlestir(satin_al_butonu, 24, 474, 150, 64)
+	_buton_boya(satin_al_butonu, P_YESIL, 24)
+	_yerlestir(pas_gec_butonu, 246, 474, 150, 64)
+	_buton_boya(pas_gec_butonu, P_GRI, 24)
+	var rozet = sayac_etiketi.get_parent()
+	if rozet is ColorRect:
+		rozet.color = Color(0.29, 0.25, 0.21)
+		_yerlestir(rozet, 180, 474, 60, 64)
+	_yerlestir(sayac_etiketi, 0, 0, 60, 64)
+	sayac_etiketi.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	sayac_etiketi.add_theme_font_size_override("font_size", 30)
+	sayac_etiketi.add_theme_color_override("font_color", Color(1, 0.88, 0.55))
+
+func _tapu_tablosunu_doldur(sehir: String, grup_satiri: String, c: float):
+	if _tapu_tablo == null:
+		return
+	var f = sehirler[sehir]["fiyat"]
+	var satirlar = [
+		["Boş arsa kirası", int(round(sehirler[sehir]["baslangic_kirasi"] * c))],
+		["1 kat", int(round(int(f * 0.50) * c))],
+		["2 kat", int(round(int(f * 1.00) * c))],
+		["3 kat", int(round(int(f * 1.50) * c))],
+		["Plaza", int(round(int(f * 2.00) * c))],
+	]
+	var t = "[center][font_size=17][color=#7a6a58]SATIN ALMA BEDELİ[/color][/font_size]\n[font_size=38][b]" + str(f) + " TL[/b][/font_size]\n[font_size=17][color=#7a6a58]" + grup_satiri + "[/color][/font_size][/center]\n"
+	# Tablo içeriği kadar geniş ve kartın tam ortasında
+	t += "[center][table=2]"
+	for s in satirlar:
+		t += "[cell][left]" + s[0] + "[/left][/cell][cell][right][b]" + str(s[1]) + " TL[/b][/right][/cell]"
+	t += "[/table][/center]"
+	_tapu_tablo.text = t
+
+# --- Zar tepsisi: bakiye panelinin üstündeki boşlukta ---
+func _zar_tepsisini_kur():
+	zar_paneli.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	zar_paneli.position = Vector2(257, 236)
+	zar_paneli.size = Vector2(298, 96)
+	var s = _stil_kutusu(Color(0.05, 0.07, 0.1, 0.82), 12)
+	zar_paneli.add_theme_stylebox_override("panel", s)
+	zar_gorseli.position = Vector2(104, 48)
+	ekstra_zar_gorseli.position = Vector2(194, 48)
