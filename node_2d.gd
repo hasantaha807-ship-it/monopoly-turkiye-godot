@@ -4155,6 +4155,7 @@ func _on_takas_butonu_basildi():
 	_insa_paneli.hide()
 	zar_secim_paneli.hide()
 	_takas_paneli.show()
+	_takas_one_al(_takas_paneli)
 	_takas_panelini_yenile()
 	_insa_arayuzunu_yenile()
 
@@ -4275,6 +4276,7 @@ func _takas_gelen_panelini_goster():
 	_takas_gelen_yazi.text = t
 	_takas_sayacini_guncelle()
 	_takas_gelen_paneli.show()
+	_takas_one_al(_takas_gelen_paneli)
 
 func _takas_cevap_ver(kabul: bool):
 	if not _takas_aktif or int(_takas["kime"]) != _yerel():
@@ -4286,3 +4288,11 @@ func _takas_sayacini_guncelle():
 	if _takas_gelen_paneli and _takas_gelen_paneli.visible:
 		var kalan = maxi(0, int(ceil((_takas_bitis - Time.get_ticks_msec()) / 1000.0)))
 		_takas_gelen_sayac.text = "Cevap için " + str(kalan) + " sn  (süre dolarsa reddedilmiş sayılır)"
+
+# Takas pencereleri sonradan eklenen arayüz parçalarının (TEPKİ VER vb.) altında kalmasın;
+# Ayarlar menüsü yine her şeyin üstünde kalır
+func _takas_one_al(panel: Control):
+	if _tepki_paneli:
+		_tepki_paneli.hide()
+	$Arayuz.move_child(panel, -1)
+	_ayarlari_en_uste_al()
