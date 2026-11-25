@@ -38,6 +38,9 @@ Ana menüdeki **ÇEVRİMİÇİ OYNA (AYNI Wİ-Fİ)** butonuyla 2-4 kişi kendi t
 - Kullanılan portlar: 7777 (oyun, ENet/UDP) ve 7778 (oda bulma yayını, UDP). Bilgisayarda oda kurarken Windows Güvenlik Duvarı izin isterse "Özel ağlar" için izin verin.
 
 ## 🎲 Kurallar (v2.3)
+- **Başlangıç parası:** Herkes 1.500 TL ile başlar; 2 kişilik oyunda 2.000 TL.
+- **Hapis:** 300 TL kefaletle hemen çıkabilir ya da bir tur içeride bekleyebilirsin. İçerideyken şehirlerinden kiranın yarısını alırsın; ihaleye ve takasa katılamazsın.
+- **Takas:** Sıra sendeyken, zar atmadan önce **TAKAS** butonuyla başka bir oyuncuya şehir + para karşılığında şehir + para teklif edebilirsin (turda en fazla 3 teklif). Katlı şehirler katlarıyla birlikte el değiştirir; karşı taraf 20 saniye içinde kabul ya da ret eder.
 - **Banka ihalesi:** Durduğun şehri almazsan (ya da 15 saniye içinde karar vermezsen) şehir anında açık artırmaya çıkar. Sen dahil herkes teklif verebilir; ihale liste fiyatının %70'inden başlar. Teklif verebilecek kimse kalmazsa ihale beklemeden kapanır.
 - **Tekel:** Bir renk grubunun tamamına sahip olan, o gruptaki evsiz şehirlerde 2 kat, evli şehirlerde 1,5 kat kira alır. Gruplar, tahtadaki kira etiketlerinin üstündeki renkli şeritlerle gösterilir; tekeldeki şehirlerin kirası altın renginde yazar.
 - **İnşaat:** Tekelin varsa, sıra sendeyken zar atmadan önce **İNŞAAT YAP** ile o gruptaki şehirlere kat çıkabilirsin. Katlar dengeli dikilir: gruptaki en az katlı şehirden başlanır.
