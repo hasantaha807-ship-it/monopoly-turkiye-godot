@@ -1262,11 +1262,15 @@ func _kareye_vardi():
 						notlar.append("[color=#7fd4ff]ev sahibi hapiste: kiranın yarısı[/color]")
 					if not notlar.is_empty():
 						aciklama = " · ".join(PackedStringArray(notlar))
+					# Kalkan varken yazı kısa tutulur: butonlar iki tane olduğu için metin onların üstüne taşmasın
+					var ust_bosluk = "\n"
 					if o_oyuncu["kartlar"].has("kira_kalkani"):
-						aciklama += "\n[color=#55dd77][b]Elinde Kira Kalkanı var:[/b] kullanırsan bu kirayı ödemezsin.[/color]"
+						ust_bosluk = ""
+						var kalkan_notu = "[color=#55dd77][b]Elinde Kira Kalkanı var![/b][/color]"
+						aciklama = kalkan_notu if notlar.is_empty() else aciklama + "\n" + kalkan_notu
 
 					bekleyen_kira = {"aktif": true, "odeyen": aktif_oyuncu_indeksi, "alan": sahip_indeksi, "miktar": kira_bedeli}
-					bildirim_yazisi.text = "[center]\n[font_size=20][b][color=#ffaa00]KİRA ÖDEMESİ![/color][/b][/font_size]\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n\n[b]Ödemen Gereken: " + str(kira_bedeli) + " TL[/b]\n\n" + aciklama + "[/center]"
+					bildirim_yazisi.text = "[center]" + ust_bosluk + "[font_size=20][b][color=#ffaa00]KİRA ÖDEMESİ![/color][/b][/font_size]\n\n" + oyuncular[sahip_indeksi]["isim"] + " oyuncusuna ait " + durulan_yer.to_upper() + " şehrine bastın.\n" + ust_bosluk + "[b]Ödemen Gereken: " + str(kira_bedeli) + " TL[/b]\n\n" + aciklama + "[/center]"
 					if _kontrol_bende():
 						_titret(220)
 				tamam_butonu.disabled = not _kontrol_bende()
@@ -2300,7 +2304,7 @@ func _bot_kalkan_kullanir_mi() -> bool:
 	if not o["kartlar"].has("kira_kalkani"):
 		return false
 	var kira = int(bekleyen_kira["miktar"])
-	return kira > int(o["para"]) or kira >= maxi(150, int(o["para"]) / 4)
+	return kira > int(o["para"]) or kira * 4 >= maxi(600, int(o["para"]))
 
 func _on_tamam_basildi():
 	if not bildirim_paneli.visible or not _kontrol_bende(): return
@@ -2418,7 +2422,7 @@ func satis_panelini_doldur(satilabilir_liste):
 	var acilir = mulk_listesi.get_popup()
 	var adet = maxi(1, mulk_listesi.get_item_count())
 	acilir.add_theme_font_size_override("font_size", 24)
-	acilir.add_theme_constant_override("v_separation", clampi(int((520 - adet * 30) / adet), 6, 18))
+	acilir.add_theme_constant_override("v_separation", clampi(int((520.0 - adet * 30) / adet), 6, 18))
 	acilir.add_theme_constant_override("item_start_padding", 14)
 	acilir.add_theme_constant_override("item_end_padding", 14)
 
